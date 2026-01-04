@@ -1,75 +1,64 @@
-# React + TypeScript + Vite
+# Posyandu Terintegrasi Layanan Primer (ILP) - Desa Tondomulyo
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Sistem manajemen kesehatan Posyandu modern yang dirancang untuk mendukung transformasi layanan kesehatan primer di tingkat desa (Desa Tondomulyo). Aplikasi ini membantu kader Posyandu untuk mencatat, melacak, dan mengelola data kesehatan masyarakat secara efisien di seluruh siklus hidup.
 
-Currently, two official plugins are available:
+## 🚀 Fitur Utama
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **🩺 Pemeriksaan Siklus Hidup Terpadu**: Formulir pemeriksaan khusus untuk 5 kategori peserta:
+  - **Ibu Hamil & Nifas**: Pemantauan kehamilan, LILA, tekanan darah, dan status imunisasi.
+  - **Bayi & Balita**: Pelacakan pertumbuhan (BB/TB), status gizi, dan imunisasi.
+  - **Anak Sekolah & Remaja**: Skrining kesehatan remaja dan edukasi.
+  - **Usia Produktif**: Skrining faktor risiko penyakit tidak menular (PTM).
+  - **Lansia**: Pemantauan kesehatan berkala untuk kualitas hidup lansia.
+- **📊 Dashboard Interaktif**: Visualisasi statistik real-time, grafik kunjungan bulanan (2026), dan distribusi peserta per kategori.
+- **🔍 Manajemen Peserta Canggih**: Pencarian peserta cepat berbasis NIK atau Nama dengan riwayat pemeriksaan yang terintegrasi.
+- **🔄 Sinkronisasi & Caching**: Sistem caching cerdas (Dexie.js-based) untuk performa cepat dan status sinkronisasi indikator real-time.
+- **📱 Desain Modern & Responsif**: Antarmuka premium dengan "Glassmorphism" effect, dioptimalkan untuk penggunaan laptop maupun mobile oleh kader di lapangan.
+- **📋 Pelaporan Otomatis**: Fitur untuk melihat dan mengunduh laporan kegiatan Posyandu (Segera hadir).
 
-## React Compiler
+## 🛠️ Tech Stack
 
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
+- **Frontend**: [React 19](https://react.dev/) + [Vite](https://vitejs.dev/)
+- **Bahasa**: [TypeScript](https://www.typescriptlang.org/)
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/)
+- **Visualisasi Data**: [Recharts](https://recharts.org/)
+- **Iconography**: [Lucide React](https://lucide.dev/)
+- **Data Persistence**: [Axios](https://axios-http.com/) & [Dexie.js](https://dexie.org/) (IndexedDB Caching)
+- **Arsitektur**: Clean Architecture (Data, Domain, & Presentation Layers)
 
-Note: This will impact Vite dev & build performances.
+## 📁 Struktur Proyek (Clean Architecture)
 
-## Expanding the ESLint configuration
+- `src/data`: Implementasi Datasource, Model API, dan Repository.
+- `src/domain`: Business Logic (Entities & Use Cases).
+- `src/presentation`: Komponen UI, Pages, Hooks, dan Contexts.
+  - `components/`: UI atomik dan molekular (Dashboard, Pemeriksaan, Peserta).
+  - `pages/`: Halaman utama aplikasi.
+  - `hooks/`: Logika stateful reusable (useAuth, usePemeriksaan, dll).
+  - `contexts/`: State management global untuk data realtime.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## 🏁 Memulai
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### Prasyarat
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+- Node.js (Versi terbaru direkomendasikan)
+- npm atau yarn
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+### Instalasi & Jalankan
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+1. Clone repositori:
+   ```bash
+   git clone https://github.com/Vrynd/Posyandu-terintegrasi-layanan-primer.git
+   ```
+2. Instal dependensi:
+   ```bash
+   npm install
+   ```
+3. Jalankan server pengembangan:
+   ```bash
+   npm run dev
+   ```
+4. Buka `http://localhost:5173` di browser Anda.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+---
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+Dikembangkan dengan ❤️ untuk kemajuan kesehatan **Desa Tondomulyo**.
