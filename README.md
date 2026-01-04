@@ -2,19 +2,26 @@
 
 Sistem manajemen kesehatan Posyandu modern yang dirancang untuk mendukung transformasi layanan kesehatan primer di tingkat desa (Desa Tondomulyo). Aplikasi ini membantu kader Posyandu untuk mencatat, melacak, dan mengelola data kesehatan masyarakat secara efisien di seluruh siklus hidup.
 
-## 🚀 Fitur Utama
+## ✨ Fitur Unggulan
 
-- **🩺 Pemeriksaan Siklus Hidup Terpadu**: Formulir pemeriksaan khusus untuk 5 kategori peserta:
-  - **Ibu Hamil & Nifas**: Pemantauan kehamilan, LILA, tekanan darah, dan status imunisasi.
-  - **Bayi & Balita**: Pelacakan pertumbuhan (BB/TB), status gizi, dan imunisasi.
-  - **Anak Sekolah & Remaja**: Skrining kesehatan remaja dan edukasi.
-  - **Usia Produktif**: Skrining faktor risiko penyakit tidak menular (PTM).
-  - **Lansia**: Pemantauan kesehatan berkala untuk kualitas hidup lansia.
-- **📊 Dashboard Interaktif**: Visualisasi statistik real-time, grafik kunjungan bulanan (2026), dan distribusi peserta per kategori.
-- **🔍 Manajemen Peserta Canggih**: Pencarian peserta cepat berbasis NIK atau Nama dengan riwayat pemeriksaan yang terintegrasi.
-- **🔄 Sinkronisasi & Caching**: Sistem caching cerdas (Dexie.js-based) untuk performa cepat dan status sinkronisasi indikator real-time.
-- **📱 Desain Modern & Responsif**: Antarmuka premium dengan "Glassmorphism" effect, dioptimalkan untuk penggunaan laptop maupun mobile oleh kader di lapangan.
-- **📋 Pelaporan Otomatis**: Fitur untuk melihat dan mengunduh laporan kegiatan Posyandu (Segera hadir).
+### 🏥 **Layanan 5 Klaster Terintegrasi**
+
+Sistem disesuaikan dengan standar Puskesmas & Posyandu ILP untuk mencakup seluruh tahapan usia:
+
+- 💝 **Ibu Hamil & Nifas** — _Pemantauan kehamilan, LILA, & tensi._
+- 👶 **Bayi & Balita** — _Pelacakan BB/TB & status gizi (Antropometri)._
+- 🎒 **Remaja** — _Skrining kesehatan & edukasi masa pertumbuhan._
+- 💼 **Usia Produktif** — _Deteksi dini PTM (Penyakit Tidak Menular)._
+- 🧓 **Lansia** — _Pengecekan rutin & pemantauan kualitas hidup._
+
+### ⚡ **Teknologi Pintar & Efisiensi**
+
+- **📊 Dashboard Real-Time** — Visualisasi data kunjungan dan statistik peserta yang interaktif.
+- **⚡ Akses Super Cepat** — Navigasi instan dengan sistem caching **Dexie.js (IndexedDB)**.
+- **� Status Sinkronisasi** — Indikator status data yang cerdas (Hijau/Merah) untuk menjamin validitas data.
+- **📱 Desain Premium (UI/UX)** — Antarmuka modern dengan efek _Glassmorphism_ yang nyaman di mata.
+- **🔍 Power Search** — Cari peserta kilat hanya dengan NIK atau Nama.
+- **📋 Pelayanan Lapangan** — Optimal digunakan di tablet/laptop oleh Kader saat kegiatan Posyandu.
 
 ## 🛠️ Tech Stack
 
