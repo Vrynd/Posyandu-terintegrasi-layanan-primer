@@ -13,6 +13,15 @@ interface CategoryStepProps {
 
 export function CategoryStep({ selectedKategori, onKategoriChange }: CategoryStepProps) {
   const kategoriKeys = Object.keys(kategoriConfig) as KategoriKey[];
+  
+  // Display labels matching dashboard stats
+  const displayLabels: Record<KategoriKey, string> = {
+    bumil: 'Ibu Hamil',
+    balita: 'Bayi & Balita',
+    remaja: 'Anak & Remaja',
+    produktif: 'Usia Produktif',
+    lansia: 'Lansia',
+  };
 
   return (
     <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden mb-6">
@@ -29,14 +38,14 @@ export function CategoryStep({ selectedKategori, onKategoriChange }: CategorySte
             const isSelected = selectedKategori === key;
             
             return (
-              <button
+                <button
                 key={key}
                 type="button"
                 onClick={() => onKategoriChange(isSelected ? null : key)}
-                className={`group relative flex flex-col items-start p-5 rounded-2xl border-2 transition-all duration-300 bg-white shadow-sm hover:shadow-md ${
+                className={`group relative flex flex-col items-start p-5 rounded-2xl border-2 transition-all duration-300 bg-white ${
                   isSelected
-                    ? "border-blue-500 bg-blue-50/40 ring-4 ring-blue-50"
-                    : "border-gray-50 hover:border-gray-200"
+                    ? "border-blue-600 bg-blue-50/40"
+                    : "border-gray-200 hover:border-gray-300"
                 }`}
               >
                 {/* Top Section: Icon and Selection Circle */}
@@ -53,8 +62,8 @@ export function CategoryStep({ selectedKategori, onKategoriChange }: CategorySte
                 
                 {/* Text Section */}
                 <div className="text-left">
-                  <p className={`text-sm font-bold tracking-tight transition-colors ${isSelected ? 'text-blue-700' : 'text-gray-900'}`}>
-                    {config.label}
+                  <p className={`text-sm tracking-tight transition-colors ${isSelected ? 'font-semibold text-blue-700' : 'font-medium text-gray-900'}`}>
+                    {displayLabels[key]}
                   </p>
                   <p className="text-[11px] text-gray-500 mt-1 leading-relaxed line-clamp-2">
                     {config.description}

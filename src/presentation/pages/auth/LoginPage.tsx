@@ -49,6 +49,12 @@ export function LoginPage() {
                         onTogglePassword={toggleShowPassword}
                         onSubmit={handleSubmit}
                     />
+
+                    {/* Location info - mobile only, outside card */}
+                    <div className="lg:hidden mt-8 text-center">
+                        <p className="text-sm text-gray-500">Desa Tondomulyo, Kec. Jakenan, Kab. Pati</p>
+                        <p className="text-xs text-gray-400">Jawa Tengah • Indonesia</p>
+                    </div>
                 </div>
             </div>
         </div>

@@ -8,6 +8,7 @@
 import { useNavigate, Link } from "react-router-dom";
 import { Home, ChevronRight, Users, User, MapPin, ClipboardCheck } from "lucide-react";
 import { usePesertaAdd } from "@/presentation/hooks/usePesertaAdd";
+import { useDocumentTitle } from "@/presentation/hooks/useDocumentTitle";
 import { StepIndicator, FullPageLoading, type Step } from "@/presentation/components/common";
 import { 
   CategoryStep, 
@@ -25,6 +26,7 @@ const steps: Step[] = [
 ];
 
 export function PesertaAddPage() {
+  useDocumentTitle('Tambah Peserta');
   const navigate = useNavigate();
   const {
     currentStep,

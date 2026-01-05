@@ -1,37 +1,42 @@
 /**
- * FilterModal Component
+ * PesertaKategoriModal - Filter by Category Modal
+ * Single select modal for filtering participants by category
  */
 
 import { X, Check, Filter as FilterIcon } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import type { KategoriKey } from '../../../domain/entities/Peserta';
-import type { KategoriConfig } from '../../constants/kategoriConfig';
+import type { KategoriKey } from '@/domain/entities/Peserta';
+import { kategoriConfig } from '@/presentation/constants/kategoriConfig';
 
 interface Props {
     isOpen: boolean;
     onClose: () => void;
-    selectedFilters: KategoriKey[];
-    kategoriConfig: Record<KategoriKey, KategoriConfig>;
-    onApply: (filters: KategoriKey[]) => void;
+    selectedKategori: KategoriKey | null;
+    onApply: (kategori: KategoriKey | null) => void;
 }
 
-export function FilterModal({
+const dotColors: Record<KategoriKey, string> = {
+    bumil: 'bg-pink-500',
+    balita: 'bg-blue-500',
+    remaja: 'bg-amber-500',
+    produktif: 'bg-emerald-500',
+    lansia: 'bg-purple-500',
+};
+
+export function PesertaKategoriModal({
     isOpen,
     onClose,
-    selectedFilters,
-    kategoriConfig,
+    selectedKategori,
     onApply,
 }: Props) {
-    const [tempFilters, setTempFilters] = useState<KategoriKey[]>(selectedFilters);
+    const [tempKategori, setTempKategori] = useState<KategoriKey | null>(selectedKategori);
 
-    // Sync with props when modal opens
     useEffect(() => {
         if (isOpen) {
-            setTempFilters(selectedFilters);
+            setTempKategori(selectedKategori);
         }
-    }, [isOpen, selectedFilters]);
+    }, [isOpen, selectedKategori]);
 
-    // Close on ESC and handle body overflow
     useEffect(() => {
         const handleEscape = (e: KeyboardEvent) => {
             if (e.key === 'Escape') onClose();
@@ -48,24 +53,16 @@ export function FilterModal({
 
     if (!isOpen) return null;
 
-    const handleToggleFilter = (key: KategoriKey) => {
-        setTempFilters(prev =>
-            prev.includes(key)
-                ? prev.filter(k => k !== key)
-                : [...prev, key]
-        );
-    };
-
-    const handleSelectAll = () => {
-        setTempFilters([]);
-    };
-
     const handleApply = () => {
-        onApply(tempFilters);
+        onApply(tempKategori);
         onClose();
     };
 
-    const hasChanges = JSON.stringify(tempFilters.sort()) !== JSON.stringify(selectedFilters.sort());
+    const handleReset = () => {
+        setTempKategori(null);
+    };
+
+    const hasChanges = tempKategori !== selectedKategori;
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
@@ -75,7 +72,7 @@ export function FilterModal({
                 onClick={onClose}
             />
 
-        {/* Modal */}
+            {/* Modal */}
             <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden animate-in fade-in zoom-in duration-200 flex flex-col max-h-[85vh]">
                 {/* ===== HEADER ===== */}
                 <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 bg-white shrink-0">
@@ -85,7 +82,7 @@ export function FilterModal({
                         </div>
                         <div>
                             <h3 className="text-lg font-bold text-gray-900">Filter Kategori</h3>
-                            <p className="text-xs text-gray-500">Pilih kategori yang ingin ditampilkan</p>
+                            <p className="text-xs text-gray-500">Pilih satu kategori peserta</p>
                         </div>
                     </div>
                     <button
@@ -98,25 +95,25 @@ export function FilterModal({
 
                 {/* ===== CONTENT ===== */}
                 <div className="flex-1 overflow-y-auto px-5 py-4">
-                    {/* All Categories Option */}
+                    {/* Semua Kategori Option */}
                     <button
-                        onClick={handleSelectAll}
+                        onClick={() => setTempKategori(null)}
                         className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border-2 transition-all mb-4 ${
-                            tempFilters.length === 0
-                                ? 'border-blue-500 bg-blue-50'
+                            tempKategori === null
+                                ? 'border-slate-800 bg-slate-50'
                                 : 'border-gray-200 hover:border-gray-300 bg-white'
                         }`}
                     >
                         <div className="flex items-center gap-3">
-                            <div className={`w-5 h-5 rounded-lg border-2 flex items-center justify-center ${
-                                tempFilters.length === 0 
-                                    ? 'bg-blue-500 border-blue-500' 
+                            <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                                tempKategori === null 
+                                    ? 'bg-slate-800 border-slate-800' 
                                     : 'border-gray-300'
                             }`}>
-                                {tempFilters.length === 0 && <Check className="w-3 h-3 text-white" />}
+                                {tempKategori === null && <Check className="w-3 h-3 text-white" />}
                             </div>
                             <span className={`text-sm font-semibold ${
-                                tempFilters.length === 0 ? 'text-blue-700' : 'text-gray-700'
+                                tempKategori === null ? 'text-slate-800' : 'text-gray-700'
                             }`}>
                                 Semua Kategori
                             </span>
@@ -128,27 +125,19 @@ export function FilterModal({
 
                     {/* Category Grid - 2 columns */}
                     <div className="grid grid-cols-2 gap-2">
-                        {(Object.entries(kategoriConfig) as [KategoriKey, KategoriConfig][]).map(([key, config]) => {
-                            const isSelected = tempFilters.includes(key);
-                            // Map kategori to solid dot colors (Tailwind safe)
-                            const dotColors: Record<KategoriKey, string> = {
-                                bumil: 'bg-pink-500',
-                                balita: 'bg-blue-500',
-                                remaja: 'bg-amber-500',
-                                produktif: 'bg-emerald-500',
-                                lansia: 'bg-purple-500',
-                            };
+                        {(Object.entries(kategoriConfig) as [KategoriKey, typeof kategoriConfig[KategoriKey]][]).map(([key, config]) => {
+                            const isSelected = tempKategori === key;
                             return (
                                 <button
                                     key={key}
-                                    onClick={() => handleToggleFilter(key)}
+                                    onClick={() => setTempKategori(key)}
                                     className={`flex items-center gap-2.5 px-3 py-3 rounded-xl border-2 transition-all text-left ${
                                         isSelected
                                             ? 'border-slate-800 bg-slate-50'
                                             : 'border-gray-200 hover:border-gray-300 bg-white'
                                     }`}
                                 >
-                                    <div className={`w-5 h-5 rounded-lg border-2 flex items-center justify-center shrink-0 ${
+                                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${
                                         isSelected 
                                             ? 'bg-slate-800 border-slate-800' 
                                             : 'border-gray-300'
@@ -175,7 +164,7 @@ export function FilterModal({
                 <div className="px-5 py-4 border-t border-gray-100 bg-white shrink-0">
                     <div className="flex items-center gap-3">
                         <button
-                            onClick={handleSelectAll}
+                            onClick={handleReset}
                             className="flex-1 py-3 px-4 bg-white border border-gray-300 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 transition-all"
                         >
                             Reset

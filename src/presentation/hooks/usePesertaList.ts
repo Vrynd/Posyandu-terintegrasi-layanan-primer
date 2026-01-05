@@ -13,13 +13,19 @@ import { useDataCache } from '../contexts/RealtimeDataContext';
 
 const ITEMS_PER_PAGE = 5;
 
-export type SortType = 'nama-asc' | 'nama-desc' | 'kunjungan-desc' | 'kunjungan-asc';
+export type SortType = 'nama-asc' | 'nama-desc' | 'umur-asc' | 'umur-desc' | 'terbaru';
+export type GenderFilter = 'all' | 'L' | 'P';
+export interface AgeRange {
+    min: number | null;
+    max: number | null;
+}
 
 export const sortOptions: { value: SortType; label: string }[] = [
     { value: 'nama-asc', label: 'Nama A-Z' },
     { value: 'nama-desc', label: 'Nama Z-A' },
-    { value: 'kunjungan-desc', label: 'Kunjungan Terbaru' },
-    { value: 'kunjungan-asc', label: 'Kunjungan Terlama' },
+    { value: 'umur-asc', label: 'Umur Termuda' },
+    { value: 'umur-desc', label: 'Umur Tertua' },
+    { value: 'terbaru', label: 'Terbaru' },
 ];
 
 // Map API response to internal Peserta format
@@ -39,6 +45,8 @@ export function usePesertaList() {
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedKategori, setSelectedKategori] = useState<KategoriKey | null>(null);
     const [selectedSort, setSelectedSort] = useState<SortType>('nama-asc');
+    const [selectedGender, setSelectedGender] = useState<GenderFilter>('all');
+    const [selectedAgeRange, setSelectedAgeRange] = useState<AgeRange>({ min: null, max: null });
     const [currentPage, setCurrentPage] = useState(1);
     const [successData, setSuccessData] = useState<{ nama: string; nik: string } | null>(null);
 
@@ -84,7 +92,18 @@ export function usePesertaList() {
             const matchSearch = p.nama.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 p.nik.includes(searchQuery);
             const matchKategori = !selectedKategori || p.kategori === selectedKategori;
-            return matchSearch && matchKategori;
+            const matchGender = selectedGender === 'all' || p.jenis_kelamin === selectedGender;
+            
+            // Age filter
+            let matchAge = true;
+            if (selectedAgeRange.min !== null || selectedAgeRange.max !== null) {
+                const age = calculateAge(p.tanggal_lahir);
+                if (selectedAgeRange.min !== null && age < selectedAgeRange.min) matchAge = false;
+                if (selectedAgeRange.max !== null && selectedAgeRange.max !== 999 && age > selectedAgeRange.max) matchAge = false;
+                if (selectedAgeRange.max === 999 && selectedAgeRange.min !== null && age < selectedAgeRange.min) matchAge = false;
+            }
+            
+            return matchSearch && matchKategori && matchGender && matchAge;
         });
 
         // Apply Sorting
@@ -94,17 +113,19 @@ export function usePesertaList() {
                     return a.nama.localeCompare(b.nama);
                 case 'nama-desc':
                     return b.nama.localeCompare(a.nama);
-                case 'kunjungan-desc':
-                    return (b.last_kunjungan_date || '').localeCompare(a.last_kunjungan_date || '');
-                case 'kunjungan-asc':
-                    return (a.last_kunjungan_date || '').localeCompare(b.last_kunjungan_date || '');
+                case 'umur-asc':
+                    return calculateAge(a.tanggal_lahir) - calculateAge(b.tanggal_lahir);
+                case 'umur-desc':
+                    return calculateAge(b.tanggal_lahir) - calculateAge(a.tanggal_lahir);
+                case 'terbaru':
+                    return Number(b.id) - Number(a.id);
                 default:
                     return 0;
             }
         });
 
         return result;
-    }, [pesertaList, searchQuery, selectedKategori, selectedSort]);
+    }, [pesertaList, searchQuery, selectedKategori, selectedSort, selectedGender, selectedAgeRange]);
 
     // Pagination
     const totalPages = Math.ceil(filteredPeserta.length / ITEMS_PER_PAGE);
@@ -137,6 +158,16 @@ export function usePesertaList() {
 
     const handleSortChange = useCallback((sort: SortType) => {
         setSelectedSort(sort);
+        setCurrentPage(1);
+    }, []);
+
+    const handleGenderChange = useCallback((gender: GenderFilter) => {
+        setSelectedGender(gender);
+        setCurrentPage(1);
+    }, []);
+
+    const handleAgeRangeChange = useCallback((ageRange: AgeRange) => {
+        setSelectedAgeRange(ageRange);
         setCurrentPage(1);
     }, []);
 
@@ -182,6 +213,8 @@ export function usePesertaList() {
         searchQuery,
         selectedKategori,
         selectedSort,
+        selectedGender,
+        selectedAgeRange,
         currentPage,
         totalPages,
         itemsPerPage: ITEMS_PER_PAGE,
@@ -190,6 +223,8 @@ export function usePesertaList() {
         handleSearchChange,
         handleFilterChange,
         handleSortChange,
+        handleGenderChange,
+        handleAgeRangeChange,
         handleNavigateToDetail,
         handleAddPeserta,
         handlePrevPage,

@@ -33,7 +33,7 @@ export function PemeriksaanWizardFooter({
                 <button
                     type="button"
                     onClick={onNext}
-                    className="flex items-center gap-2 px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-xl transition-colors"
+                    className="flex items-center gap-2 px-5 py-2 bg-linear-to-r from-slate-800 to-slate-900 hover:from-slate-700 hover:to-slate-800 text-white text-sm font-medium rounded-xl transition-colors"
                 >
                     Lanjutkan
                     <ArrowRight className="w-4 h-4" />
@@ -43,7 +43,7 @@ export function PemeriksaanWizardFooter({
                     type="button"
                     onClick={onSubmit}
                     disabled={isSaving}
-                    className="flex items-center gap-2 px-5 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex items-center gap-2 px-5 py-2 bg-linear-to-r from-slate-800 to-slate-900 hover:from-slate-700 hover:to-slate-800 text-white text-sm font-medium rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                     {isSaving ? (
                         <>

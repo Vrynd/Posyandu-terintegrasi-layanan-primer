@@ -141,59 +141,60 @@ export function HeroOverview() {
     return (
         <div className="space-y-5">
             {/* Header Card with Total & Real-time indicator */}
-            <div className="relative overflow-hidden rounded-2xl bg-linear-to-br from-slate-900 via-slate-800 to-slate-900 p-6">
+            <div className="relative overflow-hidden rounded-2xl bg-linear-to-br from-slate-900 via-slate-800 to-slate-900 p-4 sm:p-6">
                 {/* Background decoration */}
                 <div className="absolute inset-0 overflow-hidden">
                     <div className="absolute -top-24 -right-24 w-48 h-48 bg-blue-500/20 rounded-full blur-3xl" />
                     <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-purple-500/20 rounded-full blur-3xl" />
                 </div>
 
+                {/* Main Content - Different layout for mobile vs desktop */}
                 <div className="relative flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                     {/* Left - Welcome */}
                     <div>
-                        <h1 className="text-2xl font-bold text-white mb-1">
+                        <h1 className="text-xl sm:text-2xl font-bold text-white mb-0.5 sm:mb-1">
                             Selamat Datang, {firstName}!
                         </h1>
-                        <p className="text-slate-400 text-sm">
+                        <p className="text-slate-400 text-xs sm:text-sm">
                             {userRole} • Posyandu ILP Desa Tondomulyo
                         </p>
                     </div>
 
-                    {/* Right - Stats Summary + Sync */}
-                    <div className="flex items-center gap-3">
+                    {/* Right - Stats Summary (Desktop: inline, Mobile: grid) */}
+                    <div className="grid grid-cols-2 lg:flex lg:items-center gap-2 sm:gap-3">
                         {/* Total Peserta */}
-                        <div className="flex items-center gap-3 bg-white/5 backdrop-blur-sm rounded-xl px-4 py-3 border border-white/10">
-                            <div className="w-10 h-10 rounded-xl bg-linear-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
-                                <Users className="w-5 h-5 text-white" />
+                        <div className="flex items-center gap-2.5 lg:gap-3 bg-white/5 backdrop-blur-sm rounded-xl px-3 lg:px-4 py-2.5 lg:py-3 border border-white/10">
+                            <div className="w-9 h-9 lg:w-10 lg:h-10 rounded-lg lg:rounded-xl bg-linear-to-br from-blue-500 to-indigo-600 flex items-center justify-center shrink-0">
+                                <Users className="w-4 h-4 lg:w-5 lg:h-5 text-white" />
                             </div>
-                            <div>
+                            <div className="min-w-0">
                                 {isStatsLoading ? (
                                     <BeatLoader color="#ffffff" size={6} margin={2} />
                                 ) : (
                                     <>
-                                        <p className="text-2xl font-bold text-white">
+                                        <p className="text-lg sm:text-xl lg:text-2xl font-bold text-white leading-none">
                                             {stats?.total_peserta || 0}
                                         </p>
-                                        <p className="text-xs text-slate-400">Total Peserta</p>
+                                        <p className="text-xs lg:text-xs text-slate-400">Total Peserta</p>
                                     </>
                                 )}
                             </div>
                         </div>
 
-                        {/* Kunjungan Bulan Ini */}
-                        <div className="flex items-center gap-3 bg-white/5 backdrop-blur-sm rounded-xl px-4 py-3 border border-white/10">
-                            <div className="w-10 h-10 rounded-xl bg-linear-to-br from-emerald-500 to-teal-600 flex items-center justify-center">
-                                <Zap className="w-5 h-5 text-white" />
+                        {/* Kunjungan Hari Ini */}
+                        <div className="flex items-center gap-2.5 lg:gap-3 bg-white/5 backdrop-blur-sm rounded-xl px-3 lg:px-4 py-2.5 lg:py-3 border border-white/10">
+                            <div className="w-9 h-9 lg:w-10 lg:h-10 rounded-lg lg:rounded-xl bg-linear-to-br from-emerald-500 to-teal-600 flex items-center justify-center shrink-0">
+                                <Zap className="w-4 h-4 lg:w-5 lg:h-5 text-white" />
                             </div>
-                            <div>
+                            <div className="min-w-0">
                                 {isStatsLoading ? (
                                     <BeatLoader color="#ffffff" size={6} margin={2} />
                                 ) : (
                                     <>
-                                        <p className="text-2xl font-bold text-white">
+                                        <p className="text-lg sm:text-xl lg:text-2xl font-bold text-white leading-none">
                                             {stats?.kunjungan_hari_ini || 0}
                                         </p>
-                                        <p className="text-xs text-slate-400">Hari ini</p>
+                                        <p className="text-xs lg:text-xs text-slate-400">Hari ini</p>
                                     </>
                                 )}
                             </div>
@@ -204,21 +205,16 @@ export function HeroOverview() {
                 {/* Date & Weather Info + Sync Button */}
                 <div className="relative mt-4 pt-4 border-t border-white/10">
                     <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                            {/* Date */}
-                            <div className="flex items-center gap-2">
-                                <Calendar className="w-4 h-4 text-slate-400" />
-                                <span className="text-sm text-slate-400">
-                                    {formatDate()}
-                                </span>
-                            </div>
-                            
-                            {/* Weather */}
+                        <div className="flex items-center gap-2 lg:gap-4 text-slate-400">
+                            <Calendar className="w-3.5 h-3.5 lg:w-4 lg:h-4 shrink-0" />
+                            <span className="text-xs sm:text-sm truncate">
+                                {formatDate()}
+                            </span>
                             {weather && (
-                                <div className="flex items-center gap-2 px-3 py-1 bg-white/5 rounded-lg">
-                                    <CloudSun className="w-4 h-4 text-amber-400" />
-                                    <span className="text-sm text-slate-300">
-                                        {weather.temp}°C • {weather.desc}
+                                <div className="flex items-center gap-1.5 lg:gap-2 px-2 lg:px-3 py-1 bg-white/5 rounded-lg">
+                                    <CloudSun className="w-3.5 h-3.5 lg:w-4 lg:h-4 text-amber-400 shrink-0" />
+                                    <span className="text-xs sm:text-sm text-slate-300">
+                                        {weather.temp}°C <span className="hidden sm:inline">• {weather.desc}</span>
                                     </span>
                                 </div>
                             )}
@@ -231,14 +227,20 @@ export function HeroOverview() {
             </div>
 
             {/* 5 Sasaran Cards - Colorful gradient cards */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-                {sasaran.map((item) => {
+            {/* Mobile: 3 on first row, 2 centered on second row using grid-cols-6 */}
+            <div className="grid grid-cols-6 lg:grid-cols-5 gap-3">
+                {sasaran.map((item, index) => {
                     const IconComponent = item.icon;
+                    // First 3 items: span 2 cols (3 per row on mobile)
+                    // Last 2 items: span 3 cols (2 centered on second row)
+                    const colSpanClass = index < 3 
+                        ? 'col-span-2 lg:col-span-1' 
+                        : 'col-span-3 lg:col-span-1';
 
                     return (
                         <div
                             key={item.id}
-                            className={`group relative overflow-hidden rounded-2xl bg-linear-to-br ${item.gradient} p-4 hover:scale-[1.02] transition-all duration-300 cursor-pointer`}
+                            className={`group relative overflow-hidden rounded-2xl bg-linear-to-br ${item.gradient} p-4 hover:scale-[1.02] transition-all duration-300 cursor-pointer ${colSpanClass}`}
                         >
                             {/* Background glow */}
                             <div className="absolute inset-0 bg-linear-to-t from-black/20 to-transparent" />

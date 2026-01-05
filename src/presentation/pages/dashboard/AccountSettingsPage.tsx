@@ -8,9 +8,11 @@
 import { Home, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAccountSettings } from '@/presentation/hooks/useAccountSettings';
+import { useDocumentTitle } from '@/presentation/hooks/useDocumentTitle';
 import { ProfileSection, SecuritySection, DangerZoneSection } from '../../components/settings';
 
 export function AccountSettingsPage() {
+    useDocumentTitle('Pengaturan Akun');
     const {
         profileData,
         isProfileSaving,

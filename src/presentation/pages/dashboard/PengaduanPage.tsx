@@ -9,6 +9,7 @@ import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
 import { useAuth } from '../../hooks/useAuth';
+import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 
 type BugCategory = 'error' | 'tampilan' | 'data' | 'performa' | 'lainnya';
 type Priority = 'rendah' | 'sedang' | 'tinggi';
@@ -37,6 +38,7 @@ const priorities = [
 ];
 
 export function PengaduanPage() {
+    useDocumentTitle('Pengaduan');
     const { user } = useAuth();
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);

@@ -1,11 +1,11 @@
 /**
- * SortModal Component
- * Modal for sorting options
+ * PesertaSortModal - Sort Modal for Peserta List
+ * Single select modal for sorting participants
  */
 
 import { X, Check, ArrowUpDown } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import type { SortType } from './PemeriksaanToolbar';
+import type { SortType } from '@/presentation/hooks/usePesertaList';
 
 interface Props {
     isOpen: boolean;
@@ -17,11 +17,12 @@ interface Props {
 const sortOptions: { value: SortType; label: string; description: string }[] = [
     { value: 'nama-asc', label: 'Nama A-Z', description: 'Urutkan berdasarkan nama A ke Z' },
     { value: 'nama-desc', label: 'Nama Z-A', description: 'Urutkan berdasarkan nama Z ke A' },
-    { value: 'kunjungan-desc', label: 'Pemeriksaan Terbaru', description: 'Pemeriksaan paling baru dahulu' },
-    { value: 'kunjungan-asc', label: 'Pemeriksaan Terlama', description: 'Pemeriksaan paling lama dahulu' },
+    { value: 'umur-asc', label: 'Umur Termuda', description: 'Urutkan dari yang paling muda' },
+    { value: 'umur-desc', label: 'Umur Tertua', description: 'Urutkan dari yang paling tua' },
+    { value: 'terbaru', label: 'Terbaru', description: 'Peserta terbaru ditambahkan' },
 ];
 
-export function SortModal({
+export function PesertaSortModal({
     isOpen,
     onClose,
     selectedSort,
@@ -29,14 +30,12 @@ export function SortModal({
 }: Props) {
     const [tempSort, setTempSort] = useState<SortType>(selectedSort);
 
-    // Sync with props when modal opens
     useEffect(() => {
         if (isOpen) {
             setTempSort(selectedSort);
         }
     }, [isOpen, selectedSort]);
 
-    // Close on ESC and handle body overflow
     useEffect(() => {
         const handleEscape = (e: KeyboardEvent) => {
             if (e.key === 'Escape') onClose();
@@ -58,6 +57,10 @@ export function SortModal({
         onClose();
     };
 
+    const handleReset = () => {
+        setTempSort('nama-asc');
+    };
+
     const hasChanges = tempSort !== selectedSort;
 
     return (
@@ -68,7 +71,7 @@ export function SortModal({
                 onClick={onClose}
             />
 
-        {/* Modal */}
+            {/* Modal */}
             <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden animate-in fade-in zoom-in duration-200 flex flex-col max-h-[85vh]">
                 {/* ===== HEADER ===== */}
                 <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 bg-white shrink-0">
@@ -78,7 +81,7 @@ export function SortModal({
                         </div>
                         <div>
                             <h3 className="text-lg font-bold text-gray-900">Urutkan Data</h3>
-                            <p className="text-xs text-gray-500">Pilih urutan tampilan data</p>
+                            <p className="text-xs text-gray-500">Pilih urutan tampilan peserta</p>
                         </div>
                     </div>
                     <button
@@ -101,20 +104,20 @@ export function SortModal({
                                     onClick={() => setTempSort(option.value)}
                                     className={`flex items-start gap-2.5 px-3 py-3 rounded-xl border-2 transition-all text-left ${
                                         isSelected
-                                            ? 'border-purple-500 bg-purple-50'
+                                            ? 'border-slate-800 bg-slate-50'
                                             : 'border-gray-200 hover:border-gray-300 bg-white'
                                     }`}
                                 >
                                     <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 mt-0.5 ${
                                         isSelected 
-                                            ? 'bg-purple-500 border-purple-500' 
+                                            ? 'bg-slate-800 border-slate-800' 
                                             : 'border-gray-300'
                                     }`}>
                                         {isSelected && <Check className="w-3 h-3 text-white" />}
                                     </div>
                                     <div className="min-w-0">
                                         <p className={`text-sm font-semibold ${
-                                            isSelected ? 'text-purple-700' : 'text-gray-700'
+                                            isSelected ? 'text-slate-800' : 'text-gray-700'
                                         }`}>
                                             {option.label}
                                         </p>
@@ -132,7 +135,7 @@ export function SortModal({
                 <div className="px-5 py-4 border-t border-gray-100 bg-white shrink-0">
                     <div className="flex items-center gap-3">
                         <button
-                            onClick={() => setTempSort('nama-asc')}
+                            onClick={handleReset}
                             className="flex-1 py-3 px-4 bg-white border border-gray-300 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 transition-all"
                         >
                             Reset

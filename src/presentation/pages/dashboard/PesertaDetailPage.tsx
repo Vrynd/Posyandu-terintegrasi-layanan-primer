@@ -10,6 +10,7 @@
 import { useParams, Link } from 'react-router-dom';
 import { Home, ChevronRight, User, AlertTriangle, RefreshCw } from 'lucide-react';
 import { usePesertaDetail } from '../../hooks/usePesertaDetail';
+import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 import {
     PesertaProfileHeader,
     PesertaInfoCards,
@@ -40,6 +41,9 @@ export function PesertaDetailPage() {
         handleDelete,
         handleBack,
     } = usePesertaDetail(id);
+
+    // Dynamic page title
+    useDocumentTitle(peserta?.nama ? `Detail: ${peserta.nama}` : 'Detail Peserta');
 
     // Saving state - full screen overlay
     if (isSaving) {

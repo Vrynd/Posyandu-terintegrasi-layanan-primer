@@ -149,7 +149,7 @@ export function VisitChart() {
             </div>
 
             {/* Footer Stats */}
-            <div className="px-5 py-4 border-t border-gray-100 flex items-center justify-between bg-gray-50/50">
+            <div className="px-5 py-4 border-t border-gray-100 flex items-center justify-between">
                 <div>
                     <p className="text-[10px] text-gray-500 uppercase tracking-wider font-bold mb-0.5 whitespace-nowrap">Total Pemeriksaan 2026</p>
                     <p className="text-xl font-black text-gray-900">{totalVisits.toLocaleString()}</p>

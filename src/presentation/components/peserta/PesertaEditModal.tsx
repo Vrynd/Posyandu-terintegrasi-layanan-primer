@@ -166,7 +166,7 @@ export function PesertaEditModal({ isOpen, editForm, onClose, onChange, onSave }
                     </button>
                     <button
                         onClick={onSave}
-                        className="px-6 py-2.5 text-white bg-blue-600 rounded-xl font-medium hover:bg-blue-700 transition-colors flex items-center gap-2"
+                        className="px-6 py-2.5 text-white bg-linear-to-r from-slate-800 to-slate-900 hover:from-slate-700 hover:to-slate-800 rounded-xl font-medium transition-colors flex items-center gap-2"
                     >
                         <Edit2 className="w-4 h-4" />
                         Simpan Perubahan

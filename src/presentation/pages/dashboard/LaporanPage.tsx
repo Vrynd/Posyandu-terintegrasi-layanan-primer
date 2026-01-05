@@ -1,6 +1,7 @@
 import { Home, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useLaporan } from '../../hooks/useLaporan';
+import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 import { 
     LaporanTypeSelection, 
     LaporanPeriodSelection, 
@@ -8,6 +9,7 @@ import {
 } from '../../components/laporan';
 
 export function LaporanPage() {
+    useDocumentTitle('Laporan');
     const {
         selectedReport,
         selectedMonth,

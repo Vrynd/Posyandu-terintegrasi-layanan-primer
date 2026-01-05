@@ -1,6 +1,7 @@
 import { Home, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { usePesertaList } from '../../hooks/usePesertaList';
+import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 import { 
     RegistrationSuccessBanner, 
     PesertaListToolbar, 
@@ -8,6 +9,7 @@ import {
 } from '../../components/peserta';
 
 export function PesertaPage() {
+    useDocumentTitle('Daftar Peserta');
     const {
         paginatedPeserta,
         filteredPeserta,
@@ -15,12 +17,16 @@ export function PesertaPage() {
         searchQuery,
         selectedKategori,
         selectedSort,
+        selectedGender,
+        selectedAgeRange,
         currentPage,
         totalPages,
         successData,
         handleSearchChange,
         handleFilterChange,
         handleSortChange,
+        handleGenderChange,
+        handleAgeRangeChange,
         handleNavigateToDetail,
         handleAddPeserta,
         handlePrevPage,
@@ -29,7 +35,6 @@ export function PesertaPage() {
         handleDismissSuccess,
         calculateAge,
         kategoriConfig,
-        sortOptions
     } = usePesertaList();
 
     return (
@@ -67,9 +72,11 @@ export function PesertaPage() {
                 onFilterChange={handleFilterChange}
                 selectedSort={selectedSort}
                 onSortChange={handleSortChange}
+                selectedGender={selectedGender}
+                onGenderChange={handleGenderChange}
+                selectedAgeRange={selectedAgeRange}
+                onAgeRangeChange={handleAgeRangeChange}
                 onAddPeserta={handleAddPeserta}
-                kategoriConfig={kategoriConfig}
-                sortOptions={sortOptions}
             />
 
             {/* Results Card - List Peserta */}

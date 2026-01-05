@@ -9,9 +9,11 @@
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { useRegister } from '../../hooks/useRegister';
+import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 import { AuthBrandingPanel, LoadingOverlay, MobileLogo, RegisterForm } from '../../components/auth';
 
 export function RegisterPage() {
+    useDocumentTitle('Daftar');
     const {
         name,
         email,
@@ -80,6 +82,12 @@ export function RegisterPage() {
                         onTogglePasswordConfirmation={() => setShowPasswordConfirmation(!showPasswordConfirmation)}
                         onSubmit={onSubmit}
                     />
+
+                    {/* Location info - mobile only, outside card */}
+                    <div className="lg:hidden mt-8 text-center">
+                        <p className="text-sm text-gray-500">Desa Tondomulyo, Kec. Jakenan, Kab. Pati</p>
+                        <p className="text-xs text-gray-400">Jawa Tengah • Indonesia</p>
+                    </div>
                 </div>
             </div>
         </div>

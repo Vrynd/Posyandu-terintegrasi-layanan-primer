@@ -2,6 +2,7 @@ import { useParams, Link } from 'react-router-dom';
 import type { LucideIcon } from 'lucide-react';
 import { ChevronRight, Home, User, Stethoscope, Calendar, ClipboardCheck, ArrowLeft } from 'lucide-react';
 import { usePemeriksaanForm } from '@/presentation/hooks/usePemeriksaanForm';
+import { useDocumentTitle } from '@/presentation/hooks/useDocumentTitle';
 import { StepIndicator, FullPageLoading } from '@/presentation/components/common';
 import { 
     Step1Verifikasi, 
@@ -38,6 +39,9 @@ export function PemeriksaanAddPage() {
         handleSubmit,
         handleBack,
     } = usePemeriksaanForm(id);
+
+    // Dynamic page title
+    useDocumentTitle(selectedPeserta ? `Pemeriksaan: ${selectedPeserta.nama}` : 'Pemeriksaan');
 
     if (isLoading) {
         return <FullPageLoading message="Memuat data peserta..." />;
