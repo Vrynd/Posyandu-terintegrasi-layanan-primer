@@ -35,31 +35,16 @@ api.interceptors.request.use(
 // Response interceptor - handle common errors
 api.interceptors.response.use(
   (response) => response,
-  async (error) => {
+  (error) => {
     const status = error.response?.status;
-    const message = error.response?.data?.message;
 
     // Handle 401 Unauthorized - clear token
     if (status === 401) {
       localStorage.removeItem(TOKEN_KEY);
     }
 
-    // Handle 429 Too Many Requests (Rate Limited)
-    if (status === 429) {
-      const { default: toast } = await import("react-hot-toast");
-      toast.error(
-        message || "Terlalu banyak percobaan. Silakan tunggu beberapa saat.",
-        { duration: 5000 }
-      );
-    }
-
-    // Handle 423 Locked (Account Locked)
-    if (status === 423) {
-      const { default: toast } = await import("react-hot-toast");
-      toast.error(message || "Akun Anda dikunci sementara.", {
-        duration: 8000,
-      });
-    }
+    // 429 (Rate Limit) and 423 (Account Locked) are handled by the form's error display
+    // No toast needed - error message will be shown in the red error box
 
     return Promise.reject(error);
   }

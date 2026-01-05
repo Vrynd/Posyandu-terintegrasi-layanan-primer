@@ -182,14 +182,23 @@ export function useRegister(): UseRegisterReturn {
             // Navigate to dashboard on success
             toast.success('Pendaftaran akun berhasil!');
             navigate('/dashboard');
-        } catch (error) {
-            // Use user-friendly error messages (show only in error box, no toast)
-            if (error instanceof Error) {
-                const friendlyError = getUserFriendlyError(error.message);
-                setGeneralError(friendlyError);
-            } else {
-                setGeneralError('Terjadi kesalahan. Silakan coba lagi.');
+        } catch (err: unknown) {
+            // Extract error message from axios response or Error object
+            let errorMessage = 'Terjadi kesalahan. Silakan coba lagi.';
+            
+            // Check if it's an axios error with response data
+            if (err && typeof err === 'object' && 'response' in err) {
+                const axiosError = err as { response?: { data?: { message?: string } } };
+                if (axiosError.response?.data?.message) {
+                    // Use backend message directly (already in Indonesian)
+                    errorMessage = axiosError.response.data.message;
+                }
+            } else if (err instanceof Error) {
+                // Fallback to getUserFriendlyError for other errors
+                errorMessage = getUserFriendlyError(err.message);
             }
+            
+            setGeneralError(errorMessage);
         } finally {
             setIsLoading(false);
         }

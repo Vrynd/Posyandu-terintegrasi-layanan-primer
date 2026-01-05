@@ -104,14 +104,23 @@ export function useLogin(): UseLoginReturn {
             await login(identifier.trim(), password);
             toast.success('Login berhasil!');
             navigate('/dashboard');
-        } catch (err) {
-            // Use user-friendly error messages (show only in error box, no toast)
-            if (err instanceof Error) {
-                const friendlyError = getUserFriendlyError(err.message);
-                setGeneralError(friendlyError);
-            } else {
-                setGeneralError('Terjadi kesalahan. Silakan coba lagi.');
+        } catch (err: unknown) {
+            // Extract error message from axios response or Error object
+            let errorMessage = 'Terjadi kesalahan. Silakan coba lagi.';
+            
+            // Check if it's an axios error with response data
+            if (err && typeof err === 'object' && 'response' in err) {
+                const axiosError = err as { response?: { data?: { message?: string } } };
+                if (axiosError.response?.data?.message) {
+                    // Use backend message directly (already in Indonesian)
+                    errorMessage = axiosError.response.data.message;
+                }
+            } else if (err instanceof Error) {
+                // Fallback to getUserFriendlyError for other errors
+                errorMessage = getUserFriendlyError(err.message);
             }
+            
+            setGeneralError(errorMessage);
         } finally {
             setIsLoading(false);
         }
