@@ -10,6 +10,7 @@ import type { FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useAuth } from './useAuth';
+import { validateIdentifier, getUserFriendlyError } from '../../utils/security';
 
 interface UseLoginReturn {
     // Form state
@@ -64,13 +65,24 @@ export function useLogin(): UseLoginReturn {
         let isValid = true;
         clearErrors();
 
+        // Validate identifier with security checks
         if (!identifier.trim()) {
             setIdentifierError('Email atau NIK wajib diisi');
             isValid = false;
+        } else {
+            const identifierValidation = validateIdentifier(identifier);
+            if (!identifierValidation.isValid) {
+                setIdentifierError(identifierValidation.error || 'Format tidak valid');
+                isValid = false;
+            }
         }
 
+        // Validate password
         if (!password) {
             setPasswordError('Password wajib diisi');
+            isValid = false;
+        } else if (password.length < 8) {
+            setPasswordError('Password minimal 8 karakter');
             isValid = false;
         }
 
@@ -93,13 +105,12 @@ export function useLogin(): UseLoginReturn {
             toast.success('Login berhasil!');
             navigate('/dashboard');
         } catch (err) {
+            // Use user-friendly error messages (show only in error box, no toast)
             if (err instanceof Error) {
-                setGeneralError(err.message);
-                toast.error(err.message);
+                const friendlyError = getUserFriendlyError(err.message);
+                setGeneralError(friendlyError);
             } else {
-                const errorMsg = 'Terjadi kesalahan. Silakan coba lagi.';
-                setGeneralError(errorMsg);
-                toast.error(errorMsg);
+                setGeneralError('Terjadi kesalahan. Silakan coba lagi.');
             }
         } finally {
             setIsLoading(false);

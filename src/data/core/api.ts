@@ -35,13 +35,32 @@ api.interceptors.request.use(
 // Response interceptor - handle common errors
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
-    // Handle 401 Unauthorized - clear token and redirect
-    if (error.response?.status === 401) {
+  async (error) => {
+    const status = error.response?.status;
+    const message = error.response?.data?.message;
+
+    // Handle 401 Unauthorized - clear token
+    if (status === 401) {
       localStorage.removeItem(TOKEN_KEY);
-      // Optional: redirect to login
-      // window.location.href = '/login';
     }
+
+    // Handle 429 Too Many Requests (Rate Limited)
+    if (status === 429) {
+      const { default: toast } = await import("react-hot-toast");
+      toast.error(
+        message || "Terlalu banyak percobaan. Silakan tunggu beberapa saat.",
+        { duration: 5000 }
+      );
+    }
+
+    // Handle 423 Locked (Account Locked)
+    if (status === 423) {
+      const { default: toast } = await import("react-hot-toast");
+      toast.error(message || "Akun Anda dikunci sementara.", {
+        duration: 8000,
+      });
+    }
+
     return Promise.reject(error);
   }
 );

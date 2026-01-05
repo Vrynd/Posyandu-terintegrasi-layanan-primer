@@ -10,6 +10,13 @@ import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useAuth } from './useAuth';
 import type { RegisterParams } from '../../domain/entities/User';
+import {
+    validateName,
+    validateEmail,
+    validateNIK,
+    validatePhoneNumber,
+    getUserFriendlyError,
+} from '../../utils/security';
 
 interface UseRegisterReturn {
     // Form fields
@@ -110,41 +117,44 @@ export function useRegister(): UseRegisterReturn {
     const validateForm = (): boolean => {
         const errors: Record<string, string> = {};
 
-        if (!name.trim()) {
-            errors.name = 'Nama wajib diisi';
-        } else if (name.trim().length < 2) {
-            errors.name = 'Nama minimal 2 karakter';
+        // Validate name with security checks
+        const nameValidation = validateName(name);
+        if (!nameValidation.isValid) {
+            errors.name = nameValidation.error!;
         }
 
-        if (!email.trim()) {
-            errors.email = 'Email wajib diisi';
-        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-            errors.email = 'Format email tidak valid';
+        // Validate email with security checks
+        const emailValidation = validateEmail(email);
+        if (!emailValidation.isValid) {
+            errors.email = emailValidation.error!;
         }
 
+        // Validate password with strength requirement
         if (!password) {
             errors.password = 'Password wajib diisi';
         } else if (password.length < 8) {
             errors.password = 'Password minimal 8 karakter';
+        } else if (passwordStrength.passed < 3) {
+            errors.password = 'Password harus memenuhi minimal 3 kriteria keamanan';
         }
 
+        // Validate password confirmation
         if (!passwordConfirmation) {
             errors.passwordConfirmation = 'Konfirmasi password wajib diisi';
         } else if (password !== passwordConfirmation) {
             errors.passwordConfirmation = 'Password tidak cocok';
         }
 
-        // Mandatory field validations (updated per user request)
-        if (!nik.trim()) {
-            errors.nik = 'NIK wajib diisi';
-        } else if (nik.length !== 16) {
-            errors.nik = 'NIK harus 16 digit';
+        // Validate NIK with security checks
+        const nikValidation = validateNIK(nik);
+        if (!nikValidation.isValid) {
+            errors.nik = nikValidation.error!;
         }
 
-        if (!phoneNumber.trim()) {
-            errors.phoneNumber = 'Nomor telepon wajib diisi';
-        } else if (phoneNumber.length > 20) {
-            errors.phoneNumber = 'Nomor telepon maksimal 20 karakter';
+        // Validate phone number with security checks
+        const phoneValidation = validatePhoneNumber(phoneNumber);
+        if (!phoneValidation.isValid) {
+            errors.phoneNumber = phoneValidation.error!;
         }
 
         setFieldErrors(errors);
@@ -173,8 +183,10 @@ export function useRegister(): UseRegisterReturn {
             toast.success('Pendaftaran akun berhasil!');
             navigate('/dashboard');
         } catch (error) {
+            // Use user-friendly error messages (show only in error box, no toast)
             if (error instanceof Error) {
-                setGeneralError(error.message);
+                const friendlyError = getUserFriendlyError(error.message);
+                setGeneralError(friendlyError);
             } else {
                 setGeneralError('Terjadi kesalahan. Silakan coba lagi.');
             }
