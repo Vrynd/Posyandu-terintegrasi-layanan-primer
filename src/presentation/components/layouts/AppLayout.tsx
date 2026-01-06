@@ -75,6 +75,7 @@ export function AppLayout() {
                         <UserDropdown
                             userName={displayName}
                             userEmail={userEmail}
+                            userRole={user?.role === 'admin' ? 'Admin' : 'Kader'}
                             onLogout={handleLogoutClick}
                         />
                     </div>

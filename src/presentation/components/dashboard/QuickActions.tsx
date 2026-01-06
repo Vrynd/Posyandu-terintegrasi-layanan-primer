@@ -57,7 +57,7 @@ export function QuickActions() {
             icon: Bug,
             bgGradient: 'from-amber-500 to-orange-600',
             route: '/dashboard/pengaduan',
-            comingSoon: true,
+            comingSoon: false,
         },
     ];
 

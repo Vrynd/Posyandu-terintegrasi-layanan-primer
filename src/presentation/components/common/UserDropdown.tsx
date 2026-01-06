@@ -5,13 +5,14 @@ import { useNavigate } from 'react-router-dom';
 interface UserDropdownProps {
     userName: string;
     userEmail: string;
+    userRole: string;
     onLogout: () => void;
 }
 
 /**
  * UserDropdown - Popover menu for user actions
  */
-export function UserDropdown({ userName, userEmail, onLogout }: UserDropdownProps) {
+export function UserDropdown({ userName, userEmail, userRole, onLogout }: UserDropdownProps) {
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
     const navigate = useNavigate();
@@ -42,12 +43,12 @@ export function UserDropdown({ userName, userEmail, onLogout }: UserDropdownProp
                 onClick={() => setIsOpen(!isOpen)}
                 className="flex items-center gap-2 px-2 py-1.5 rounded-xl hover:bg-gray-100 transition-colors"
             >
-                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white flex items-center justify-center font-bold text-sm shadow-md shadow-blue-500/20">
+                <div className="w-9 h-9 rounded-xl bg-linear-to-br from-blue-600 to-indigo-600 text-white flex items-center justify-center font-bold text-sm shadow-md shadow-blue-500/20">
                     {getInitial(userName)}
                 </div>
                 <div className="hidden md:block text-left">
                     <p className="text-sm font-medium text-gray-900">{userName}</p>
-                    <p className="text-xs text-gray-500">Kader</p>
+                    <p className="text-xs text-gray-500 capitalize">{userRole}</p>
                 </div>
                 <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
             </button>
