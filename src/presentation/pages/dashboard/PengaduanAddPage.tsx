@@ -1,18 +1,18 @@
-
 /**
  * PengaduanAddPage - Step Wizard Form for Creating Complaint
  * Route: /dashboard/pengaduan/baru
  */
 
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { Home, ChevronRight, Bug, FileText, CheckCircle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Bug, FileText, CheckCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 import { useAuth } from '../../hooks/useAuth';
 import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 import { usePengaduan } from '../../hooks/usePengaduan';
 import { StepIndicator, FullPageLoading, type Step } from '../../components/common';
+import { PengaduanPageHeader } from '../../components/pengaduan';
 import {
     KategoriStep,
     DeskripsiStep,
@@ -116,24 +116,14 @@ export function PengaduanAddPage() {
             {isSubmitting && <FullPageLoading message="Mengirim pengaduan..." />}
 
             {/* Header */}
-            <div className="flex items-center justify-between mb-6">
-                <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Buat Pengaduan</h1>
-                    <p className="text-gray-500 text-sm mt-1">Laporkan bug atau masalah sistem</p>
-                </div>
-                <nav className="hidden sm:flex items-center gap-2 text-sm">
-                    <Link to="/dashboard" className="flex items-center gap-1 text-gray-500 hover:text-gray-700 transition-colors">
-                        <Home className="w-4 h-4" />
-                        <span>Dashboard</span>
-                    </Link>
-                    <ChevronRight className="w-4 h-4 text-gray-400" />
-                    <Link to="/dashboard/pengaduan" className="text-gray-500 hover:text-gray-700 transition-colors">
-                        Pengaduan
-                    </Link>
-                    <ChevronRight className="w-4 h-4 text-gray-400" />
-                    <span className="font-medium text-gray-900">Buat</span>
-                </nav>
-            </div>
+            <PengaduanPageHeader 
+                title="Buat Pengaduan" 
+                description="Laporkan bug atau masalah sistem"
+                breadcrumbs={[
+                    { label: 'Pengaduan', path: '/dashboard/pengaduan' },
+                    { label: 'Buat', isCurrent: true }
+                ]}
+            />
 
             {/* Step Indicator */}
             <StepIndicator steps={FORM_STEPS} currentStep={currentStep} />

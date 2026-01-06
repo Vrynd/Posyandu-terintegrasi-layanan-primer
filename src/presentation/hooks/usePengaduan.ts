@@ -1,11 +1,10 @@
 /**
  * usePengaduan Hook
  * Business logic for pengaduan feature with role-based behavior
+ * Uses UseCases for clean architecture adherence
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { pengaduanApiDataSource } from '../../data/datasources/PengaduanApiDataSource';
-import { useAuth } from './useAuth';
 import type {
     Pengaduan,
     PengaduanDetail,
@@ -14,6 +13,15 @@ import type {
     PengaduanFilterParams,
     PengaduanStatus,
 } from '../../domain/entities/Pengaduan';
+
+// Import UseCases
+import { getPengaduanListUseCase } from '../../domain/usecases/pengaduan/GetPengaduanListUseCase';
+import { getPengaduanDetailUseCase } from '../../domain/usecases/pengaduan/GetPengaduanDetailUseCase';
+import { getPengaduanStatsUseCase } from '../../domain/usecases/pengaduan/GetPengaduanStatsUseCase';
+import { createPengaduanUseCase } from '../../domain/usecases/pengaduan/CreatePengaduanUseCase';
+import { updatePengaduanStatusUseCase } from '../../domain/usecases/pengaduan/UpdatePengaduanStatusUseCase';
+import { addPengaduanResponseUseCase } from '../../domain/usecases/pengaduan/AddPengaduanResponseUseCase';
+import { deletePengaduanUseCase } from '../../domain/usecases/pengaduan/DeletePengaduanUseCase';
 
 interface UsePengaduanReturn {
     // Data
@@ -48,8 +56,6 @@ interface UsePengaduanReturn {
 }
 
 export function usePengaduan(): UsePengaduanReturn {
-    const { user } = useAuth();
-    
     // Data state
     const [pengaduanList, setPengaduanList] = useState<Pengaduan[]>([]);
     const [selectedPengaduan, setSelectedPengaduan] = useState<PengaduanDetail | null>(null);
@@ -79,13 +85,11 @@ export function usePengaduan(): UsePengaduanReturn {
         setIsLoading(true);
         setError(null);
         try {
-            const response = await pengaduanApiDataSource.getList(filters);
-            if (response.success) {
-                setPengaduanList(response.data.data);
-                setCurrentPage(response.data.current_page);
-                setLastPage(response.data.last_page);
-                setTotal(response.data.total);
-            }
+            const result = await getPengaduanListUseCase.execute(filters);
+            setPengaduanList(result.data);
+            setCurrentPage(result.current_page);
+            setLastPage(result.last_page);
+            setTotal(result.total);
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Gagal memuat data');
         } finally {
@@ -100,10 +104,8 @@ export function usePengaduan(): UsePengaduanReturn {
         setIsLoadingDetail(true);
         setError(null);
         try {
-            const response = await pengaduanApiDataSource.getDetail(id);
-            if (response.success) {
-                setSelectedPengaduan(response.data);
-            }
+            const detail = await getPengaduanDetailUseCase.execute(id);
+            setSelectedPengaduan(detail);
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Gagal memuat detail');
         } finally {
@@ -112,20 +114,16 @@ export function usePengaduan(): UsePengaduanReturn {
     }, []);
 
     /**
-     * Fetch statistics (Admin only)
+     * Fetch statistics
      */
     const fetchStats = useCallback(async () => {
-        if (user?.role !== 'admin') return;
-        
         try {
-            const response = await pengaduanApiDataSource.getStats();
-            if (response.success) {
-                setStats(response.data);
-            }
+            const result = await getPengaduanStatsUseCase.execute();
+            setStats(result);
         } catch (err) {
             console.error('Failed to fetch stats:', err);
         }
-    }, [user?.role]);
+    }, []);
 
 
     /**
@@ -135,12 +133,9 @@ export function usePengaduan(): UsePengaduanReturn {
         setIsSubmitting(true);
         setError(null);
         try {
-            const response = await pengaduanApiDataSource.create(params);
-            if (response.success) {
-                await fetchList(); // Refresh the list
-                return true;
-            }
-            return false;
+            await createPengaduanUseCase.execute(params);
+            await fetchList(); // Refresh the list
+            return true;
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Gagal mengirim pengaduan');
             return false;
@@ -156,36 +151,29 @@ export function usePengaduan(): UsePengaduanReturn {
         setIsSubmitting(true);
         setError(null);
         try {
-            const response = await pengaduanApiDataSource.updateStatus(id, status);
-            if (response.success) {
-                // Update in list
-                setPengaduanList(prev => 
-                    prev.map(p => p.id === id ? { ...p, status } : p)
-                );
-                // Update selected if viewing detail
-                if (selectedPengaduan?.id === id) {
-                    setSelectedPengaduan(prev => prev ? { ...prev, status } : null);
-                }
-                // Refresh stats and detail
-                await fetchStats();
-                // Re-fetch detail to get fresh data from server
-                const detailResponse = await pengaduanApiDataSource.getDetail(id);
-                if (detailResponse.success) {
-                    setSelectedPengaduan(detailResponse.data);
-                }
-                return true;
+            await updatePengaduanStatusUseCase.execute(id, status);
+            
+            // Update local state for optimization
+            setPengaduanList(prev => 
+                prev.map(p => p.id === id ? { ...p, status } : p)
+            );
+            if (selectedPengaduan?.id === id) {
+                setSelectedPengaduan(prev => prev ? { ...prev, status } : null);
             }
-            setError(response.message || 'Gagal mengubah status');
-            return false;
+            
+            // Refresh stats and detail
+            await fetchStats();
+            await fetchDetail(id);
+            
+            return true;
         } catch (err) {
-            const errorMessage = err instanceof Error ? err.message : 'Gagal mengubah status';
-            setError(errorMessage);
+            setError(err instanceof Error ? err.message : 'Gagal mengubah status');
             console.error('Update status error:', err);
             return false;
         } finally {
             setIsSubmitting(false);
         }
-    }, [selectedPengaduan?.id, fetchStats]);
+    }, [selectedPengaduan?.id, fetchStats, fetchDetail]);
 
     /**
      * Add response (Admin only)
@@ -194,16 +182,13 @@ export function usePengaduan(): UsePengaduanReturn {
         setIsSubmitting(true);
         setError(null);
         try {
-            const result = await pengaduanApiDataSource.addResponse({
+            await addPengaduanResponseUseCase.execute({
                 pengaduan_id: pengaduanId,
                 response,
             });
-            if (result.success) {
-                // Refresh detail to show new response
-                await fetchDetail(pengaduanId);
-                return true;
-            }
-            return false;
+            // Refresh detail to show new response
+            await fetchDetail(pengaduanId);
+            return true;
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Gagal mengirim respon');
             return false;
@@ -219,16 +204,13 @@ export function usePengaduan(): UsePengaduanReturn {
         setIsSubmitting(true);
         setError(null);
         try {
-            const response = await pengaduanApiDataSource.delete(id);
-            if (response.success) {
-                setPengaduanList(prev => prev.filter(p => p.id !== id));
-                if (selectedPengaduan?.id === id) {
-                    setSelectedPengaduan(null);
-                }
-                await fetchStats();
-                return true;
+            await deletePengaduanUseCase.execute(id);
+            setPengaduanList(prev => prev.filter(p => p.id !== id));
+            if (selectedPengaduan?.id === id) {
+                setSelectedPengaduan(null);
             }
-            return false;
+            await fetchStats();
+            return true;
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Gagal menghapus pengaduan');
             return false;
