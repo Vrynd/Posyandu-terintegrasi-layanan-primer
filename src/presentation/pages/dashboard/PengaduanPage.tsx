@@ -13,12 +13,16 @@ import { usePengaduan } from '../../hooks/usePengaduan';
 import { 
     PengaduanStatsCards,
     PengaduanToolbar,
-    PengaduanList,
-    PengaduanDetailPanel,
+    PengaduanCardGrid,
+    PengaduanFilterModal,
     PengaduanHistory,
     PengaduanKategoriModal
 } from '../../components/pengaduan';
+import { Pagination } from '../../components/common';
 import { KATEGORI_OPTIONS } from '../../../domain/entities/Pengaduan';
+
+// Pagination config
+const ITEMS_PER_PAGE = 9;
 
 export function PengaduanPage() {
     useDocumentTitle('Pengaduan');
@@ -26,19 +30,18 @@ export function PengaduanPage() {
     const { user } = useAuth();
     const isAdmin = user?.role === 'admin';
     const [isKategoriModalOpen, setIsKategoriModalOpen] = useState(false);
+    const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
+    const [currentPage, setCurrentPage] = useState(1);
     
     const {
         pengaduanList,
         selectedPengaduan,
         stats,
         isLoading,
-        isSubmitting,
         filters,
         setFilters,
         fetchDetail,
         fetchStats,
-        updateStatus,
-        addResponse,
         clearSelectedPengaduan,
     } = usePengaduan();
 
@@ -49,21 +52,16 @@ export function PengaduanPage() {
         }
     }, [isAdmin, fetchStats]);
 
-    // Admin handlers
-    const handleUpdateStatus = async (status: Parameters<typeof updateStatus>[1]) => {
-        if (!selectedPengaduan) return false;
-        return updateStatus(selectedPengaduan.id, status);
-    };
-
-    const handleAddResponse = async (response: string) => {
-        if (!selectedPengaduan) return false;
-        return addResponse(selectedPengaduan.id, response);
-    };
-
-    // Navigate to create page
     const handleCreateNew = () => {
         navigate('/dashboard/pengaduan/baru');
     };
+
+    // Pagination logic for admin view
+    const totalPages = Math.ceil(pengaduanList.length / ITEMS_PER_PAGE);
+    const paginatedList = pengaduanList.slice(
+        (currentPage - 1) * ITEMS_PER_PAGE,
+        currentPage * ITEMS_PER_PAGE
+    );
 
     // Render Admin View
     if (isAdmin) {
@@ -87,42 +85,64 @@ export function PengaduanPage() {
 
                 {/* Stats Cards */}
                 {stats && (
-                    <PengaduanStatsCards 
-                        stats={stats} 
-                        filters={filters} 
-                        onFilterChange={setFilters} 
-                    />
+                    <PengaduanStatsCards stats={stats} />
                 )}
 
-                {/* Toolbar */}
-                <PengaduanToolbar
-                    filters={filters}
-                    onFilterChange={setFilters}
-                    onResetFilter={() => setFilters({ ...filters, status: undefined })}
-                    showResetButton={!!filters.status}
-                />
+                {/* Main Card */}
+                <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+                    {/* Toolbar Section */}
+                    <div className="p-6 border-b border-gray-100">
+                        <PengaduanToolbar
+                            filters={filters}
+                            onFilterChange={(newFilters) => {
+                                setFilters(newFilters);
+                                setCurrentPage(1);
+                            }}
+                            onOpenFilterModal={() => setIsFilterModalOpen(true)}
+                        />
+                    </div>
 
-                {/* Content Area */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div className="lg:col-span-2">
-                        <PengaduanList
-                            pengaduanList={pengaduanList}
-                            selectedPengaduan={selectedPengaduan}
-                            isLoading={isLoading}
-                            onSelect={fetchDetail}
-                            showUserInfo={true}
-                        />
-                    </div>
-                    <div className="lg:col-span-1">
-                        <PengaduanDetailPanel
-                            pengaduan={selectedPengaduan}
-                            isSubmitting={isSubmitting}
-                            onClose={clearSelectedPengaduan}
-                            onUpdateStatus={handleUpdateStatus}
-                            onAddResponse={handleAddResponse}
-                        />
-                    </div>
+                    {/* Results Summary - only show when multiple pages */}
+                    {!isLoading && totalPages > 1 && paginatedList.length > 0 && (
+                        <div className="px-6 py-3 bg-gray-50 border-b border-gray-100">
+                            <p className="text-sm text-gray-600">
+                                Menampilkan{' '}
+                                <span className="font-semibold text-slate-700">
+                                    {(currentPage - 1) * ITEMS_PER_PAGE + 1}-{Math.min(currentPage * ITEMS_PER_PAGE, pengaduanList.length)}
+                                </span>
+                                {' '}dari <span className="font-semibold text-slate-700">{pengaduanList.length}</span> pengaduan
+                            </p>
+                        </div>
+                    )}
+
+                    {/* Card Grid View */}
+                    <PengaduanCardGrid
+                        pengaduanList={paginatedList}
+                        isLoading={isLoading}
+                        onNavigate={(id) => navigate(`/dashboard/pengaduan/${id}`)}
+                    />
+
+                    {/* Pagination */}
+                    <Pagination
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        onPrevPage={() => setCurrentPage(p => Math.max(1, p - 1))}
+                        onNextPage={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                        onGoToPage={setCurrentPage}
+                    />
                 </div>
+
+                {/* Filter Modal */}
+                <PengaduanFilterModal
+                    isOpen={isFilterModalOpen}
+                    onClose={() => setIsFilterModalOpen(false)}
+                    selectedStatus={filters.status}
+                    selectedKategori={filters.kategori}
+                    onApply={(status, kategori) => {
+                        setFilters({ ...filters, status, kategori });
+                        setCurrentPage(1);
+                    }}
+                />
             </div>
         );
     }

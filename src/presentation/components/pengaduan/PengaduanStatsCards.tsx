@@ -1,36 +1,70 @@
 /**
  * PengaduanStatsCards - Admin statistics cards
- * Shows count of pengaduan by status
+ * Display-only stats cards (no filter functionality)
  */
 
-import type { PengaduanStats, PengaduanFilterParams } from '../../../domain/entities/Pengaduan';
-import { STATUS_OPTIONS } from '../../../domain/entities/Pengaduan';
+import { ClipboardList, Hourglass, Settings, BadgeCheck, XCircle } from 'lucide-react';
+import type { PengaduanStats } from '../../../domain/entities/Pengaduan';
 
 interface PengaduanStatsCardsProps {
     stats: PengaduanStats;
-    filters: PengaduanFilterParams;
-    onFilterChange: (filters: PengaduanFilterParams) => void;
 }
 
-export function PengaduanStatsCards({ stats, filters, onFilterChange }: PengaduanStatsCardsProps) {
+export function PengaduanStatsCards({ stats }: PengaduanStatsCardsProps) {
+    const total = stats.pending + stats.in_progress + stats.resolved + stats.rejected;
+
     return (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-            {STATUS_OPTIONS.map((statusOption) => (
-                <button
-                    key={statusOption.id}
-                    onClick={() => onFilterChange({ ...filters, status: statusOption.id })}
-                    className={`p-4 rounded-xl border transition-all ${
-                        filters.status === statusOption.id 
-                            ? 'border-amber-500 bg-amber-50' 
-                            : 'border-gray-100 bg-white hover:border-gray-200'
-                    }`}
-                >
-                    <div className={`text-2xl font-bold ${statusOption.color}`}>
-                        {stats[statusOption.id as keyof PengaduanStats]}
-                    </div>
-                    <div className="text-sm text-gray-500">{statusOption.label}</div>
-                </button>
-            ))}
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+            {/* Total */}
+            <div className="bg-white rounded-xl border border-gray-100 p-5 flex items-center gap-4 border-l-4 border-l-slate-400">
+                <div className="w-11 h-11 bg-linear-to-br from-slate-100 to-slate-200 rounded-lg flex items-center justify-center">
+                    <ClipboardList className="w-5 h-5 text-slate-600" />
+                </div>
+                <div>
+                    <p className="text-2xl font-bold text-gray-900">{total}</p>
+                    <p className="text-xs text-gray-500">Total</p>
+                </div>
+            </div>
+            {/* Menunggu */}
+            <div className="bg-white rounded-xl border border-gray-100 p-5 flex items-center gap-4 border-l-4 border-l-amber-400">
+                <div className="w-11 h-11 bg-linear-to-br from-amber-100 to-amber-200 rounded-lg flex items-center justify-center">
+                    <Hourglass className="w-5 h-5 text-amber-600" />
+                </div>
+                <div>
+                    <p className="text-2xl font-bold text-gray-900">{stats.pending}</p>
+                    <p className="text-xs text-gray-500">Menunggu</p>
+                </div>
+            </div>
+            {/* Diproses */}
+            <div className="bg-white rounded-xl border border-gray-100 p-5 flex items-center gap-4 border-l-4 border-l-blue-500">
+                <div className="w-11 h-11 bg-linear-to-br from-blue-100 to-blue-200 rounded-lg flex items-center justify-center">
+                    <Settings className="w-5 h-5 text-blue-600" />
+                </div>
+                <div>
+                    <p className="text-2xl font-bold text-gray-900">{stats.in_progress}</p>
+                    <p className="text-xs text-gray-500">Diproses</p>
+                </div>
+            </div>
+            {/* Selesai */}
+            <div className="bg-white rounded-xl border border-gray-100 p-5 flex items-center gap-4 border-l-4 border-l-green-500">
+                <div className="w-11 h-11 bg-linear-to-br from-green-100 to-green-200 rounded-lg flex items-center justify-center">
+                    <BadgeCheck className="w-5 h-5 text-green-600" />
+                </div>
+                <div>
+                    <p className="text-2xl font-bold text-gray-900">{stats.resolved}</p>
+                    <p className="text-xs text-gray-500">Selesai</p>
+                </div>
+            </div>
+            {/* Ditolak */}
+            <div className="bg-white rounded-xl border border-gray-100 p-5 flex items-center gap-4 border-l-4 border-l-red-500">
+                <div className="w-11 h-11 bg-linear-to-br from-red-100 to-red-200 rounded-lg flex items-center justify-center">
+                    <XCircle className="w-5 h-5 text-red-600" />
+                </div>
+                <div>
+                    <p className="text-2xl font-bold text-gray-900">{stats.rejected}</p>
+                    <p className="text-xs text-gray-500">Ditolak</p>
+                </div>
+            </div>
         </div>
     );
 }

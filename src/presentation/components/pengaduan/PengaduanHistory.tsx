@@ -133,40 +133,151 @@ export function PengaduanHistory({
                 </button>
             </div>
 
-            {/* Detail Modal */}
+            {/* Detail Modal - Styled like FilterModal */}
             {selectedPengaduan && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-2xl max-w-lg w-full max-h-[80vh] overflow-y-auto">
-                        <div className="p-6">
-                            <div className="flex items-center justify-between mb-4">
-                                <h3 className="font-semibold text-gray-900">Detail Pengaduan</h3>
-                                <button onClick={onCloseDetail} className="text-gray-400 hover:text-gray-600">
-                                    <X className="w-5 h-5" />
-                                </button>
+                <div className="fixed inset-0 z-50 flex items-center justify-center">
+                    {/* Backdrop with blur */}
+                    <div
+                        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+                        onClick={onCloseDetail}
+                    />
+
+                    {/* Modal - Wider for better content display */}
+                    <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl mx-4 overflow-hidden animate-in fade-in zoom-in duration-200 flex flex-col max-h-[90vh]">
+                        {/* ===== HEADER ===== */}
+                        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-white shrink-0">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 bg-linear-to-br from-slate-800 to-slate-900 rounded-xl flex items-center justify-center">
+                                    <Bug className="w-5 h-5 text-white" />
+                                </div>
+                                <div>
+                                    <h3 className="text-lg font-bold text-gray-900">Detail Pengaduan</h3>
+                                    <p className="text-xs text-gray-500">Lihat informasi lengkap pengaduan Anda</p>
+                                </div>
+                            </div>
+                            <button
+                                onClick={onCloseDetail}
+                                className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                            >
+                                <X className="w-5 h-5 text-gray-400" />
+                            </button>
+                        </div>
+
+                        {/* ===== CONTENT ===== */}
+                        <div className="flex-1 overflow-y-auto px-6 py-5">
+                            {/* Top Section: Title + Badges */}
+                            <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 pb-5 border-b border-gray-100">
+                                <div className="flex-1">
+                                    <h4 className="text-xl font-semibold text-gray-900 mb-2">{selectedPengaduan.judul}</h4>
+                                    <div className="flex items-center gap-2 text-xs text-gray-400">
+                                        <Clock className="w-3.5 h-3.5" />
+                                        <span>
+                                            {new Date(selectedPengaduan.created_at).toLocaleDateString('id-ID', {
+                                                day: 'numeric',
+                                                month: 'long',
+                                                year: 'numeric',
+                                                hour: '2-digit',
+                                                minute: '2-digit'
+                                            })}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-2 flex-wrap md:flex-nowrap">
+                                    <span className={`px-3 py-1.5 text-xs font-semibold rounded-lg whitespace-nowrap ${STATUS_OPTIONS.find(s => s.id === selectedPengaduan.status)?.bgColor} ${STATUS_OPTIONS.find(s => s.id === selectedPengaduan.status)?.color}`}>
+                                        {STATUS_OPTIONS.find(s => s.id === selectedPengaduan.status)?.label}
+                                    </span>
+                                    <span className="px-3 py-1.5 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 whitespace-nowrap">
+                                        {KATEGORI_OPTIONS.find(k => k.id === selectedPengaduan.kategori)?.label}
+                                    </span>
+                                    <span className={`px-3 py-1.5 text-xs font-medium rounded-lg whitespace-nowrap ${
+                                        selectedPengaduan.prioritas === 'tinggi' ? 'bg-red-100 text-red-700' :
+                                        selectedPengaduan.prioritas === 'sedang' ? 'bg-amber-100 text-amber-700' :
+                                        'bg-green-100 text-green-700'
+                                    }`}>
+                                        Prioritas {selectedPengaduan.prioritas.charAt(0).toUpperCase() + selectedPengaduan.prioritas.slice(1)}
+                                    </span>
+                                </div>
                             </div>
 
-                            <h4 className="font-medium text-gray-900">{selectedPengaduan.judul}</h4>
-                            <p className="text-sm text-gray-500 mt-2">{selectedPengaduan.deskripsi}</p>
+                            {/* Main Content */}
+                            <div className="space-y-4 py-5">
+                                {/* Description Section */}
+                                <div className="bg-gray-50 rounded-xl p-4">
+                                    <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Deskripsi Masalah</label>
+                                    <p className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">{selectedPengaduan.deskripsi}</p>
+                                </div>
 
+                                {/* Reproduction Steps (if exists) */}
+                                {selectedPengaduan.langkah_reproduksi && (
+                                    <div className="bg-gray-50 rounded-xl p-4">
+                                        <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Langkah Reproduksi</label>
+                                        <p className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">{selectedPengaduan.langkah_reproduksi}</p>
+                                    </div>
+                                )}
+
+                                {/* Images (if exists) */}
+                                {selectedPengaduan.images && selectedPengaduan.images.length > 0 && (
+                                    <div>
+                                        <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Lampiran Gambar ({selectedPengaduan.images.length})</label>
+                                        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                                            {selectedPengaduan.images.map((img, idx) => (
+                                                <a 
+                                                    key={idx} 
+                                                    href={img} 
+                                                    target="_blank" 
+                                                    rel="noopener noreferrer"
+                                                    className="block aspect-video bg-gray-100 rounded-xl overflow-hidden hover:opacity-90 hover:shadow-md transition-all"
+                                                >
+                                                    <img src={img} alt={`Screenshot ${idx + 1}`} className="w-full h-full object-cover" />
+                                                </a>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Admin Responses */}
                             {selectedPengaduan.responses.length > 0 && (
-                                <div className="mt-6">
-                                    <h5 className="text-sm font-medium text-gray-700 mb-3">Respon dari Admin</h5>
+                                <div className="pt-5 border-t border-gray-100">
+                                    <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-4">
+                                        Respon Admin ({selectedPengaduan.responses.length})
+                                    </label>
                                     <div className="space-y-3">
                                         {selectedPengaduan.responses.map((r) => (
-                                            <div key={r.id} className="p-4 bg-green-50 border border-green-100 rounded-xl">
+                                            <div key={r.id} className="p-4 bg-emerald-50 border border-emerald-100 rounded-xl">
                                                 <div className="flex items-center gap-2 mb-2">
-                                                    <CheckCircle2 className="w-4 h-4 text-green-600" />
-                                                    <span className="text-sm font-medium text-green-700">{r.admin.name}</span>
+                                                    <div className="w-7 h-7 bg-emerald-500 rounded-full flex items-center justify-center">
+                                                        <CheckCircle2 className="w-4 h-4 text-white" />
+                                                    </div>
+                                                    <div>
+                                                        <span className="text-sm font-semibold text-emerald-800">{r.admin.name}</span>
+                                                        <span className="text-xs text-emerald-600 ml-1">• Admin</span>
+                                                    </div>
+                                                    <span className="ml-auto text-xs text-gray-400 flex items-center gap-1">
+                                                        <Clock className="w-3 h-3" />
+                                                        {new Date(r.created_at).toLocaleDateString('id-ID', {
+                                                            day: 'numeric',
+                                                            month: 'short',
+                                                            year: 'numeric'
+                                                        })}
+                                                    </span>
                                                 </div>
-                                                <p className="text-sm text-gray-600">{r.response}</p>
-                                                <p className="text-xs text-gray-400 mt-2">
-                                                    {new Date(r.created_at).toLocaleDateString('id-ID')}
-                                                </p>
+                                                <p className="text-sm text-gray-700 leading-relaxed pl-9">{r.response}</p>
                                             </div>
                                         ))}
                                     </div>
                                 </div>
                             )}
+                        </div>
+
+                        {/* ===== FOOTER ===== */}
+                        <div className="px-6 py-4 border-t border-gray-100 bg-white shrink-0">
+                            <button
+                                onClick={onCloseDetail}
+                                className="w-full py-3 px-4 bg-linear-to-r from-slate-800 to-slate-900 hover:from-slate-700 hover:to-slate-800 text-white font-semibold rounded-xl transition-all shadow-lg shadow-slate-300"
+                            >
+                                Tutup
+                            </button>
                         </div>
                     </div>
                 </div>

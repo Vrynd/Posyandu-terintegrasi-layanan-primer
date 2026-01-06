@@ -25,11 +25,11 @@ export function PengaduanFormFooter({
     const isLastStep = currentStep === totalSteps;
 
     return (
-        <div className="bg-white rounded-2xl border border-gray-100 p-4 flex items-center justify-between">
+        <div className="bg-white rounded-2xl border border-gray-100 py-4 px-6 flex items-center justify-between">
             {/* Previous Button */}
             <button
                 onClick={onPrev}
-                className="flex items-center gap-2 px-5 py-2.5 text-gray-600 hover:text-gray-800 font-medium transition-colors"
+                className="flex items-center gap-2 px-5 py-2 text-gray-600 hover:text-gray-800 text-sm font-medium bg-gray-50 rounded-xl transition-all"
             >
                 <ArrowLeft className="w-4 h-4" />
                 {isFirstStep ? 'Batal' : 'Kembali'}
@@ -45,7 +45,7 @@ export function PengaduanFormFooter({
                 <button
                     onClick={onSubmit}
                     disabled={isSubmitting}
-                    className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all disabled:opacity-50 shadow-lg shadow-blue-600/20"
+                    className="flex items-center gap-2 px-5 py-2  bg-slate-800 hover:bg-slate-900 text-white font-semibold rounded-xl transition-all disabled:opacity-50"
                 >
                     {isSubmitting ? (
                         <><Loader2 className="w-4 h-4 animate-spin" /> Mengirim...</>
@@ -56,7 +56,7 @@ export function PengaduanFormFooter({
             ) : (
                 <button
                     onClick={onNext}
-                    className="flex items-center gap-2 px-6 py-2.5 bg-slate-800 hover:bg-slate-900 text-white font-semibold rounded-xl transition-all"
+                    className="flex items-center gap-2 px-5 py-2 bg-slate-800 hover:bg-slate-900 text-white font-medium text-sm rounded-xl transition-all"
                 >
                     Lanjut
                     <ArrowRight className="w-4 h-4" />
