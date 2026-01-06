@@ -1,10 +1,11 @@
 /**
  * PengaduanHistory - Kader's pengaduan history view
+ * Version 2: Card-based layout with color-coded priority strips
  */
 
-import { Bug, Clock, MessageSquare, CheckCircle2, X } from 'lucide-react';
+import { Bug, Clock, MessageSquare, CheckCircle2, X, ChevronRight, Plus } from 'lucide-react';
 import type { Pengaduan, PengaduanDetail } from '../../../domain/entities/Pengaduan';
-import { STATUS_OPTIONS } from '../../../domain/entities/Pengaduan';
+import { STATUS_OPTIONS, KATEGORI_OPTIONS } from '../../../domain/entities/Pengaduan';
 
 interface PengaduanHistoryProps {
     pengaduanList: Pengaduan[];
@@ -25,21 +26,24 @@ export function PengaduanHistory({
 }: PengaduanHistoryProps) {
     if (isLoading) {
         return (
-            <div className="bg-white rounded-xl border border-gray-100 p-8 text-center">
-                <div className="w-8 h-8 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto" />
-                <p className="text-gray-500 mt-2">Memuat data...</p>
+            <div className="bg-white rounded-2xl border border-gray-100 p-16 text-center">
+                <div className="w-10 h-10 border-4 border-slate-800 border-t-transparent rounded-full animate-spin mx-auto" />
+                <p className="text-gray-500 mt-4">Memuat data pengaduan...</p>
             </div>
         );
     }
 
     if (pengaduanList.length === 0) {
         return (
-            <div className="bg-white rounded-xl border border-gray-100 p-8 text-center">
-                <Bug className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                <p className="text-gray-500">Belum ada pengaduan</p>
+            <div className="bg-white rounded-2xl border border-gray-100 p-16 text-center">
+                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Bug className="w-8 h-8 text-gray-400" />
+                </div>
+                <p className="font-semibold text-gray-900">Belum ada pengaduan</p>
+                <p className="text-sm text-gray-500 mt-1">Laporkan masalah yang Anda temui</p>
                 <button
                     onClick={onCreateNew}
-                    className="mt-4 px-4 py-2 bg-amber-500 text-white rounded-lg text-sm font-medium"
+                    className="mt-6 px-6 py-2.5 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-sm font-medium transition-colors"
                 >
                     Buat Pengaduan Pertama
                 </button>
@@ -47,48 +51,86 @@ export function PengaduanHistory({
         );
     }
 
+    // Priority color mapping for left strip
+    const getPriorityStrip = (prioritas: string) => {
+        switch (prioritas) {
+            case 'tinggi': return 'bg-red-500';
+            case 'sedang': return 'bg-amber-500';
+            case 'rendah': return 'bg-green-500';
+            default: return 'bg-gray-300';
+        }
+    };
+
     return (
         <>
-            <div className="space-y-4">
+            {/* Card Grid Layout */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {pengaduanList.map(pengaduan => {
                     const statusOpt = STATUS_OPTIONS.find((s) => s.id === pengaduan.status);
+                    const kategoriOpt = KATEGORI_OPTIONS.find((k) => k.id === pengaduan.kategori);
                     
                     return (
                         <div
                             key={pengaduan.id}
-                            className="bg-white rounded-xl border border-gray-100 p-4"
+                            onClick={() => onSelect(pengaduan.id)}
+                                    className="group bg-white rounded-xl border border-gray-100 overflow-hidden cursor-pointer hover:border-gray-200 transition-all"
                         >
-                            <div className="flex items-start justify-between gap-3">
-                                <div className="flex-1">
-                                    <h3 className="font-medium text-gray-900">{pengaduan.judul}</h3>
-                                    <p className="text-sm text-gray-500 mt-1 line-clamp-2">{pengaduan.deskripsi}</p>
-                                </div>
-                                <span className={`px-3 py-1 text-xs font-medium rounded-full ${statusOpt?.bgColor} ${statusOpt?.color}`}>
-                                    {statusOpt?.label}
-                                </span>
-                            </div>
-                            <div className="flex items-center gap-4 mt-3 text-xs text-gray-400">
-                                <span className="flex items-center gap-1">
-                                    <Clock className="w-3 h-3" />
-                                    {new Date(pengaduan.created_at).toLocaleDateString('id-ID')}
-                                </span>
-                                <span className="flex items-center gap-1">
-                                    <MessageSquare className="w-3 h-3" />
-                                    {pengaduan.responses_count} respon
-                                </span>
-                            </div>
+                            {/* Priority Strip */}
+                            <div className={`h-1 ${getPriorityStrip(pengaduan.prioritas)}`} />
                             
-                            {pengaduan.responses_count > 0 && (
-                                <button
-                                    onClick={() => onSelect(pengaduan.id)}
-                                    className="mt-3 text-sm text-amber-600 hover:text-amber-700 font-medium"
-                                >
-                                    Lihat respon →
-                                </button>
-                            )}
+                            <div className="p-5">
+                                {/* Header: Category + Status */}
+                                <div className="flex items-center justify-between mb-3">
+                                    <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                                        {kategoriOpt?.label || pengaduan.kategori}
+                                    </span>
+                                    <span className={`px-2.5 py-1 text-xs font-medium rounded-full ${statusOpt?.bgColor} ${statusOpt?.color}`}>
+                                        {statusOpt?.label}
+                                    </span>
+                                </div>
+
+                                {/* Title */}
+                                <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-slate-700 transition-colors">
+                                    {pengaduan.judul}
+                                </h3>
+
+                                {/* Description Preview */}
+                                <p className="text-sm text-gray-500 line-clamp-2 mb-4">
+                                    {pengaduan.deskripsi}
+                                </p>
+
+                                {/* Footer: Date + Responses */}
+                                <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                                    <div className="flex items-center gap-3 text-xs text-gray-400">
+                                        <span className="flex items-center gap-1">
+                                            <Clock className="w-3.5 h-3.5" />
+                                            {new Date(pengaduan.created_at).toLocaleDateString('id-ID', {
+                                                day: 'numeric',
+                                                month: 'short'
+                                            })}
+                                        </span>
+                                        <span className="flex items-center gap-1">
+                                            <MessageSquare className="w-3.5 h-3.5" />
+                                            {pengaduan.responses_count}
+                                        </span>
+                                    </div>
+                                    <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-slate-600 transition-colors" />
+                                </div>
+                            </div>
                         </div>
                     );
                 })}
+
+                {/* Add New Card */}
+                <button
+                    onClick={onCreateNew}
+                    className="group bg-gray-50 rounded-xl border-2 border-dashed border-gray-200 p-8 flex flex-col items-center justify-center min-h-[200px] hover:border-slate-400 hover:bg-slate-50 transition-all"
+                >
+                    <div className="w-12 h-12 rounded-full bg-gray-100 group-hover:bg-slate-100 flex items-center justify-center mb-3 transition-colors">
+                        <Plus className="w-6 h-6 text-gray-400 group-hover:text-slate-600" />
+                    </div>
+                    <p className="font-medium text-gray-500 group-hover:text-slate-700">Buat Pengaduan Baru</p>
+                </button>
             </div>
 
             {/* Detail Modal */}

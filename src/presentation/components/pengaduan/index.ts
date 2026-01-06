@@ -9,3 +9,4 @@ export * from './PengaduanList';
 export * from './PengaduanDetailPanel';
 export * from './PengaduanForm';
 export * from './PengaduanHistory';
+export * from './PengaduanKategoriModal';

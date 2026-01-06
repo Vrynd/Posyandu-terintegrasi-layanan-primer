@@ -138,10 +138,10 @@ export const KATEGORI_OPTIONS: { id: PengaduanKategori; label: string; descripti
     { id: 'lainnya', label: 'Lainnya', description: 'Masalah lainnya' },
 ];
 
-export const PRIORITAS_OPTIONS: { id: PengaduanPrioritas; label: string; color: string }[] = [
-    { id: 'rendah', label: 'Rendah', color: 'bg-green-100 text-green-700 border-green-200' },
-    { id: 'sedang', label: 'Sedang', color: 'bg-yellow-100 text-yellow-700 border-yellow-200' },
-    { id: 'tinggi', label: 'Tinggi', color: 'bg-red-100 text-red-700 border-red-200' },
+export const PRIORITAS_OPTIONS: { id: PengaduanPrioritas; label: string; color: string; description: string }[] = [
+    { id: 'rendah', label: 'Rendah', color: 'bg-green-100 text-green-700 border-green-200', description: 'Tidak mengganggu pekerjaan utama' },
+    { id: 'sedang', label: 'Sedang', color: 'bg-yellow-100 text-yellow-700 border-yellow-200', description: 'Menghambat sebagian pekerjaan' },
+    { id: 'tinggi', label: 'Tinggi', color: 'bg-red-100 text-red-700 border-red-200', description: 'Tidak bisa bekerja sama sekali' },
 ];
 
 export const STATUS_OPTIONS: { id: PengaduanStatus; label: string; color: string; bgColor: string }[] = [

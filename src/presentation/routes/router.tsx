@@ -29,6 +29,7 @@ import { AppLayout } from '../components/layouts/AppLayout';
 import { DashboardPage } from '../pages/dashboard/DashboardPage';
 import { LaporanPage } from '../pages/dashboard/LaporanPage';
 import { PengaduanPage } from '../pages/dashboard/PengaduanPage';
+import { PengaduanAddPage } from '../pages/dashboard/PengaduanAddPage';
 import { PesertaPage } from '../pages/dashboard/PesertaPage';
 import { PesertaDetailPage } from '../pages/dashboard/PesertaDetailPage';
 import { PemeriksaanPage } from '../pages/dashboard/PemeriksaanPage';
@@ -162,6 +163,10 @@ export const router = createBrowserRouter([
                     {
                         path: '/dashboard/pengaduan',
                         element: <PengaduanPage />,
+                    },
+                    {
+                        path: '/dashboard/pengaduan/baru',
+                        element: <PengaduanAddPage />,
                     },
 
                     // ========================================
