@@ -3,7 +3,8 @@
  * Compact card grid layout - mobile-first approach
  */
 
-import { Bug, ChevronRight, Loader2, MessageSquare, Clock, User } from 'lucide-react';
+import { Bug, ChevronRight, MessageSquare, Clock, User } from 'lucide-react';
+import { BeatLoader } from 'react-spinners';
 import type { Pengaduan } from '../../../domain/entities/Pengaduan';
 import { STATUS_OPTIONS, KATEGORI_OPTIONS } from '../../../domain/entities/Pengaduan';
 
@@ -20,8 +21,8 @@ export function PengaduanCardGrid({ isLoading, pengaduanList, onNavigate }: Prop
     if (isLoading) {
         return (
             <div className="py-20 text-center">
-                <Loader2 className="w-10 h-10 text-slate-600 animate-spin mx-auto mb-4" />
-                <p className="text-gray-500">Memuat data pengaduan...</p>
+                <BeatLoader color="#3B82F6" size={12} margin={4} />
+                <p className="text-gray-500 mt-4">Memuat data pengaduan...</p>
             </div>
         );
     }

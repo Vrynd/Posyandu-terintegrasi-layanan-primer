@@ -31,19 +31,25 @@ export function PengaduanPage() {
     const isAdmin = user?.role === 'admin';
     const [isKategoriModalOpen, setIsKategoriModalOpen] = useState(false);
     const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
-    const [currentPage, setCurrentPage] = useState(1);
     
     const {
         pengaduanList,
         selectedPengaduan,
         stats,
         isLoading,
+        isLoadingDetail,
         filters,
         setFilters,
         fetchDetail,
         fetchStats,
         clearSelectedPengaduan,
+        // Server-side pagination data from hook
+        lastPage: totalPages,
+        total,
     } = usePengaduan();
+
+    // Current page is managed via filters.page
+    const currentPage = filters.page || 1;
 
     // Load stats for admin
     useEffect(() => {
@@ -56,12 +62,10 @@ export function PengaduanPage() {
         navigate('/dashboard/pengaduan/baru');
     };
 
-    // Pagination logic for admin view
-    const totalPages = Math.ceil(pengaduanList.length / ITEMS_PER_PAGE);
-    const paginatedList = pengaduanList.slice(
-        (currentPage - 1) * ITEMS_PER_PAGE,
-        currentPage * ITEMS_PER_PAGE
-    );
+    // Helper function for page changes (server-side)
+    const setCurrentPage = (page: number) => {
+        setFilters({ ...filters, page, per_page: ITEMS_PER_PAGE });
+    };
 
     // Render Admin View
     if (isAdmin) {
@@ -83,10 +87,8 @@ export function PengaduanPage() {
                     </nav>
                 </div>
 
-                {/* Stats Cards */}
-                {stats && (
-                    <PengaduanStatsCards stats={stats} />
-                )}
+                {/* Stats Cards - always show with skeleton loading */}
+                <PengaduanStatsCards stats={stats} isLoading={!stats && isLoading} />
 
                 {/* Main Card */}
                 <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
@@ -95,29 +97,28 @@ export function PengaduanPage() {
                         <PengaduanToolbar
                             filters={filters}
                             onFilterChange={(newFilters) => {
-                                setFilters(newFilters);
-                                setCurrentPage(1);
+                                setFilters({ ...newFilters, page: 1, per_page: ITEMS_PER_PAGE });
                             }}
                             onOpenFilterModal={() => setIsFilterModalOpen(true)}
                         />
                     </div>
 
                     {/* Results Summary - only show when multiple pages */}
-                    {!isLoading && totalPages > 1 && paginatedList.length > 0 && (
+                    {!isLoading && totalPages > 1 && pengaduanList.length > 0 && (
                         <div className="px-6 py-3 bg-gray-50 border-b border-gray-100">
                             <p className="text-sm text-gray-600">
                                 Menampilkan{' '}
                                 <span className="font-semibold text-slate-700">
-                                    {(currentPage - 1) * ITEMS_PER_PAGE + 1}-{Math.min(currentPage * ITEMS_PER_PAGE, pengaduanList.length)}
+                                    {(currentPage - 1) * ITEMS_PER_PAGE + 1}-{Math.min(currentPage * ITEMS_PER_PAGE, total)}
                                 </span>
-                                {' '}dari <span className="font-semibold text-slate-700">{pengaduanList.length}</span> pengaduan
+                                {' '}dari <span className="font-semibold text-slate-700">{total}</span> pengaduan
                             </p>
                         </div>
                     )}
 
                     {/* Card Grid View */}
                     <PengaduanCardGrid
-                        pengaduanList={paginatedList}
+                        pengaduanList={pengaduanList}
                         isLoading={isLoading}
                         onNavigate={(id) => navigate(`/dashboard/pengaduan/${id}`)}
                     />
@@ -126,8 +127,8 @@ export function PengaduanPage() {
                     <Pagination
                         currentPage={currentPage}
                         totalPages={totalPages}
-                        onPrevPage={() => setCurrentPage(p => Math.max(1, p - 1))}
-                        onNextPage={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                        onPrevPage={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                        onNextPage={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
                         onGoToPage={setCurrentPage}
                     />
                 </div>
@@ -139,8 +140,7 @@ export function PengaduanPage() {
                     selectedStatus={filters.status}
                     selectedKategori={filters.kategori}
                     onApply={(status, kategori) => {
-                        setFilters({ ...filters, status, kategori });
-                        setCurrentPage(1);
+                        setFilters({ ...filters, status, kategori, page: 1 });
                     }}
                 />
             </div>
@@ -258,6 +258,7 @@ export function PengaduanPage() {
                 pengaduanList={pengaduanList}
                 selectedPengaduan={selectedPengaduan}
                 isLoading={isLoading}
+                isLoadingDetail={isLoadingDetail}
                 onSelect={fetchDetail}
                 onCloseDetail={clearSelectedPengaduan}
                 onCreateNew={handleCreateNew}

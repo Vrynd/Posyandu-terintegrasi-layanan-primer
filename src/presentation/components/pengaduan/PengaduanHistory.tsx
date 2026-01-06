@@ -3,14 +3,19 @@
  * Version 2: Card-based layout with color-coded priority strips
  */
 
+import { useState } from 'react';
 import { Bug, Clock, MessageSquare, CheckCircle2, X, ChevronRight, Plus } from 'lucide-react';
+import { BeatLoader } from 'react-spinners';
 import type { Pengaduan, PengaduanDetail } from '../../../domain/entities/Pengaduan';
 import { STATUS_OPTIONS, KATEGORI_OPTIONS } from '../../../domain/entities/Pengaduan';
+import { getStorageUrl } from '../../../data/core/api';
+import { ImageLightbox } from '../common';
 
 interface PengaduanHistoryProps {
     pengaduanList: Pengaduan[];
     selectedPengaduan: PengaduanDetail | null;
     isLoading: boolean;
+    isLoadingDetail?: boolean;
     onSelect: (id: number) => void;
     onCloseDetail: () => void;
     onCreateNew: () => void;
@@ -20,14 +25,26 @@ export function PengaduanHistory({
     pengaduanList, 
     selectedPengaduan,
     isLoading,
+    isLoadingDetail,
     onSelect, 
     onCloseDetail,
     onCreateNew 
 }: PengaduanHistoryProps) {
+    // Lightbox state
+    const [lightboxOpen, setLightboxOpen] = useState(false);
+    const [lightboxIndex, setLightboxIndex] = useState(0);
+    const [lightboxImages, setLightboxImages] = useState<string[]>([]);
+
+    const openLightbox = (images: string[], index: number) => {
+        setLightboxImages(images.map(img => getStorageUrl(img)));
+        setLightboxIndex(index);
+        setLightboxOpen(true);
+    };
+
     if (isLoading) {
         return (
             <div className="bg-white rounded-2xl border border-gray-100 p-16 text-center">
-                <div className="w-10 h-10 border-4 border-slate-800 border-t-transparent rounded-full animate-spin mx-auto" />
+                <BeatLoader color="#3B82F6" size={12} margin={4} />
                 <p className="text-gray-500 mt-4">Memuat data pengaduan...</p>
             </div>
         );
@@ -133,13 +150,13 @@ export function PengaduanHistory({
                 </button>
             </div>
 
-            {/* Detail Modal - Styled like FilterModal */}
-            {selectedPengaduan && (
+            {/* Detail Modal - Opens immediately, shows loading inside */}
+            {(selectedPengaduan || isLoadingDetail) && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center">
                     {/* Backdrop with blur */}
                     <div
                         className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-                        onClick={onCloseDetail}
+                        onClick={!isLoadingDetail ? onCloseDetail : undefined}
                     />
 
                     {/* Modal - Wider for better content display */}
@@ -157,14 +174,23 @@ export function PengaduanHistory({
                             </div>
                             <button
                                 onClick={onCloseDetail}
-                                className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                                disabled={isLoadingDetail}
+                                className="p-2 rounded-lg hover:bg-gray-100 transition-colors disabled:opacity-50"
                             >
                                 <X className="w-5 h-5 text-gray-400" />
                             </button>
                         </div>
 
                         {/* ===== CONTENT ===== */}
-                        <div className="flex-1 overflow-y-auto px-6 py-5">
+                        {isLoadingDetail ? (
+                            /* Loading State Inside Modal */
+                            <div className="flex-1 px-6 py-12 text-center">
+                                <BeatLoader color="#3B82F6" size={14} margin={5} />
+                                <p className="text-gray-500 mt-4">Memuat detail pengaduan...</p>
+                            </div>
+                        ) : selectedPengaduan ? (
+                            /* Actual Content */
+                            <div className="flex-1 overflow-y-auto px-6 py-5">
                             {/* Top Section: Title + Badges */}
                             <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 pb-5 border-b border-gray-100">
                                 <div className="flex-1">
@@ -219,18 +245,23 @@ export function PengaduanHistory({
                                 {selectedPengaduan.images && selectedPengaduan.images.length > 0 && (
                                     <div>
                                         <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Lampiran Gambar ({selectedPengaduan.images.length})</label>
-                                        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                                            {selectedPengaduan.images.map((img, idx) => (
-                                                <a 
-                                                    key={idx} 
-                                                    href={img} 
-                                                    target="_blank" 
-                                                    rel="noopener noreferrer"
-                                                    className="block aspect-video bg-gray-100 rounded-xl overflow-hidden hover:opacity-90 hover:shadow-md transition-all"
-                                                >
-                                                    <img src={img} alt={`Screenshot ${idx + 1}`} className="w-full h-full object-cover" />
-                                                </a>
-                                            ))}
+                                        <div className={`grid gap-2 ${
+                                            selectedPengaduan.images.length === 1 ? 'grid-cols-1' :
+                                            selectedPengaduan.images.length === 2 ? 'grid-cols-2' :
+                                            'grid-cols-3'
+                                        }`}>
+                                            {selectedPengaduan.images.map((img, idx) => {
+                                                const imageUrl = getStorageUrl(img);
+                                                return (
+                                                    <button 
+                                                        key={idx} 
+                                                        onClick={() => openLightbox(selectedPengaduan.images, idx)}
+                                                        className="block aspect-video bg-gray-100 rounded-lg overflow-hidden hover:opacity-90 hover:ring-2 hover:ring-blue-400 transition-all cursor-zoom-in"
+                                                    >
+                                                        <img src={imageUrl} alt={`Screenshot ${idx + 1}`} className="w-full h-full object-cover" />
+                                                    </button>
+                                                );
+                                            })}
                                         </div>
                                     </div>
                                 )}
@@ -269,19 +300,30 @@ export function PengaduanHistory({
                                 </div>
                             )}
                         </div>
+                        ) : null}
 
                         {/* ===== FOOTER ===== */}
-                        <div className="px-6 py-4 border-t border-gray-100 bg-white shrink-0">
-                            <button
-                                onClick={onCloseDetail}
-                                className="w-full py-3 px-4 bg-linear-to-r from-slate-800 to-slate-900 hover:from-slate-700 hover:to-slate-800 text-white font-semibold rounded-xl transition-all shadow-lg shadow-slate-300"
-                            >
-                                Tutup
-                            </button>
-                        </div>
+                        {!isLoadingDetail && selectedPengaduan && (
+                            <div className="px-6 py-4 border-t border-gray-100 bg-white shrink-0">
+                                <button
+                                    onClick={onCloseDetail}
+                                    className="w-full py-3 px-4 bg-linear-to-r from-slate-800 to-slate-900 hover:from-slate-700 hover:to-slate-800 text-white font-semibold rounded-xl transition-all shadow-lg shadow-slate-300"
+                                >
+                                    Tutup
+                                </button>
+                            </div>
+                        )}
                     </div>
                 </div>
             )}
+
+            {/* Lightbox for viewing images */}
+            <ImageLightbox
+                images={lightboxImages}
+                initialIndex={lightboxIndex}
+                isOpen={lightboxOpen}
+                onClose={() => setLightboxOpen(false)}
+            />
         </>
     );
 }

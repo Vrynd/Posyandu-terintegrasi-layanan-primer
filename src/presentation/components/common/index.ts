@@ -11,6 +11,7 @@ export * from './LogoutConfirmModal';
 export * from './ComingSoonModal';
 export * from './UserDropdown';
 export * from './StepIndicator';
+export * from './ImageLightbox';
 
 // Re-export from form directory
 export * from './form';

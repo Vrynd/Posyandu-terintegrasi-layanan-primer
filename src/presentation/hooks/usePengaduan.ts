@@ -10,7 +10,6 @@ import type {
     Pengaduan,
     PengaduanDetail,
     PengaduanStats,
-    PengaduanNotification,
     CreatePengaduanParams,
     PengaduanFilterParams,
     PengaduanStatus,
@@ -21,7 +20,6 @@ interface UsePengaduanReturn {
     pengaduanList: Pengaduan[];
     selectedPengaduan: PengaduanDetail | null;
     stats: PengaduanStats | null;
-    notification: PengaduanNotification | null;
     
     // Pagination
     currentPage: number;
@@ -30,6 +28,7 @@ interface UsePengaduanReturn {
     
     // State
     isLoading: boolean;
+    isLoadingDetail: boolean;
     isSubmitting: boolean;
     error: string | null;
     
@@ -41,13 +40,11 @@ interface UsePengaduanReturn {
     fetchList: () => Promise<void>;
     fetchDetail: (id: number) => Promise<void>;
     fetchStats: () => Promise<void>;
-    fetchNotifications: () => Promise<void>;
     createPengaduan: (params: CreatePengaduanParams) => Promise<boolean>;
     updateStatus: (id: number, status: PengaduanStatus) => Promise<boolean>;
     addResponse: (pengaduanId: number, response: string) => Promise<boolean>;
     deletePengaduan: (id: number) => Promise<boolean>;
     clearSelectedPengaduan: () => void;
-    dismissNotification: () => void;
 }
 
 export function usePengaduan(): UsePengaduanReturn {
@@ -57,7 +54,6 @@ export function usePengaduan(): UsePengaduanReturn {
     const [pengaduanList, setPengaduanList] = useState<Pengaduan[]>([]);
     const [selectedPengaduan, setSelectedPengaduan] = useState<PengaduanDetail | null>(null);
     const [stats, setStats] = useState<PengaduanStats | null>(null);
-    const [notification, setNotification] = useState<PengaduanNotification | null>(null);
     
     // Pagination state
     const [currentPage, setCurrentPage] = useState(1);
@@ -66,6 +62,7 @@ export function usePengaduan(): UsePengaduanReturn {
     
     // UI state
     const [isLoading, setIsLoading] = useState(false);
+    const [isLoadingDetail, setIsLoadingDetail] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
     
@@ -100,7 +97,7 @@ export function usePengaduan(): UsePengaduanReturn {
      * Fetch pengaduan detail
      */
     const fetchDetail = useCallback(async (id: number) => {
-        setIsLoading(true);
+        setIsLoadingDetail(true);
         setError(null);
         try {
             const response = await pengaduanApiDataSource.getDetail(id);
@@ -110,7 +107,7 @@ export function usePengaduan(): UsePengaduanReturn {
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Gagal memuat detail');
         } finally {
-            setIsLoading(false);
+            setIsLoadingDetail(false);
         }
     }, []);
 
@@ -130,24 +127,6 @@ export function usePengaduan(): UsePengaduanReturn {
         }
     }, [user?.role]);
 
-    /**
-     * Fetch notifications for banner
-     */
-    const fetchNotifications = useCallback(async () => {
-        if (!user) return;
-        
-        try {
-            const response = await pengaduanApiDataSource.getNotifications(
-                user.role,
-                user.id
-            );
-            if (response.success) {
-                setNotification(response.data);
-            }
-        } catch (err) {
-            console.error('Failed to fetch notifications:', err);
-        }
-    }, [user]);
 
     /**
      * Create new pengaduan (Kader only)
@@ -187,12 +166,21 @@ export function usePengaduan(): UsePengaduanReturn {
                 if (selectedPengaduan?.id === id) {
                     setSelectedPengaduan(prev => prev ? { ...prev, status } : null);
                 }
-                await fetchStats(); // Refresh stats
+                // Refresh stats and detail
+                await fetchStats();
+                // Re-fetch detail to get fresh data from server
+                const detailResponse = await pengaduanApiDataSource.getDetail(id);
+                if (detailResponse.success) {
+                    setSelectedPengaduan(detailResponse.data);
+                }
                 return true;
             }
+            setError(response.message || 'Gagal mengubah status');
             return false;
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'Gagal mengubah status');
+            const errorMessage = err instanceof Error ? err.message : 'Gagal mengubah status';
+            setError(errorMessage);
+            console.error('Update status error:', err);
             return false;
         } finally {
             setIsSubmitting(false);
@@ -256,13 +244,6 @@ export function usePengaduan(): UsePengaduanReturn {
         setSelectedPengaduan(null);
     }, []);
 
-    /**
-     * Dismiss notification banner
-     */
-    const dismissNotification = useCallback(() => {
-        setNotification(null);
-    }, []);
-
     // Load initial data when filters change
     useEffect(() => {
         fetchList();
@@ -273,7 +254,6 @@ export function usePengaduan(): UsePengaduanReturn {
         pengaduanList,
         selectedPengaduan,
         stats,
-        notification,
         
         // Pagination
         currentPage,
@@ -282,6 +262,7 @@ export function usePengaduan(): UsePengaduanReturn {
         
         // State
         isLoading,
+        isLoadingDetail,
         isSubmitting,
         error,
         
@@ -293,12 +274,10 @@ export function usePengaduan(): UsePengaduanReturn {
         fetchList,
         fetchDetail,
         fetchStats,
-        fetchNotifications,
         createPengaduan,
         updateStatus,
         addResponse,
         deletePengaduan,
         clearSelectedPengaduan,
-        dismissNotification,
     };
 }

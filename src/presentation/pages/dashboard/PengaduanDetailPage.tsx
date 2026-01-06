@@ -21,7 +21,8 @@ import {
     PRIORITAS_OPTIONS,
     type PengaduanStatus 
 } from '../../../domain/entities/Pengaduan';
-import { FullPageLoading } from '../../components/common';
+import { FullPageLoading, ImageLightbox } from '../../components/common';
+import { getStorageUrl } from '../../../data/core/api';
 
 export function PengaduanDetailPage() {
     const { id } = useParams();
@@ -31,7 +32,7 @@ export function PengaduanDetailPage() {
 
     const {
         selectedPengaduan,
-        isLoading,
+        isLoadingDetail,
         isSubmitting,
         fetchDetail,
         updateStatus,
@@ -40,6 +41,15 @@ export function PengaduanDetailPage() {
 
     const [responseText, setResponseText] = useState('');
     const [selectedStatus, setSelectedStatus] = useState<PengaduanStatus | ''>('');
+    const [lightboxOpen, setLightboxOpen] = useState(false);
+    const [lightboxIndex, setLightboxIndex] = useState(0);
+    const [lightboxImages, setLightboxImages] = useState<string[]>([]);
+
+    const openLightbox = (images: string[], index: number) => {
+        setLightboxImages(images.map(img => getStorageUrl(img)));
+        setLightboxIndex(index);
+        setLightboxOpen(true);
+    };
 
     // Fetch detail on mount
     useEffect(() => {
@@ -68,12 +78,12 @@ export function PengaduanDetailPage() {
         navigate('/dashboard/pengaduan');
     };
 
-    // Loading state
-    if (isLoading) {
+    // Loading state - show while fetching detail
+    if (isLoadingDetail) {
         return <FullPageLoading message="Memuat detail pengaduan..." />;
     }
 
-    // Not found state
+    // Not found state - only show after loading is complete
     if (!selectedPengaduan) {
         return (
             <div className="max-w-7xl mx-auto px-4 py-20 text-center">
@@ -105,6 +115,7 @@ export function PengaduanDetailPage() {
     const statusInfo = STATUS_OPTIONS.find(s => s.id === selectedPengaduan.status);
 
     return (
+        <>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
             {/* Header with Breadcrumb */}
             <div className="flex items-center justify-between mb-6">
@@ -237,18 +248,24 @@ export function PengaduanDetailPage() {
                             </h4>
                         </div>
                         {selectedPengaduan.images && selectedPengaduan.images.length > 0 ? (
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                                {selectedPengaduan.images.map((img, idx) => (
-                                    <a
-                                        key={idx}
-                                        href={img}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="block aspect-video bg-gray-100 rounded-xl overflow-hidden hover:opacity-90 hover:shadow-md transition-all ring-1 ring-gray-200"
-                                    >
-                                        <img src={img} alt={`Screenshot ${idx + 1}`} className="w-full h-full object-cover" />
-                                    </a>
-                                ))}
+                            <div className={`grid gap-2 ${
+                                selectedPengaduan.images.length === 1 ? 'grid-cols-1 max-w-md' :
+                                selectedPengaduan.images.length === 2 ? 'grid-cols-2' :
+                                selectedPengaduan.images.length === 3 ? 'grid-cols-3' :
+                                'grid-cols-4'
+                            }`}>
+                                {selectedPengaduan.images.map((img, idx) => {
+                                    const imageUrl = getStorageUrl(img);
+                                    return (
+                                        <button
+                                            key={idx}
+                                            onClick={() => openLightbox(selectedPengaduan.images, idx)}
+                                            className="block aspect-video bg-gray-100 rounded-xl overflow-hidden hover:opacity-90 hover:ring-2 hover:ring-blue-400 transition-all cursor-zoom-in ring-1 ring-gray-200"
+                                        >
+                                            <img src={imageUrl} alt={`Screenshot ${idx + 1}`} className="w-full h-full object-cover" />
+                                        </button>
+                                    );
+                                })}
                             </div>
                         ) : (
                             <div className="border-2 border-dashed border-gray-200 rounded-xl p-8 text-center">
@@ -385,5 +402,14 @@ export function PengaduanDetailPage() {
                 </div>
             )}
         </div>
+
+        {/* Lightbox for viewing images */}
+        <ImageLightbox
+            images={lightboxImages}
+            initialIndex={lightboxIndex}
+            isOpen={lightboxOpen}
+            onClose={() => setLightboxOpen(false)}
+        />
+        </>
     );
 }

@@ -50,4 +50,26 @@ api.interceptors.response.use(
   }
 );
 
+/**
+ * Get the base URL for the API (without /api suffix)
+ */
+export const getBaseUrl = () => {
+  const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:8000/api";
+  return apiUrl.replace(/\/api$/, '');
+};
+
+/**
+ * Get storage URL for uploaded files
+ * @param path - The path returned from API (e.g., "pengaduan/abc123.jpg")
+ * @returns Full URL to the file
+ */
+export const getStorageUrl = (path: string): string => {
+  if (!path) return '';
+  // If already a full URL, return as-is
+  if (path.startsWith('http://') || path.startsWith('https://')) {
+    return path;
+  }
+  return `${getBaseUrl()}/storage/${path}`;
+};
+
 export default api;
