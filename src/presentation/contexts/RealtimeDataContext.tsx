@@ -5,7 +5,7 @@
  * - Force refresh capability
  */
 
-import React, { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
+import React, { createContext, useContext, useState, useCallback, useRef } from 'react';
 import type { PesertaListItem } from '../../data/models/PesertaApiTypes';
 import type { PemeriksaanListItem } from '../../data/models/PemeriksaanApiTypes';
 import { pesertaApiDataSource } from '../../data/datasources/PesertaApiDataSource';
@@ -237,12 +237,12 @@ export function DataCacheProvider({ children }: { children: React.ReactNode }) {
         await forceRefreshAll();
     }, [forceRefreshAll]);
 
-    // Initial fetch on mount
-    useEffect(() => {
-        fetchPeserta();
-        fetchPemeriksaan();
-        fetchStats();
-    }, []);
+    // Initial fetch on mount - DISABLED (React Query handles this now)
+    // useEffect(() => {
+    //     fetchPeserta();
+    //     fetchPemeriksaan();
+    //     fetchStats();
+    // }, []);
 
     const value: DataCacheContextType = {
         pesertaList,

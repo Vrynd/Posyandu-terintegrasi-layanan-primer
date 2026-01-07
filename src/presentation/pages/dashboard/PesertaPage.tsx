@@ -35,6 +35,7 @@ export function PesertaPage() {
         handleDismissSuccess,
         calculateAge,
         kategoriConfig,
+        handleHoverPeserta,
     } = usePesertaList();
 
     return (
@@ -92,6 +93,7 @@ export function PesertaPage() {
                 onNextPage={handleNextPage}
                 onGoToPage={handleGoToPage}
                 onNavigateToDetail={handleNavigateToDetail}
+                onHoverPeserta={handleHoverPeserta}
                 calculateAge={calculateAge}
             />
         </div>

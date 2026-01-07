@@ -6,14 +6,16 @@ interface PesertaListItemProps {
     config: any;
     age: number;
     onClick: () => void;
+    onMouseEnter?: () => void; // For prefetching on hover
 }
 
-export function PesertaListItem({ peserta, config, age, onClick }: PesertaListItemProps) {
+export function PesertaListItem({ peserta, config, age, onClick, onMouseEnter }: PesertaListItemProps) {
     const Icon = config.icon;
 
     return (
         <button
             onClick={onClick}
+            onMouseEnter={onMouseEnter}
             className="w-full px-4 py-4 border border-gray-100 rounded-xl hover:border-gray-200 hover:bg-gray-50 transition-all duration-200 text-left group flex items-center gap-4"
         >
             {/* Avatar */}

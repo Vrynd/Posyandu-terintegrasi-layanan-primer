@@ -1,22 +1,25 @@
 /**
  * usePesertaDetail Hook
  * State and logic for PesertaDetailPage
- * Uses Laravel API via PesertaApiDataSource
+ * Uses React Query for optimal caching
  */
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { pesertaApiDataSource } from '../../data/datasources/PesertaApiDataSource';
-import type { PesertaDetail, } from '../../data/models/PesertaApiTypes';
-import type { PemeriksaanListItem } from '../../data/models/PemeriksaanApiTypes';
+import type { PesertaDetail } from '../../data/models/PesertaApiTypes';
 import {
     type PesertaEditForm,
     calculateAge,
     createEmptyEditForm,
 } from '../../domain/entities/Peserta';
 import { kategoriConfig } from '../constants/kategoriConfig';
-import { useDataCache } from '../contexts/RealtimeDataContext';
+import { 
+    usePesertaDetail as usePesertaDetailQuery, 
+    useUpdatePeserta, 
+    useDeletePeserta,
+    useLatestVisit,
+} from '../../data/queries';
 
 // Format date to YYYY-MM-DD for HTML date input
 function formatDateForInput(dateString: string | undefined | null): string {
@@ -43,11 +46,7 @@ function formatDateForInput(dateString: string | undefined | null): string {
 
 // Map API response to edit form
 function pesertaDetailToEditForm(peserta: PesertaDetail): PesertaEditForm {
-    console.log('[pesertaDetailToEditForm] Input:', peserta);
-    console.log('[pesertaDetailToEditForm] tanggal_lahir:', peserta.tanggal_lahir);
-    
     const formattedDate = formatDateForInput(peserta.tanggal_lahir);
-    console.log('[pesertaDetailToEditForm] Formatted date:', formattedDate);
     
     return {
         nama: peserta.nama,
@@ -65,83 +64,32 @@ function pesertaDetailToEditForm(peserta: PesertaDetail): PesertaEditForm {
 
 export function usePesertaDetail(id: string | undefined) {
     const navigate = useNavigate();
+    const numericId = id ? parseInt(id, 10) : 0;
 
-    // State
-    const [peserta, setPeserta] = useState<PesertaDetail | null>(null);
-    const [lastVisit, setLastVisit] = useState<PemeriksaanListItem | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    // Use React Query for fetching peserta detail
+    const { 
+        data: peserta, 
+        isLoading, 
+        error: queryError,
+        refetch
+    } = usePesertaDetailQuery(numericId);
+
+    // Use React Query for fetching latest visit (more efficient than full list)
+    const { data: lastVisit } = useLatestVisit(numericId);
+
+    // Use React Query mutations
+    const updateMutation = useUpdatePeserta();
+    const deleteMutation = useDeletePeserta();
 
     // Modal states
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
-    const [isSaving, setIsSaving] = useState(false);
-    const [isDeleting, setIsDeleting] = useState(false);
 
     // Edit form state
     const [editForm, setEditForm] = useState<PesertaEditForm>(createEmptyEditForm());
 
-    // Use cache context for pemeriksaan
-    const { fetchPemeriksaan } = useDataCache();
-
-    // Fetch peserta detail from API
-    const fetchData = useCallback(async () => {
-        if (!id) {
-            setIsLoading(false);
-            return;
-        }
-
-        setIsLoading(true);
-        setError(null);
-
-        try {
-            const numericId = parseInt(id, 10);
-            if (isNaN(numericId)) {
-                setError('ID peserta tidak valid');
-                setIsLoading(false);
-                return;
-            }
-
-            // Fetch Peserta from API and pemeriksaan from cache
-            const [pesertaRes, pemeriksaanList] = await Promise.all([
-                pesertaApiDataSource.getPesertaById(numericId),
-                fetchPemeriksaan() // Uses cache if valid
-            ]);
-            
-            if (pesertaRes.success && pesertaRes.data) {
-                setPeserta(pesertaRes.data);
-            } else {
-                setError(pesertaRes.message || 'Peserta tidak ditemukan');
-            }
-
-            // Filter pemeriksaan for this peserta from cached data
-            const pesertaPemeriksaan = pemeriksaanList.filter(
-                (p: PemeriksaanListItem) => p.peserta_id === numericId
-            );
-            
-            if (pesertaPemeriksaan.length > 0) {
-                // Get the most recent visit
-                const sortedVisits = [...pesertaPemeriksaan].sort((a, b) => 
-                    new Date(b.tanggal_kunjungan).getTime() - new Date(a.tanggal_kunjungan).getTime()
-                );
-                setLastVisit(sortedVisits[0] as any);
-            } else {
-                setLastVisit(null);
-            }
-        } catch (err) {
-            console.error('[PesertaDetail] Error fetching:', err);
-            setError('Gagal memuat data peserta');
-        } finally {
-            setIsLoading(false);
-        }
-    }, [id]);
-
-    // Initial fetch
-    useEffect(() => {
-        fetchData();
-    }, [fetchData]);
-
     const config = peserta ? kategoriConfig[peserta.kategori] : null;
+    const error = queryError?.message || (numericId === 0 && id ? 'ID peserta tidak valid' : null);
 
     // Open edit modal with peserta data
     const openEditModal = useCallback(() => {
@@ -161,15 +109,11 @@ export function usePesertaDetail(id: string | undefined) {
         setEditForm(prev => ({ ...prev, [field]: value }));
     }, []);
 
-    // Save edit via API
+    // Save edit via mutation
     const handleSaveEdit = useCallback(async () => {
-        if (!id || !peserta) return;
+        if (!numericId || !peserta) return;
 
-        setIsSaving(true);
         try {
-            const numericId = parseInt(id, 10);
-            
-            // Build update request
             const updateData = {
                 nama: editForm.nama,
                 tanggal_lahir: editForm.tanggalLahir,
@@ -180,23 +124,14 @@ export function usePesertaDetail(id: string | undefined) {
                 nomor_bpjs: editForm.nomorBpjs,
             };
 
-            const response = await pesertaApiDataSource.updatePeserta(numericId, updateData);
-            
-            if (response.success) {
-                toast.success('Data peserta berhasil diperbarui');
-                setShowEditModal(false);
-                // Refresh data
-                await fetchData();
-            } else {
-                toast.error(response.message || 'Gagal memperbarui data');
-            }
+            await updateMutation.mutateAsync({ id: numericId, data: updateData });
+            toast.success('Data peserta berhasil diperbarui');
+            setShowEditModal(false);
         } catch (err) {
             console.error('[PesertaDetail] Update error:', err);
             toast.error('Gagal memperbarui data peserta');
-        } finally {
-            setIsSaving(false);
         }
-    }, [id, peserta, editForm, fetchData]);
+    }, [numericId, peserta, editForm, updateMutation]);
 
     // Open delete confirmation
     const openDeleteConfirm = useCallback(() => {
@@ -208,29 +143,21 @@ export function usePesertaDetail(id: string | undefined) {
         setShowDeleteConfirm(false);
     }, []);
 
-    // Handle delete via API
+    // Handle delete via mutation
     const handleDelete = useCallback(async () => {
-        if (!id || !peserta) return;
+        if (!numericId || !peserta) return;
 
-        setIsDeleting(true);
         try {
-            const numericId = parseInt(id, 10);
-            const response = await pesertaApiDataSource.deletePeserta(numericId);
-            
-            if (response.success) {
-                toast.success(`${peserta.nama} berhasil dihapus`);
-                navigate('/dashboard/participants');
-            } else {
-                toast.error(response.message || 'Gagal menghapus peserta');
-            }
+            await deleteMutation.mutateAsync(numericId);
+            toast.success(`${peserta.nama} berhasil dihapus`);
+            navigate('/dashboard/participants');
         } catch (err) {
             console.error('[PesertaDetail] Delete error:', err);
             toast.error('Gagal menghapus data peserta');
         } finally {
-            setIsDeleting(false);
             setShowDeleteConfirm(false);
         }
-    }, [id, peserta, navigate]);
+    }, [numericId, peserta, deleteMutation, navigate]);
 
     // Navigate to new visit with pre-selected peserta
     const handleNewVisit = useCallback(() => {
@@ -247,9 +174,14 @@ export function usePesertaDetail(id: string | undefined) {
         navigate('/dashboard/participants');
     }, [navigate]);
 
+    // Refresh with React Query invalidation
+    const refresh = useCallback(async () => {
+        await refetch();
+    }, [refetch]);
+
     return {
         // Data
-        peserta,
+        peserta: peserta || null,
         config,
         editForm,
         lastVisit,
@@ -262,8 +194,8 @@ export function usePesertaDetail(id: string | undefined) {
         // Modal states
         showDeleteConfirm,
         showEditModal,
-        isSaving,
-        isDeleting,
+        isSaving: updateMutation.isPending,
+        isDeleting: deleteMutation.isPending,
 
         // Actions
         openEditModal,
@@ -275,6 +207,6 @@ export function usePesertaDetail(id: string | undefined) {
         handleDelete,
         handleNewVisit,
         handleBack,
-        refresh: fetchData,
+        refresh,
     };
 }

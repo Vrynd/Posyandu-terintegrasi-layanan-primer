@@ -57,6 +57,15 @@ export class PesertaApiDataSource {
         const response = await api.delete<ApiResponse<{ success: boolean; message: string }>>(`/peserta/${id}`);
         return response.data;
     }
+
+    /**
+     * Get latest visit for a peserta
+     * GET /api/peserta/{id}/latest-visit
+     */
+    async getLatestVisit(id: number): Promise<ApiResponse<any>> {
+        const response = await api.get<ApiResponse<any>>(`/peserta/${id}/latest-visit`);
+        return response.data;
+    }
 }
 
 // Singleton instance

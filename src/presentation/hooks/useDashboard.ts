@@ -1,91 +1,47 @@
 /**
  * useDashboard Hook
  * State and logic for Dashboard page
- * Uses DataCacheContext for caching
+ * Uses React Query for optimal caching
  */
 
-import { useState, useEffect, useCallback } from 'react';
-import { dashboardApiDataSource } from '../../data/datasources/DashboardApiDataSource';
-import type { DashboardStats, DashboardChartItem } from '../../data/models/DashboardApiTypes';
-import { useDataCache } from '../contexts/RealtimeDataContext';
-
-// Cache for chart data (not in context cache)
-let chartDataCache: DashboardChartItem[] = [];
-let chartCacheTimestamp: number | null = null;
-const CHART_CACHE_EXPIRY_MS = 5 * 60 * 1000; // 5 minutes
+import { useCallback } from 'react';
+import { useDashboardStats, useDashboardChart, queryClient, queryKeys } from '../../data/queries';
+import type { DashboardStats } from '../../data/models/DashboardApiTypes';
 
 export function useDashboard() {
-    const { fetchStats, dashboardStats, isStatsLoading } = useDataCache();
+    // Use React Query hooks for stats and chart
+    const { 
+        data: statsData, 
+        isLoading: isStatsLoading, 
+        error: statsError 
+    } = useDashboardStats();
     
-    const [chartData, setChartData] = useState<DashboardChartItem[]>(chartDataCache);
-    const [isChartLoading, setIsChartLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-
-    // Check if chart cache is valid
-    const isChartCacheValid = useCallback(() => {
-        if (!chartCacheTimestamp) return false;
-        return Date.now() - chartCacheTimestamp < CHART_CACHE_EXPIRY_MS;
-    }, []);
-
-    // Fetch chart data with caching
-    const fetchChartData = useCallback(async (forceRefresh = false) => {
-        // Return cached data if valid
-        if (!forceRefresh && isChartCacheValid() && chartDataCache.length > 0) {
-            console.log('[Dashboard] Using cached chart data');
-            setChartData(chartDataCache);
-            return;
-        }
-
-        console.log('[Dashboard] Fetching chart data from API...');
-        setIsChartLoading(true);
-        try {
-            const chartRes = await dashboardApiDataSource.getChartData();
-            if (chartRes.success) {
-                chartDataCache = chartRes.data;
-                chartCacheTimestamp = Date.now();
-                setChartData(chartRes.data);
-            }
-        } catch (err) {
-            console.error('[useDashboard] Error fetching chart data:', err);
-            setError('Gagal memuat data chart');
-        } finally {
-            setIsChartLoading(false);
-        }
-    }, [isChartCacheValid]);
-
-    // Load data on mount (uses cache if valid)
-    useEffect(() => {
-        fetchStats(); // Uses context cache
-        fetchChartData(); // Uses local chart cache
-    }, [fetchStats, fetchChartData]);
+    const { 
+        data: chartData, 
+        isLoading: isChartLoading, 
+        error: chartError 
+    } = useDashboardChart();
 
     // Refresh function for force reload
     const refresh = useCallback(async () => {
-        setError(null);
         await Promise.all([
-            fetchStats(true),
-            fetchChartData(true)
+            queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.stats() }),
+            queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.chart() }),
         ]);
-    }, [fetchStats, fetchChartData]);
+    }, []);
 
-    // Convert context stats format to API stats format
-    const stats: DashboardStats | null = dashboardStats ? {
-        total_peserta: dashboardStats.totalPeserta,
-        kunjungan_hari_ini: dashboardStats.totalKunjungan,
-        kategori: {
-            bumil: dashboardStats.totalBumil,
-            balita: dashboardStats.totalBalita,
-            remaja: dashboardStats.totalRemaja,
-            produktif: dashboardStats.totalProduktif,
-            lansia: dashboardStats.totalLansia
-        }
+    // Format stats to match expected structure
+    const stats: DashboardStats | null = statsData ? {
+        total_peserta: statsData.total_peserta,
+        kunjungan_hari_ini: statsData.kunjungan_hari_ini,
+        kategori: statsData.kategori
     } : null;
 
     return {
         stats,
-        chartData,
+        chartData: chartData || [],
         isLoading: isStatsLoading || isChartLoading,
-        error,
+        error: statsError?.message || chartError?.message || null,
         refresh
     };
 }

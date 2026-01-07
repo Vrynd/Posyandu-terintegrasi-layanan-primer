@@ -1,8 +1,10 @@
 
 import { RouterProvider } from 'react-router-dom'
+import { QueryClientProvider } from '@tanstack/react-query'
 import { router } from './presentation/routes/router'
 import { AuthProvider } from './presentation/hooks/useAuth'
 import { DataCacheProvider } from '@/presentation/contexts/RealtimeDataContext'
+import { queryClient } from './data/core/queryClient'
 import { Toaster } from 'react-hot-toast'
 
 import './index.css'
@@ -22,12 +24,14 @@ declare global {
 function App() {
 
   return (
-    <AuthProvider>
-      <DataCacheProvider>
-        <Toaster position="top-right" />
-        <RouterProvider router={router} />
-      </DataCacheProvider>
-    </AuthProvider>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <DataCacheProvider>
+          <Toaster position="top-right" />
+          <RouterProvider router={router} />
+        </DataCacheProvider>
+      </AuthProvider>
+    </QueryClientProvider>
   )
 }
 

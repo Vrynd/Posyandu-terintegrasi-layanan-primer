@@ -12,4 +12,5 @@ export { RegistrationSuccessBanner } from './RegistrationSuccessBanner';
 export { PesertaListToolbar } from './PesertaListToolbar';
 export { PesertaListResults } from './PesertaListResults';
 export { PesertaListItem } from './PesertaListItem';
+export { LastVisitCard } from './LastVisitCard';
 

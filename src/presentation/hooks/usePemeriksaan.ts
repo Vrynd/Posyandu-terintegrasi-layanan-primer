@@ -1,7 +1,7 @@
 /**
- * useKunjungan Hook
+ * usePemeriksaan Hook
  * State and logic for Posyandu Page - search, filter, sort, and pagination
- * Uses Laravel API via PesertaApiDataSource
+ * Uses React Query for optimal caching
  */
 
 import { useState, useMemo, useCallback, useEffect } from 'react';
@@ -11,7 +11,7 @@ import type { PesertaListItem } from '../../data/models/PesertaApiTypes';
 import { useDebounce } from './useDebounce';
 import type { SortType } from '../components/pemeriksaan';
 import type { KategoriKey } from '../../domain/entities/Peserta';
-import { useDataCache } from '../contexts/RealtimeDataContext';
+import { usePesertaList as usePesertaListQuery, queryClient, queryKeys } from '../../data/queries';
 
 const ITEMS_PER_PAGE = 10;
 
@@ -20,7 +20,6 @@ export function usePemeriksaan() {
     
     // State
     const [pesertaList, setPesertaList] = useState<PesertaListItem[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedFilters, setSelectedFilters] = useState<KategoriKey[]>([]);
     const [selectedSort, setSelectedSort] = useState<SortType>('nama-asc');
@@ -29,27 +28,14 @@ export function usePemeriksaan() {
     // Debounced search query
     const debouncedSearchQuery = useDebounce(searchQuery, 300);
 
-    // Use cache context
-    const { fetchPeserta: fetchFromCache } = useDataCache();
+    // Use React Query for fetching peserta list
+    const { data: apiData, isLoading: isQueryLoading } = usePesertaListQuery({ limit: 100 });
 
-    // Internal cache for peserta (loaded once from context cache)
-    const [cachedPeserta, setCachedPeserta] = useState<PesertaListItem[]>([]);
-    const [isCacheLoaded, setIsCacheLoaded] = useState(false);
-
-    // Load cache once on first search/filter
-    const ensureCacheLoaded = useCallback(async () => {
-        if (isCacheLoaded) return cachedPeserta;
-        
-        try {
-            const data = await fetchFromCache();
-            setCachedPeserta(data);
-            setIsCacheLoaded(true);
-            return data;
-        } catch (err) {
-            console.error('[usePemeriksaan] Error loading cache:', err);
-            return [];
-        }
-    }, [fetchFromCache, isCacheLoaded, cachedPeserta]);
+    // Extract cached peserta from query data
+    const cachedPeserta: PesertaListItem[] = useMemo(() => {
+        if (!apiData) return [];
+        return apiData.data || [];
+    }, [apiData]);
 
     // Filter peserta based on search query and filters
     useEffect(() => {
@@ -58,70 +44,30 @@ export function usePemeriksaan() {
         if (!shouldSearch) {
             // Clear results when no search/filter active
             setPesertaList([]);
-            setIsLoading(false);
             return;
         }
 
-        const searchPeserta = async () => {
-            setIsLoading(true);
-            try {
-                const data = await ensureCacheLoaded();
-                
-                // Filter from cached data
-                let filtered = data.filter(p => {
-                    // Match search query
-                    const matchSearch = debouncedSearchQuery.length < 1 ||
-                        p.nama.toLowerCase().includes(debouncedSearchQuery.toLowerCase()) ||
-                        p.nik.includes(debouncedSearchQuery);
-                    
-                    // Match category filter
-                    const matchKategori = selectedFilters.length === 0 ||
-                        selectedFilters.includes(p.kategori);
-                    
-                    return matchSearch && matchKategori;
-                });
-                
-                setPesertaList(filtered);
-            } catch (err) {
-                console.error('[usePemeriksaan] Error searching:', err);
-                setPesertaList([]);
-            } finally {
-                setIsLoading(false);
-            }
-        };
+        // Filter from cached data (powered by React Query cache)
+        const filtered = cachedPeserta.filter(p => {
+            // Match search query
+            const matchSearch = debouncedSearchQuery.length < 1 ||
+                p.nama.toLowerCase().includes(debouncedSearchQuery.toLowerCase()) ||
+                p.nik.includes(debouncedSearchQuery);
+            
+            // Match category filter
+            const matchKategori = selectedFilters.length === 0 ||
+                selectedFilters.includes(p.kategori);
+            
+            return matchSearch && matchKategori;
+        });
+        
+        setPesertaList(filtered);
+    }, [debouncedSearchQuery, selectedFilters, cachedPeserta]);
 
-        searchPeserta();
-    }, [debouncedSearchQuery, selectedFilters, ensureCacheLoaded]);
-
-    // Refresh function for force reload
+    // Refresh function with React Query invalidation
     const refresh = useCallback(async () => {
-        setIsCacheLoaded(false);
-        setCachedPeserta([]);
-        // Re-trigger search if there's an active query
-        if (debouncedSearchQuery.length >= 1 || selectedFilters.length > 0) {
-            setIsLoading(true);
-            try {
-                const data = await fetchFromCache(true);
-                setCachedPeserta(data);
-                setIsCacheLoaded(true);
-                
-                // Re-filter
-                let filtered = data.filter(p => {
-                    const matchSearch = debouncedSearchQuery.length < 1 ||
-                        p.nama.toLowerCase().includes(debouncedSearchQuery.toLowerCase()) ||
-                        p.nik.includes(debouncedSearchQuery);
-                    const matchKategori = selectedFilters.length === 0 ||
-                        selectedFilters.includes(p.kategori);
-                    return matchSearch && matchKategori;
-                });
-                setPesertaList(filtered);
-            } catch (err) {
-                console.error('[usePemeriksaan] Error refreshing:', err);
-            } finally {
-                setIsLoading(false);
-            }
-        }
-    }, [fetchFromCache, debouncedSearchQuery, selectedFilters]);
+        await queryClient.invalidateQueries({ queryKey: queryKeys.peserta.lists() });
+    }, []);
 
     const { paginatedResults, totalResults, totalPages } = useMemo(() => {
         let results = [...pesertaList];
@@ -192,7 +138,8 @@ export function usePemeriksaan() {
         navigate(`/dashboard/examinations/${slug}/${peserta.id}`);
     }, [navigate]);
 
-
+    // Determine loading state (only loading when query active)
+    const isLoading = isQueryLoading && (debouncedSearchQuery.length >= 1 || selectedFilters.length > 0);
 
     return {
         // State

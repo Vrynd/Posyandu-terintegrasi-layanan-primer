@@ -1,15 +1,15 @@
 /**
  * usePesertaList Hook
  * State and logic for PesertaPage - search, filter, pagination
- * Uses Laravel API via PesertaApiDataSource
+ * Uses React Query for optimal caching
  */
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { calculateAge, type KategoriKey } from '../../domain/entities/Peserta';
 import { kategoriConfig } from '../constants/kategoriConfig';
 import type { PesertaListItem } from '../../data/models/PesertaApiTypes';
-import { useDataCache } from '../contexts/RealtimeDataContext';
+import { usePesertaList as usePesertaListQuery, usePrefetchPeserta, queryClient, queryKeys } from '../../data/queries';
 
 const ITEMS_PER_PAGE = 5;
 
@@ -38,10 +38,7 @@ export function usePesertaList() {
     const navigate = useNavigate();
     const [searchParams, setSearchParams] = useSearchParams();
     
-    // State
-    const [pesertaList, setPesertaList] = useState<PesertaDisplay[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    // State for filtering/sorting (client-side)
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedKategori, setSelectedKategori] = useState<KategoriKey | null>(null);
     const [selectedSort, setSelectedSort] = useState<SortType>('nama-asc');
@@ -49,6 +46,15 @@ export function usePesertaList() {
     const [selectedAgeRange, setSelectedAgeRange] = useState<AgeRange>({ min: null, max: null });
     const [currentPage, setCurrentPage] = useState(1);
     const [successData, setSuccessData] = useState<{ nama: string; nik: string } | null>(null);
+
+    // Use React Query for fetching peserta list
+    const { data: apiData, isLoading, error: queryError } = usePesertaListQuery({ limit: 100 });
+    
+    // Extract list from API response
+    const pesertaList: PesertaDisplay[] = useMemo(() => {
+        if (!apiData) return [];
+        return (apiData.data || []) as PesertaDisplay[];
+    }, [apiData]);
 
     // Banner logic
     useEffect(() => {
@@ -61,30 +67,6 @@ export function usePesertaList() {
             setSearchParams({}, { replace: true });
         }
     }, [searchParams, setSearchParams]);
-
-    // Use cache context
-    const { fetchPeserta: fetchFromCache } = useDataCache();
-
-    // Fetch data from cache (uses API only if cache expired)
-    const loadPeserta = useCallback(async (forceRefresh = false) => {
-        setIsLoading(true);
-        setError(null);
-        try {
-            const data = await fetchFromCache(forceRefresh);
-            setPesertaList(data as PesertaDisplay[]);
-        } catch (err) {
-            console.error('[usePesertaList] Error fetching:', err);
-            setError('Gagal memuat data peserta');
-        } finally {
-            setIsLoading(false);
-        }
-    }, [fetchFromCache]);
-
-    // Initial fetch (uses cache if valid)
-    useEffect(() => {
-        loadPeserta();
-    }, [loadPeserta]);
-
 
     // Filter and Sort peserta (client-side)
     const filteredPeserta = useMemo(() => {
@@ -195,9 +177,16 @@ export function usePesertaList() {
         setSuccessData(null);
     }, []);
 
+    // Refresh with React Query invalidation
     const refresh = useCallback(async () => {
-        return loadPeserta(true);
-    }, [loadPeserta]);
+        await queryClient.invalidateQueries({ queryKey: queryKeys.peserta.lists() });
+    }, []);
+
+    // Prefetch peserta detail on hover
+    const prefetchPeserta = usePrefetchPeserta();
+    const handleHoverPeserta = useCallback((id: number) => {
+        prefetchPeserta(id);
+    }, [prefetchPeserta]);
 
     return {
         // Data
@@ -205,7 +194,7 @@ export function usePesertaList() {
         filteredPeserta,
         kategoryCounts,
         isLoading,
-        error,
+        error: queryError?.message || null,
         totalDataCount: pesertaList.length,
         successData,
 
@@ -231,6 +220,7 @@ export function usePesertaList() {
         handleNextPage,
         handleGoToPage,
         handleDismissSuccess,
+        handleHoverPeserta, // Prefetch on hover
         refresh,
 
         // Helpers
