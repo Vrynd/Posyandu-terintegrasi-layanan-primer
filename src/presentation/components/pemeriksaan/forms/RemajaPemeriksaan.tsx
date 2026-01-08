@@ -1,4 +1,4 @@
-import { Stethoscope, ClipboardCheck } from 'lucide-react';
+import { Stethoscope, ClipboardCheck, Heart, BookOpen } from 'lucide-react';
 import { FormCard, FormInput, FormSelect, TagSelector, YesNoToggle } from '../../common/form';
 import { 
     skriningTbcOptions, 
@@ -38,13 +38,98 @@ export function RemajaPemeriksaan({
 }: RemajaPemeriksaanProps) {
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            {/* Card 1: Pemeriksaan Fisik */}
             <FormCard
-                title="Pemeriksaan Fisik & Riwayat"
-                icon={<Stethoscope className="w-5 h-5 text-indigo-600" />}
-                iconBgColor="bg-indigo-100"
-                iconColor="text-indigo-600"
+                title="Pemeriksaan Fisik"
+                icon={<Stethoscope className="w-5 h-5 text-blue-600" />}
+                iconBgColor="bg-blue-100"
+                iconColor="text-blue-600"
             >
-                <div className="space-y-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <FormInput
+                        label="Tinggi Badan (cm)"
+                        value={formData.tinggi_badan}
+                        onChange={(v: string) => onChange('tinggi_badan', v.replace(/[^\d.]/g, ''))}
+                        placeholder="Contoh: 165"
+                    />
+                    <FormInput
+                        label="Berat Badan (kg)"
+                        value={formData.berat_badan}
+                        onChange={(v: string) => onChange('berat_badan', v.replace(/[^\d.]/g, ''))}
+                        placeholder="Contoh: 55"
+                    />
+                    <FormSelect
+                        label="IMT"
+                        value={formData.imt}
+                        onChange={(v: string) => onChange('imt', v)}
+                        options={imtOptions}
+                    />
+                    <FormInput
+                        label="Lingkar Perut (cm)"
+                        value={formData.lingkar_perut}
+                        onChange={(v: string) => onChange('lingkar_perut', v.replace(/[^\d.]/g, ''))}
+                        placeholder="Contoh: 75"
+                    />
+                    <FormInput
+                        label="Tekanan Darah (mmHg)"
+                        value={formData.tekanan_darah}
+                        onChange={(v: string) => onChange('tekanan_darah', v)}
+                        placeholder="Contoh: 120/80"
+                    />
+                    <FormInput
+                        label="Gula Darah (mg/dL)"
+                        value={formData.gula_darah}
+                        onChange={(v: string) => onChange('gula_darah', v.replace(/[^\d.]/g, ''))}
+                        placeholder="Contoh: 100"
+                    />
+                    {isPerempuan && (
+                        <FormSelect
+                            label="Kadar HB"
+                            value={formData.kadar_hb}
+                            onChange={(v: string) => onChange('kadar_hb', v)}
+                            options={kadarHbOptions}
+                        />
+                    )}
+                </div>
+            </FormCard>
+
+            {/* Card 2: Skrining */}
+            <FormCard
+                title="Skrining"
+                icon={<ClipboardCheck className="w-5 h-5 text-orange-600" />}
+                iconBgColor="bg-orange-100"
+                iconColor="text-orange-600"
+            >
+                <TagSelector
+                    label="Skrining TBC"
+                    selectedTags={formData.skrining_tbc}
+                    options={[...skriningTbcOptions]}
+                    onChange={onSkriningTbcChange}
+                />
+                
+                <div className="mt-6 pt-6 border-t border-gray-100">
+                    <h4 className="text-sm font-semibold text-gray-700 mb-4">Skrining Mental (HEEADSSS)</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {skriningMentalQuestions.map((q) => (
+                            <YesNoToggle
+                                key={q.key}
+                                label={q.label}
+                                value={formData.skrining_mental[q.key as keyof typeof formData.skrining_mental]}
+                                onChange={(v: boolean | null) => onMentalChange(q.key, v)}
+                            />
+                        ))}
+                    </div>
+                </div>
+            </FormCard>
+
+            {/* Card 3: Layanan */}
+            <FormCard
+                title="Layanan"
+                icon={<Heart className="w-5 h-5 text-green-600" />}
+                iconBgColor="bg-green-100"
+                iconColor="text-green-600"
+            >
+                <div className="space-y-6">
                     <TagSelector
                         label="Riwayat Penyakit Keluarga"
                         selectedTags={formData.riwayat_keluarga}
@@ -78,93 +163,13 @@ export function RemajaPemeriksaan({
                             }
                         }}
                     />
-
-                    <div className="pt-6 border-t border-gray-100">
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                            <FormInput
-                                label="Tinggi Badan (cm)"
-                                value={formData.tinggi_badan}
-                                onChange={(v: string) => onChange('tinggi_badan', v.replace(/[^\d.]/g, ''))}
-                                placeholder="Contoh: 165"
-                            />
-                            <FormInput
-                                label="Berat Badan (kg)"
-                                value={formData.berat_badan}
-                                onChange={(v: string) => onChange('berat_badan', v.replace(/[^\d.]/g, ''))}
-                                placeholder="Contoh: 55"
-                            />
-                            <FormSelect
-                                label="IMT"
-                                value={formData.imt}
-                                onChange={(v: string) => onChange('imt', v)}
-                                options={imtOptions}
-                            />
-                            <FormInput
-                                label="Lingkar Perut (cm)"
-                                value={formData.lingkar_perut}
-                                onChange={(v: string) => onChange('lingkar_perut', v.replace(/[^\d.]/g, ''))}
-                                placeholder="Contoh: 75"
-                            />
-                            <FormInput
-                                label="Tekanan Darah (mmHg)"
-                                value={formData.tekanan_darah}
-                                onChange={(v: string) => onChange('tekanan_darah', v)}
-                                placeholder="Contoh: 120/80"
-                            />
-                            <FormInput
-                                label="Gula Darah (mg/dL)"
-                                value={formData.gula_darah}
-                                onChange={(v: string) => onChange('gula_darah', v.replace(/[^\d.]/g, ''))}
-                                placeholder="Contoh: 100"
-                            />
-                            {isPerempuan && (
-                                <FormSelect
-                                    label="Kadar HB"
-                                    value={formData.kadar_hb}
-                                    onChange={(v: string) => onChange('kadar_hb', v)}
-                                    options={kadarHbOptions}
-                                />
-                            )}
-                        </div>
-                    </div>
                 </div>
             </FormCard>
 
+            {/* Card 4: Edukasi & Rujukan */}
             <FormCard
-                title="Skrining TBC"
-                icon={<ClipboardCheck className="w-5 h-5 text-orange-600" />}
-                iconBgColor="bg-orange-100"
-                iconColor="text-orange-600"
-            >
-                <TagSelector
-                    label="Gejala TBC"
-                    selectedTags={formData.skrining_tbc}
-                    options={[...skriningTbcOptions]}
-                    onChange={onSkriningTbcChange}
-                />
-            </FormCard>
-
-            <FormCard
-                title="Skrining Mental (HEEADSSS)"
-                icon={<ClipboardCheck className="w-5 h-5 text-rose-600" />}
-                iconBgColor="bg-rose-100"
-                iconColor="text-rose-600"
-            >
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {skriningMentalQuestions.map((q) => (
-                        <YesNoToggle
-                            key={q.key}
-                            label={q.label}
-                            value={formData.skrining_mental[q.key as keyof typeof formData.skrining_mental]}
-                            onChange={(v: boolean | null) => onMentalChange(q.key, v)}
-                        />
-                    ))}
-                </div>
-            </FormCard>
-
-            <FormCard
-                title="Edukasi"
-                icon={<ClipboardCheck className="w-5 h-5 text-purple-600" />}
+                title="Edukasi & Rujukan"
+                icon={<BookOpen className="w-5 h-5 text-purple-600" />}
                 iconBgColor="bg-purple-100"
                 iconColor="text-purple-600"
             >

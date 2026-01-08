@@ -1,4 +1,4 @@
-import { Stethoscope, ClipboardCheck } from 'lucide-react';
+import { Stethoscope, ClipboardCheck, Heart, BookOpen } from 'lucide-react';
 import { FormCard, FormInput, TagSelector, YesNoToggle } from '../../common/form';
 import { skriningTbcOptions, penyuluhanBumilOptions } from '@/domain/entities/Pemeriksaan';
 import type { PemeriksaanFormData } from '@/presentation/hooks/usePemeriksaanForm';
@@ -12,11 +12,12 @@ interface BumilPemeriksaanProps {
 export function BumilPemeriksaan({ formData, onChange, onSkriningTbcChange }: BumilPemeriksaanProps) {
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            {/* Card 1: Pemeriksaan Fisik */}
             <FormCard
-                title="Pemeriksaan Ibu Hamil"
-                icon={<Stethoscope className="w-5 h-5 text-pink-600" />}
-                iconBgColor="bg-pink-100"
-                iconColor="text-pink-600"
+                title="Pemeriksaan Fisik"
+                icon={<Stethoscope className="w-5 h-5 text-blue-600" />}
+                iconBgColor="bg-blue-100"
+                iconColor="text-blue-600"
             >
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     <FormInput
@@ -70,8 +71,9 @@ export function BumilPemeriksaan({ formData, onChange, onSkriningTbcChange }: Bu
                 </div>
             </FormCard>
 
+            {/* Card 2: Skrining */}
             <FormCard
-                title="Skrining & Layanan"
+                title="Skrining"
                 icon={<ClipboardCheck className="w-5 h-5 text-orange-600" />}
                 iconBgColor="bg-orange-100"
                 iconColor="text-orange-600"
@@ -82,18 +84,43 @@ export function BumilPemeriksaan({ formData, onChange, onSkriningTbcChange }: Bu
                     options={[...skriningTbcOptions]}
                     onChange={onSkriningTbcChange}
                 />
+            </FormCard>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6 pt-6 border-t border-gray-100">
-                    <YesNoToggle label="Mendapat Tablet Tambah Darah?" value={formData.tablet_darah} onChange={(v: boolean | null) => onChange('tablet_darah', v)} />
-                    <YesNoToggle label="Konseling ASI Eksklusif?" value={formData.asi_eksklusif} onChange={(v: boolean | null) => onChange('asi_eksklusif', v)} />
-                    <YesNoToggle label="MT Bumil KEK?" value={formData.mt_bumil_kek} onChange={(v: boolean | null) => onChange('mt_bumil_kek', v)} />
-                    <YesNoToggle label="Ikut Kelas Bumil?" value={formData.kelas_bumil} onChange={(v: boolean | null) => onChange('kelas_bumil', v)} />
+            {/* Card 3: Layanan */}
+            <FormCard
+                title="Layanan"
+                icon={<Heart className="w-5 h-5 text-green-600" />}
+                iconBgColor="bg-green-100"
+                iconColor="text-green-600"
+            >
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <YesNoToggle 
+                        label="Mendapat Tablet Tambah Darah?" 
+                        value={formData.tablet_darah} 
+                        onChange={(v: boolean | null) => onChange('tablet_darah', v)} 
+                    />
+                    <YesNoToggle 
+                        label="Konseling ASI Eksklusif?" 
+                        value={formData.asi_eksklusif} 
+                        onChange={(v: boolean | null) => onChange('asi_eksklusif', v)} 
+                    />
+                    <YesNoToggle 
+                        label="MT Bumil KEK?" 
+                        value={formData.mt_bumil_kek} 
+                        onChange={(v: boolean | null) => onChange('mt_bumil_kek', v)} 
+                    />
+                    <YesNoToggle 
+                        label="Ikut Kelas Bumil?" 
+                        value={formData.kelas_bumil} 
+                        onChange={(v: boolean | null) => onChange('kelas_bumil', v)} 
+                    />
                 </div>
             </FormCard>
 
+            {/* Card 4: Edukasi & Rujukan */}
             <FormCard
-                title="Penyuluhan"
-                icon={<ClipboardCheck className="w-5 h-5 text-purple-600" />}
+                title="Edukasi & Rujukan"
+                icon={<BookOpen className="w-5 h-5 text-purple-600" />}
                 iconBgColor="bg-purple-100"
                 iconColor="text-purple-600"
             >

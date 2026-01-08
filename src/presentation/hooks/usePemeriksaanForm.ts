@@ -51,6 +51,7 @@ export interface PemeriksaanFormData {
     lingkar_lengan: string;
     balita_mendapatkan: string[];
     edukasi_konseling: string[];
+    ada_gejala_sakit: boolean | null;
     
     // Step 2: Pemeriksaan - Remaja (Data Riwayat)
     nama_ortu_remaja: string;
@@ -105,6 +106,7 @@ export interface PemeriksaanFormData {
     };
     jumlah_skor_adl: number;
     tingkat_kemandirian: string;
+    jumlah_skor_puma: number;
     alat_kontrasepsi: string;
     
     // Common skrining
@@ -148,6 +150,7 @@ export const initialPemeriksaanForm: PemeriksaanFormData = {
     lingkar_lengan: '',
     balita_mendapatkan: [],
     edukasi_konseling: [],
+    ada_gejala_sakit: null,
     // Remaja - Data Riwayat
     nama_ortu_remaja: '',
     riwayat_keluarga: [],
@@ -200,6 +203,7 @@ export const initialPemeriksaanForm: PemeriksaanFormData = {
     },
     jumlah_skor_adl: 0,
     tingkat_kemandirian: '',
+    jumlah_skor_puma: 0,
     alat_kontrasepsi: '',
     skrining_tbc: []
 };
@@ -244,6 +248,7 @@ export interface UsePemeriksaanFormReturn {
     handlePrev: () => void;
     handleSubmit: () => Promise<void>;
     handleBack: () => void;
+    handleReset: () => void;
 }
 
 export function usePemeriksaanForm(id: string | undefined): UsePemeriksaanFormReturn {
@@ -353,10 +358,16 @@ export function usePemeriksaanForm(id: string | undefined): UsePemeriksaanFormRe
     };
 
     const handlePumaChange = (key: string, value: boolean | null) => {
-        handleFormChange('skrining_puma', {
+        const newPuma = {
             ...formData.skrining_puma,
             [key]: value
-        });
+        };
+        
+        // Calculate PUMA score (each 'true' answer = 1 point)
+        const pumaScore = Object.values(newPuma).filter(v => v === true).length;
+        
+        handleFormChange('skrining_puma', newPuma);
+        handleFormChange('jumlah_skor_puma', pumaScore);
     };
 
     const handleAdlChange = (key: string, value: number) => {
@@ -471,7 +482,7 @@ export function usePemeriksaanForm(id: string | undefined): UsePemeriksaanFormRe
 
             if (cat === 'bumil') {
                 Object.assign(kunjunganRequest, {
-                    umur_kehamilan: formData.umur_kehamilan ? parseInt(formData.umur_kehamilan) : undefined,
+                    usia_kehamilan: formData.umur_kehamilan ? parseInt(formData.umur_kehamilan) : undefined,
                     lila: formData.lila ? parseFloat(formData.lila) : undefined,
                     tekanan_darah: formData.tekanan_darah || undefined,
                     skrining_tbc: formData.skrining_tbc.length > 0 ? formData.skrining_tbc : undefined,
@@ -479,7 +490,7 @@ export function usePemeriksaanForm(id: string | undefined): UsePemeriksaanFormRe
                     asi_eksklusif: formData.asi_eksklusif,
                     mt_bumil_kek: formData.mt_bumil_kek,
                     kelas_bumil: formData.kelas_bumil,
-                    penyuluhan: formData.penyuluhan.length > 0 ? formData.penyuluhan : undefined,
+                    edukasi: formData.penyuluhan.length > 0 ? formData.penyuluhan : undefined,
                 });
             } else if (cat === 'balita') {
                 Object.assign(kunjunganRequest, {
@@ -490,7 +501,8 @@ export function usePemeriksaanForm(id: string | undefined): UsePemeriksaanFormRe
                     lingkar_lengan: formData.lingkar_lengan ? parseFloat(formData.lingkar_lengan) : undefined,
                     skrining_tbc: formData.skrining_tbc.length > 0 ? formData.skrining_tbc : undefined,
                     balita_mendapatkan: formData.balita_mendapatkan.length > 0 ? formData.balita_mendapatkan : undefined,
-                    edukasi_konseling: formData.edukasi_konseling.length > 0 ? formData.edukasi_konseling : undefined,
+                    edukasi: formData.edukasi_konseling.length > 0 ? formData.edukasi_konseling : undefined,
+                    ada_gejala_sakit: formData.ada_gejala_sakit,
                 });
             } else if (cat === 'remaja') {
                 const skriningMentalArray = Object.entries(formData.skrining_mental)
@@ -559,6 +571,26 @@ export function usePemeriksaanForm(id: string | undefined): UsePemeriksaanFormRe
 
     const handleBack = () => navigate('/dashboard/examinations');
 
+    const handleReset = () => {
+        // Keep identity data, reset pemeriksaan data
+        setFormData(prev => ({
+            ...initialPemeriksaanForm,
+            // Preserve identity fields
+            tanggal_kunjungan: new Date().toISOString().split('T')[0],
+            alamat: prev.alamat,
+            rt: prev.rt,
+            rw: prev.rw,
+            telepon: prev.telepon,
+            kepesertaan_bpjs: prev.kepesertaan_bpjs,
+            nomor_bpjs: prev.nomor_bpjs,
+            nama_suami: prev.nama_suami,
+            nama_ortu: prev.nama_ortu,
+            nama_ortu_remaja: prev.nama_ortu_remaja,
+            pekerjaan: prev.pekerjaan,
+        }));
+        toast.success('Form berhasil direset');
+    };
+
     return {
         selectedPeserta,
         isLoading,
@@ -575,5 +607,6 @@ export function usePemeriksaanForm(id: string | undefined): UsePemeriksaanFormRe
         handlePrev,
         handleSubmit,
         handleBack,
+        handleReset,
     };
 }

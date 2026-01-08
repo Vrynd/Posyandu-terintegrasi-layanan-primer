@@ -36,6 +36,7 @@ interface UsePengaduanReturn {
     
     // State
     isLoading: boolean;
+    isLoadingStats: boolean;
     isLoadingDetail: boolean;
     isSubmitting: boolean;
     error: string | null;
@@ -68,6 +69,7 @@ export function usePengaduan(): UsePengaduanReturn {
     
     // UI state
     const [isLoading, setIsLoading] = useState(false);
+    const [isLoadingStats, setIsLoadingStats] = useState(false);
     const [isLoadingDetail, setIsLoadingDetail] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -117,11 +119,14 @@ export function usePengaduan(): UsePengaduanReturn {
      * Fetch statistics
      */
     const fetchStats = useCallback(async () => {
+        setIsLoadingStats(true);
         try {
             const result = await getPengaduanStatsUseCase.execute();
             setStats(result);
         } catch (err) {
             console.error('Failed to fetch stats:', err);
+        } finally {
+            setIsLoadingStats(false);
         }
     }, []);
 
@@ -244,6 +249,7 @@ export function usePengaduan(): UsePengaduanReturn {
         
         // State
         isLoading,
+        isLoadingStats,
         isLoadingDetail,
         isSubmitting,
         error,

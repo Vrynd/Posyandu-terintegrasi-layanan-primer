@@ -147,15 +147,41 @@ export class PengaduanApiDataSource {
     }
 
     /**
-     * Get statistics (Admin only)
+     * Get statistics (works for both Admin and Kader - filtered by role on backend)
      */
     async getStats(): Promise<ApiResponse<PengaduanStats>> {
-        const response = await api.get<{ data: PengaduanStats }>('/pengaduan/stats');
-        return {
-            success: true,
-            message: 'Success',
-            data: response.data.data,
-        };
+        try {
+            const response = await api.get<{ success?: boolean; data?: PengaduanStats } | PengaduanStats>('/pengaduan/stats');
+            
+            // Handle different response structures
+            let statsData: PengaduanStats;
+            
+            if (response.data && 'data' in response.data && response.data.data) {
+                // Structure: { success: true, data: { pending: 0, ... } }
+                statsData = response.data.data;
+            } else if (response.data && 'pending' in response.data) {
+                // Structure: { pending: 0, in_progress: 0, ... }
+                statsData = response.data as PengaduanStats;
+            } else {
+                // Fallback to empty stats
+                console.warn('Unexpected stats response structure:', response.data);
+                statsData = { pending: 0, in_progress: 0, resolved: 0, rejected: 0, total: 0 };
+            }
+            
+            return {
+                success: true,
+                message: 'Success',
+                data: statsData,
+            };
+        } catch (error) {
+            console.error('Failed to fetch stats:', error);
+            // Return empty stats instead of failing
+            return {
+                success: true,
+                message: 'No stats available',
+                data: { pending: 0, in_progress: 0, resolved: 0, rejected: 0, total: 0 },
+            };
+        }
     }
 }
 

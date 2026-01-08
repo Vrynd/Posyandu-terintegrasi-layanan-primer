@@ -1,6 +1,6 @@
 import { useParams, Link } from 'react-router-dom';
 import type { LucideIcon } from 'lucide-react';
-import { ChevronRight, Home, User, Stethoscope, Calendar, ClipboardCheck, ArrowLeft } from 'lucide-react';
+import { ChevronRight, Home, User, Stethoscope, Calendar, ClipboardCheck, ArrowLeft, RotateCcw } from 'lucide-react';
 import { usePemeriksaanForm } from '@/presentation/hooks/usePemeriksaanForm';
 import { useDocumentTitle } from '@/presentation/hooks/useDocumentTitle';
 import { StepIndicator, FullPageLoading } from '@/presentation/components/common';
@@ -38,6 +38,7 @@ export function PemeriksaanAddPage() {
         handlePrev,
         handleSubmit,
         handleBack,
+        handleReset,
     } = usePemeriksaanForm(id);
 
     // Dynamic page title
@@ -117,20 +118,32 @@ export function PemeriksaanAddPage() {
 
             <StepIndicator steps={steps} currentStep={currentStep} />
 
-            <div className="mt-8 bg-white rounded-2xl border border-gray-100 overflow-hidden">
-                <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50">
-                    <h2 className="text-base font-semibold text-gray-900">
-                        {currentStep === 1 && 'Verifikasi Data Peserta'}
-                        {currentStep === 2 && 'Hasil Medis Pemeriksaan'}
-                        {currentStep === 3 && 'Data Kunjungan'}
-                        {currentStep === 4 && 'Konfirmasi & Simpan'}
-                    </h2>
-                    <p className="text-xs text-gray-500 mt-0.5">
-                        {currentStep === 1 && 'Pastikan data identitas peserta sudah sesuai'}
-                        {currentStep === 2 && 'Lengkapi hasil pemeriksaan kesehatan sesuai kategori'}
-                        {currentStep === 3 && 'Tentukan waktu, lokasi, dan status rujukan'}
-                        {currentStep === 4 && 'Periksa kembali semua data sebelum disimpan ke sistem'}
-                    </p>
+            <div className=" bg-white rounded-2xl border border-gray-100 overflow-hidden">
+                <div className="px-6 py-4 border-b border-gray-100 flex items-start justify-between">
+                    <div>
+                        <h2 className="text-base font-semibold text-gray-900">
+                            {currentStep === 1 && 'Verifikasi Data Peserta'}
+                            {currentStep === 2 && 'Hasil Medis Pemeriksaan'}
+                            {currentStep === 3 && 'Data Kunjungan'}
+                            {currentStep === 4 && 'Konfirmasi & Simpan'}
+                        </h2>
+                        <p className="text-xs text-gray-500 mt-0.5">
+                            {currentStep === 1 && 'Pastikan data identitas peserta sudah sesuai'}
+                            {currentStep === 2 && 'Lengkapi hasil pemeriksaan kesehatan sesuai kategori'}
+                            {currentStep === 3 && 'Tentukan waktu, lokasi, dan status rujukan'}
+                            {currentStep === 4 && 'Periksa kembali semua data sebelum disimpan ke sistem'}
+                        </p>
+                    </div>
+                    {currentStep === 2 && (
+                        <button
+                            type="button"
+                            onClick={handleReset}
+                            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                        >
+                            <RotateCcw className="w-4 h-4" />
+                            Reset Form
+                        </button>
+                    )}
                 </div>
                 <div className="p-6">
                     {renderStepContent()}
