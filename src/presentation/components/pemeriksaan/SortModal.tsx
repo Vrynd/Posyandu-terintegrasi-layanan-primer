@@ -101,20 +101,20 @@ export function SortModal({
                                     onClick={() => setTempSort(option.value)}
                                     className={`flex items-start gap-2.5 px-3 py-3 rounded-xl border-2 transition-all text-left ${
                                         isSelected
-                                            ? 'border-purple-500 bg-purple-50'
+                                            ? 'border-slate-800 bg-slate-50'
                                             : 'border-gray-200 hover:border-gray-300 bg-white'
                                     }`}
                                 >
                                     <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 mt-0.5 ${
                                         isSelected 
-                                            ? 'bg-purple-500 border-purple-500' 
+                                            ? 'bg-slate-800 border-slate-800' 
                                             : 'border-gray-300'
                                     }`}>
                                         {isSelected && <Check className="w-3 h-3 text-white" />}
                                     </div>
                                     <div className="min-w-0">
                                         <p className={`text-sm font-semibold ${
-                                            isSelected ? 'text-purple-700' : 'text-gray-700'
+                                            isSelected ? 'text-slate-800' : 'text-gray-700'
                                         }`}>
                                             {option.label}
                                         </p>

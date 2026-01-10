@@ -33,7 +33,7 @@ export const kategoriConfig: Record<KategoriKey, KategoriConfig> = {
         urlSlug: 'pregnant'
     },
     balita: {
-        label: 'Balita',
+        label: 'Bayi & Balita',
         description: 'Bayi & Anak Usia 0-5 Tahun',
         icon: Baby,
         color: 'text-blue-600',
@@ -44,7 +44,7 @@ export const kategoriConfig: Record<KategoriKey, KategoriConfig> = {
         urlSlug: 'toddler'
     },
     remaja: {
-        label: 'Remaja',
+        label: 'Anak Remaja & Sekolah',
         description: 'Anak Sekolah & Remaja',
         icon: GraduationCap,
         color: 'text-amber-600',
@@ -55,7 +55,7 @@ export const kategoriConfig: Record<KategoriKey, KategoriConfig> = {
         urlSlug: 'adolescent'
     },
     produktif: {
-        label: 'Produktif',
+        label: 'Usia Produktif',
         description: 'Usia Dewasa 15-59 Tahun',
         icon: Users,
         color: 'text-emerald-600',

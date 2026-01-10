@@ -41,7 +41,7 @@ export function usePesertaList() {
     // State for filtering/sorting (client-side)
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedKategori, setSelectedKategori] = useState<KategoriKey | null>(null);
-    const [selectedSort, setSelectedSort] = useState<SortType>('nama-asc');
+    const [selectedSort, setSelectedSort] = useState<SortType>('terbaru');
     const [selectedGender, setSelectedGender] = useState<GenderFilter>('all');
     const [selectedAgeRange, setSelectedAgeRange] = useState<AgeRange>({ min: null, max: null });
     const [currentPage, setCurrentPage] = useState(1);
@@ -74,7 +74,9 @@ export function usePesertaList() {
             const matchSearch = p.nama.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 p.nik.includes(searchQuery);
             const matchKategori = !selectedKategori || p.kategori === selectedKategori;
-            const matchGender = selectedGender === 'all' || p.jenis_kelamin === selectedGender;
+            const matchGender = selectedGender === 'all' || 
+                (selectedGender === 'L' && p.jenis_kelamin === 'Laki-Laki') ||
+                (selectedGender === 'P' && p.jenis_kelamin === 'Perempuan');
             
             // Age filter
             let matchAge = true;

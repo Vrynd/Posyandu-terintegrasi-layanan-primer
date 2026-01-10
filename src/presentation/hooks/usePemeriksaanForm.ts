@@ -1,15 +1,17 @@
 /**
  * useKunjunganForm Hook
  * Logic for health examination visit wizard
+ * Uses React Query for caching peserta and latest visit data
  */
 
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { pesertaApiDataSource } from '@/data/datasources/PesertaApiDataSource';
 import { pemeriksaanApiDataSource } from '@/data/datasources/PemeriksaanApiDataSource';
+import { pesertaApiDataSource } from '@/data/datasources/PesertaApiDataSource';
 import { kategoriConfig } from '@/presentation/constants/kategoriConfig';
 import type { ParticipantType } from '@/domain/entities/Pemeriksaan';
+import { usePesertaDetail, useLatestVisit } from '@/data/queries';
 
 // Combined form data type
 export interface PemeriksaanFormData {
@@ -257,259 +259,252 @@ export interface UsePemeriksaanFormReturn {
 
 export function usePemeriksaanForm(id: string | undefined): UsePemeriksaanFormReturn {
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+    const numericId = id && id !== 'baru' ? parseInt(id, 10) : 0;
+    
+    // Read initial step from query param (for skip to step 2 feature)
+    const initialStep = parseInt(searchParams.get('step') || '1', 10);
+    
+    // Use React Query for caching peserta and latest visit data
+    const { data: pesertaData, isLoading: isPesertaLoading, error: pesertaError } = usePesertaDetail(numericId);
+    const { data: lastVisitData, isLoading: isVisitLoading } = useLatestVisit(numericId);
+    
     const [selectedPeserta, setSelectedPeserta] = useState<SelectedPeserta | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [currentStep, setCurrentStep] = useState(1);
+    const [currentStep, setCurrentStep] = useState(initialStep >= 1 && initialStep <= 4 ? initialStep : 1);
     const [formData, setFormData] = useState<PemeriksaanFormData>(initialPemeriksaanForm);
     const [savedFormData, setSavedFormData] = useState<PemeriksaanFormData | null>(null);
     const [lastVisitDate, setLastVisitDate] = useState<string | null>(null);
     const [isPreFilled, setIsPreFilled] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
+    const [hasProcessedData, setHasProcessedData] = useState(false);
+    
+    // Derive loading state from React Query
+    const isLoading = (isPesertaLoading || isVisitLoading) && numericId > 0;
 
+    // Process peserta data from React Query (with caching)
     useEffect(() => {
-        const fetchPeserta = async () => {
-            if (!id || id === 'baru') {
-                setIsLoading(false);
-                return;
-            }
-            setIsLoading(true);
-            try {
-                const response = await pesertaApiDataSource.getPesertaById(Number(id));
-                if (response.success && response.data) {
-                    const ext = response.data.extension || {};
-                    const d = response.data;
-                    const mapped: SelectedPeserta = {
-                        id: String(d.id),
-                        nik: d.nik,
-                        nama: d.nama,
-                        kategori: d.kategori as ParticipantType,
-                        lastVisitDate: d.updated_at,
-                        identity: {
-                            nama: d.nama,
-                            nik: d.nik,
-                            tanggalLahir: d.tanggal_lahir?.slice(0, 10),
-                            jenisKelamin: d.jenis_kelamin,
-                            tinggiBadan: (ext as any).tinggi_badan?.toString() || '',
-                            alamat: d.alamat || '',
-                            rt: d.rt || '',
-                            rw: d.rw || '',
-                            telepon: d.telepon || '',
-                            kepesertaanBpjs: d.kepesertaan_bpjs ?? false,
-                            nomorBpjs: d.nomor_bpjs || '',
-                            namaSuami: (ext as any).nama_suami || '',
-                            namaOrtu: (ext as any).nama_ortu || '',
-                            pekerjaan: (ext as any).pekerjaan || '',
-                        }
-                    };
-                    setSelectedPeserta(mapped);
-                    
-                    // Semantic URL Redirection
-                    const currentPath = window.location.pathname;
-                    const slug = kategoriConfig[mapped.kategori].urlSlug;
-                    if (!currentPath.includes(`/${slug}/`)) {
-                        navigate(`/dashboard/examinations/${slug}/${id}`, { replace: true });
-                    }
-
-                    // Pre-populate formData with identity
-                    setFormData((prev: PemeriksaanFormData) => ({ 
-                        ...prev, 
-                        alamat: mapped.identity.alamat || '',
-                        rt: mapped.identity.rt || '',
-                        rw: mapped.identity.rw || '',
-                        telepon: mapped.identity.telepon || '',
-                        kepesertaan_bpjs: mapped.identity.kepesertaanBpjs ?? false,
-                        nomor_bpjs: mapped.identity.nomorBpjs || '',
-                        nama_suami: mapped.identity.namaSuami || '',
-                        nama_ortu: mapped.identity.namaOrtu || '',
-                        nama_ortu_remaja: mapped.identity.namaOrtu || '',
-                        pekerjaan: mapped.identity.pekerjaan || '',
-                        tinggi_badan: mapped.identity.tinggiBadan || prev.tinggi_badan,
-                        // Bumil-specific fields from extension
-                        hamil_anak_ke: (ext as any).hamil_anak_ke?.toString() || '',
-                        jarak_anak: (ext as any).jarak_anak || '',
-                        bb_sebelum_hamil: (ext as any).bb_sebelum_hamil?.toString() || '',
-                        // Remaja-specific fields from extension
-                        riwayat_keluarga: (ext as any).riwayat_keluarga || [],
-                        perilaku_berisiko: (ext as any).perilaku_berisiko || [],
-                        // Produktif/Lansia-specific fields from extension
-                        status_perkawinan: (ext as any).status_perkawinan || '',
-                        merokok: (ext as any).merokok ?? null,
-                        konsumsi_gula: (ext as any).konsumsi_gula ?? null,
-                        konsumsi_garam: (ext as any).konsumsi_garam ?? null,
-                        konsumsi_lemak: (ext as any).konsumsi_lemak ?? null,
-                        riwayat_diri: (ext as any).riwayat_diri || [],
-                    }));
-
-                    // Fetch last visit data and pre-fill examination form
-                    try {
-                        const lastVisitResponse = await pesertaApiDataSource.getLatestVisit(Number(id));
-                        if (lastVisitResponse.success && lastVisitResponse.data?.detail) {
-                            const detail = lastVisitResponse.data.detail;
-                            const visitDate = lastVisitResponse.data.tanggal_kunjungan;
-                            
-                            setLastVisitDate(visitDate || null);
-                            setIsPreFilled(true);
-
-                            // Pre-fill form based on category
-                            setFormData((prev: PemeriksaanFormData) => {
-                                const prefilled: Partial<PemeriksaanFormData> = {};
-
-                                // Common fields
-                                if (detail.berat_badan) prefilled.berat_badan = String(detail.berat_badan);
-                                if (detail.tinggi_badan) prefilled.tinggi_badan = String(detail.tinggi_badan);
-                                if (detail.tekanan_darah) prefilled.tekanan_darah = detail.tekanan_darah;
-                                if (detail.skrining_tbc) prefilled.skrining_tbc = detail.skrining_tbc;
-
-                                // Bumil fields
-                                if (detail.umur_kehamilan || detail.usia_kehamilan) {
-                                    prefilled.umur_kehamilan = String(detail.umur_kehamilan || detail.usia_kehamilan);
-                                }
-                                if (detail.lila) prefilled.lila = String(detail.lila);
-                                if (detail.tablet_darah !== undefined) prefilled.tablet_darah = detail.tablet_darah;
-                                if (detail.asi_eksklusif !== undefined) prefilled.asi_eksklusif = detail.asi_eksklusif;
-                                if (detail.mt_bumil_kek !== undefined) prefilled.mt_bumil_kek = detail.mt_bumil_kek;
-                                if (detail.kelas_bumil !== undefined) prefilled.kelas_bumil = detail.kelas_bumil;
-                                if (detail.penyuluhan || detail.edukasi) {
-                                    prefilled.penyuluhan = detail.penyuluhan || detail.edukasi || [];
-                                }
-
-                                // Balita fields
-                                if (detail.umur_bulan) prefilled.umur_bulan = String(detail.umur_bulan);
-                                if (detail.kesimpulan_bb) prefilled.kesimpulan_bb = detail.kesimpulan_bb;
-                                if (detail.panjang_badan) prefilled.panjang_badan = String(detail.panjang_badan);
-                                if (detail.lingkar_kepala) prefilled.lingkar_kepala = String(detail.lingkar_kepala);
-                                if (detail.lingkar_lengan) prefilled.lingkar_lengan = String(detail.lingkar_lengan);
-                                if (detail.balita_mendapatkan) prefilled.balita_mendapatkan = detail.balita_mendapatkan;
-                                if (detail.edukasi_konseling || detail.edukasi) {
-                                    prefilled.edukasi_konseling = detail.edukasi_konseling || detail.edukasi || [];
-                                }
-                                if (detail.ada_gejala_sakit !== undefined) prefilled.ada_gejala_sakit = detail.ada_gejala_sakit;
-
-                                // Remaja/Dewasa fields
-                                if (detail.imt) prefilled.imt = detail.imt;
-                                if (detail.lingkar_perut) prefilled.lingkar_perut = String(detail.lingkar_perut);
-                                if (detail.gula_darah) prefilled.gula_darah = String(detail.gula_darah);
-                                if (detail.kadar_hb) prefilled.kadar_hb = detail.kadar_hb;
-                                if (detail.edukasi) prefilled.edukasi = detail.edukasi;
-
-                                // Remaja mental screening - API returns array of keys that are true
-                                // Set true for items in array, false for items not in array (since previous examination had data)
-                                if (detail.skrining_mental && Array.isArray(detail.skrining_mental)) {
-                                    const mentalObj = {
-                                        nyamanDirumah: detail.skrining_mental.includes('nyamanDirumah'),
-                                        bebanSekolah: detail.skrining_mental.includes('bebanSekolah'),
-                                        sukaTubuh: detail.skrining_mental.includes('sukaTubuh'),
-                                        temanDiluarGrup: detail.skrining_mental.includes('temanDiluarGrup'),
-                                        konsumsiRokokAlkoholNarkoba: detail.skrining_mental.includes('konsumsiRokokAlkoholNarkoba'),
-                                        hubunganSeksual: detail.skrining_mental.includes('hubunganSeksual'),
-                                        tidakAmanLingkungan: detail.skrining_mental.includes('tidakAmanLingkungan'),
-                                        inginBunuhDiri: detail.skrining_mental.includes('inginBunuhDiri'),
-                                    };
-                                    prefilled.skrining_mental = mentalObj;
-                                } else if (detail.skrining_mental && typeof detail.skrining_mental === 'object') {
-                                    prefilled.skrining_mental = {
-                                        ...prev.skrining_mental,
-                                        ...detail.skrining_mental
-                                    };
-                                }
-
-                                // Dewasa fields
-                                if (detail.asam_urat) prefilled.asam_urat = String(detail.asam_urat);
-                                if (detail.kolesterol) prefilled.kolesterol = String(detail.kolesterol);
-                                if (detail.tes_mata) prefilled.tes_mata = detail.tes_mata;
-                                if (detail.tes_telinga) prefilled.tes_telinga = detail.tes_telinga;
-                                if (detail.alat_kontrasepsi) prefilled.alat_kontrasepsi = detail.alat_kontrasepsi;
-                                
-                                // PUMA screening - API returns array of keys that are true
-                                // Set true for items in array, false for items not in array
-                                if (detail.skrining_puma && Array.isArray(detail.skrining_puma)) {
-                                    const pumaObj = {
-                                        napasPendek: detail.skrining_puma.includes('napasPendek'),
-                                        dahakSaatTidakFlu: detail.skrining_puma.includes('dahakSaatTidakFlu'),
-                                        batukSaatTidakFlu: detail.skrining_puma.includes('batukSaatTidakFlu'),
-                                        tesSpirometri: detail.skrining_puma.includes('tesSpirometri'),
-                                    };
-                                    prefilled.skrining_puma = pumaObj;
-                                    // Calculate PUMA score
-                                    const pumaScore = Object.values(pumaObj).filter(v => v === true).length;
-                                    prefilled.jumlah_skor_puma = pumaScore;
-                                } else if (detail.jumlah_skor_puma !== undefined) {
-                                    prefilled.jumlah_skor_puma = detail.jumlah_skor_puma;
-                                }
-
-                                // ADL for Lansia - API returns array of strings in format ["key:value", ...]
-                                // Parse and map to form object
-                                if (detail.adl && Array.isArray(detail.adl)) {
-                                    const adlObj = {
-                                        pengendalianBab: 0,
-                                        pengendalianBak: 0,
-                                        kebersihanDiri: 0,
-                                        penggunaanWc: 0,
-                                        makanMinum: 0,
-                                        mobilitas: 0,
-                                        berjalanTempatRata: 0,
-                                        naikTurunTangga: 0,
-                                    };
-                                    
-                                    // Parse "key:value" format
-                                    detail.adl.forEach((item: string) => {
-                                        const [key, valueStr] = item.split(':');
-                                        const value = parseInt(valueStr, 10);
-                                        if (key in adlObj && !isNaN(value)) {
-                                            (adlObj as any)[key] = value;
-                                        }
-                                    });
-                                    
-                                    prefilled.adl = adlObj;
-                                    
-                                    // Calculate total ADL score
-                                    const totalScore = Object.values(adlObj).reduce((sum, val) => sum + val, 0);
-                                    prefilled.jumlah_skor_adl = totalScore;
-                                    
-                                    // Calculate tingkat kemandirian
-                                    let tingkat = '';
-                                    if (totalScore > 15) tingkat = 'mandiri';
-                                    else if (totalScore >= 10) tingkat = 'ringan';
-                                    else if (totalScore >= 6) tingkat = 'sedang';
-                                    else if (totalScore >= 3) tingkat = 'berat';
-                                    else tingkat = 'total';
-                                    prefilled.tingkat_kemandirian = tingkat;
-                                } else {
-                                    // Fallback: use values from API directly if available
-                                    if (detail.jumlah_skor_adl !== undefined) {
-                                        prefilled.jumlah_skor_adl = detail.jumlah_skor_adl;
-                                    }
-                                    if (detail.tingkat_kemandirian) {
-                                        prefilled.tingkat_kemandirian = detail.tingkat_kemandirian;
-                                    }
-                                }
-
-                                return { ...prev, ...prefilled };
-                            });
-                            
-                            // Save the pre-filled form data for reset functionality
-                            setFormData(current => {
-                                setSavedFormData(current);
-                                return current;
-                            });
-                        }
-                    } catch (visitErr) {
-                        // Silently fail - last visit data is optional
-                        console.log('No last visit data available');
-                    }
-                } else {
-                    setError('Data peserta tidak ditemukan.');
-                }
-            } catch (err) {
-                setError('Terjadi kesalahan saat memuat data peserta.');
-            } finally {
-                setIsLoading(false);
+        if (!pesertaData || hasProcessedData) return;
+        
+        const ext = pesertaData.extension || {};
+        const d = pesertaData;
+        const mapped: SelectedPeserta = {
+            id: String(d.id),
+            nik: d.nik,
+            nama: d.nama,
+            kategori: d.kategori as ParticipantType,
+            lastVisitDate: d.updated_at,
+            identity: {
+                nama: d.nama,
+                nik: d.nik,
+                tanggalLahir: d.tanggal_lahir?.slice(0, 10),
+                jenisKelamin: d.jenis_kelamin,
+                tinggiBadan: (ext as any).tinggi_badan?.toString() || '',
+                alamat: d.alamat || '',
+                rt: d.rt || '',
+                rw: d.rw || '',
+                telepon: d.telepon || '',
+                kepesertaanBpjs: d.kepesertaan_bpjs ?? false,
+                nomorBpjs: d.nomor_bpjs || '',
+                namaSuami: (ext as any).nama_suami || '',
+                namaOrtu: (ext as any).nama_ortu || '',
+                pekerjaan: (ext as any).pekerjaan || '',
             }
         };
-        fetchPeserta();
-    }, [id, navigate]);
+        setSelectedPeserta(mapped);
+        
+        // Semantic URL Redirection
+        const currentPath = window.location.pathname;
+        const slug = kategoriConfig[mapped.kategori].urlSlug;
+        if (!currentPath.includes(`/${slug}/`)) {
+            navigate(`/dashboard/examinations/${slug}/${id}`, { replace: true });
+        }
+
+        // Pre-populate formData with identity
+        setFormData((prev: PemeriksaanFormData) => ({ 
+            ...prev, 
+            alamat: mapped.identity.alamat || '',
+            rt: mapped.identity.rt || '',
+            rw: mapped.identity.rw || '',
+            telepon: mapped.identity.telepon || '',
+            kepesertaan_bpjs: mapped.identity.kepesertaanBpjs ?? false,
+            nomor_bpjs: mapped.identity.nomorBpjs || '',
+            nama_suami: mapped.identity.namaSuami || '',
+            nama_ortu: mapped.identity.namaOrtu || '',
+            nama_ortu_remaja: mapped.identity.namaOrtu || '',
+            pekerjaan: mapped.identity.pekerjaan || '',
+            tinggi_badan: mapped.identity.tinggiBadan || prev.tinggi_badan,
+            // Bumil-specific fields from extension
+            hamil_anak_ke: (ext as any).hamil_anak_ke?.toString() || '',
+            jarak_anak: (ext as any).jarak_anak || '',
+            bb_sebelum_hamil: (ext as any).bb_sebelum_hamil?.toString() || '',
+            // Remaja-specific fields from extension
+            riwayat_keluarga: (ext as any).riwayat_keluarga || [],
+            perilaku_berisiko: (ext as any).perilaku_berisiko || [],
+            // Produktif/Lansia-specific fields from extension
+            status_perkawinan: (ext as any).status_perkawinan || '',
+            merokok: (ext as any).merokok ?? null,
+            konsumsi_gula: (ext as any).konsumsi_gula ?? null,
+            konsumsi_garam: (ext as any).konsumsi_garam ?? null,
+            konsumsi_lemak: (ext as any).konsumsi_lemak ?? null,
+            riwayat_diri: (ext as any).riwayat_diri || [],
+        }));
+
+        setHasProcessedData(true);
+    }, [pesertaData, hasProcessedData, id, navigate]);
+
+    // Process latest visit data from React Query (with caching)
+    useEffect(() => {
+        if (!lastVisitData?.detail || !pesertaData || isPreFilled) return;
+        
+        const detail = lastVisitData.detail;
+        const visitDate = lastVisitData.tanggal_kunjungan;
+        
+        setLastVisitDate(visitDate || null);
+        setIsPreFilled(true);
+
+        // Pre-fill form based on category
+        setFormData((prev: PemeriksaanFormData) => {
+            const prefilled: Partial<PemeriksaanFormData> = {};
+
+            // Common fields
+            if (detail.berat_badan) prefilled.berat_badan = String(detail.berat_badan);
+            if (detail.tinggi_badan) prefilled.tinggi_badan = String(detail.tinggi_badan);
+            if (detail.tekanan_darah) prefilled.tekanan_darah = detail.tekanan_darah;
+            if (detail.skrining_tbc) prefilled.skrining_tbc = detail.skrining_tbc;
+
+            // Bumil fields
+            if (detail.umur_kehamilan || detail.usia_kehamilan) {
+                prefilled.umur_kehamilan = String(detail.umur_kehamilan || detail.usia_kehamilan);
+            }
+            if (detail.lila) prefilled.lila = String(detail.lila);
+            if (detail.tablet_darah !== undefined) prefilled.tablet_darah = detail.tablet_darah;
+            if (detail.asi_eksklusif !== undefined) prefilled.asi_eksklusif = detail.asi_eksklusif;
+            if (detail.mt_bumil_kek !== undefined) prefilled.mt_bumil_kek = detail.mt_bumil_kek;
+            if (detail.kelas_bumil !== undefined) prefilled.kelas_bumil = detail.kelas_bumil;
+            if (detail.penyuluhan || detail.edukasi) {
+                prefilled.penyuluhan = detail.penyuluhan || detail.edukasi || [];
+            }
+
+            // Balita fields
+            if (detail.umur_bulan) prefilled.umur_bulan = String(detail.umur_bulan);
+            if (detail.kesimpulan_bb) prefilled.kesimpulan_bb = detail.kesimpulan_bb;
+            if (detail.panjang_badan) prefilled.panjang_badan = String(detail.panjang_badan);
+            if (detail.lingkar_kepala) prefilled.lingkar_kepala = String(detail.lingkar_kepala);
+            if (detail.lingkar_lengan) prefilled.lingkar_lengan = String(detail.lingkar_lengan);
+            if (detail.balita_mendapatkan) prefilled.balita_mendapatkan = detail.balita_mendapatkan;
+            if (detail.edukasi_konseling || detail.edukasi) {
+                prefilled.edukasi_konseling = detail.edukasi_konseling || detail.edukasi || [];
+            }
+            if (detail.ada_gejala_sakit !== undefined) prefilled.ada_gejala_sakit = detail.ada_gejala_sakit;
+
+            // Remaja/Dewasa fields
+            if (detail.imt) prefilled.imt = detail.imt;
+            if (detail.lingkar_perut) prefilled.lingkar_perut = String(detail.lingkar_perut);
+            if (detail.gula_darah) prefilled.gula_darah = String(detail.gula_darah);
+            if (detail.kadar_hb) prefilled.kadar_hb = detail.kadar_hb;
+            if (detail.edukasi) prefilled.edukasi = detail.edukasi;
+
+            // Remaja mental screening
+            if (detail.skrining_mental && Array.isArray(detail.skrining_mental)) {
+                const mentalObj = {
+                    nyamanDirumah: detail.skrining_mental.includes('nyamanDirumah'),
+                    bebanSekolah: detail.skrining_mental.includes('bebanSekolah'),
+                    sukaTubuh: detail.skrining_mental.includes('sukaTubuh'),
+                    temanDiluarGrup: detail.skrining_mental.includes('temanDiluarGrup'),
+                    konsumsiRokokAlkoholNarkoba: detail.skrining_mental.includes('konsumsiRokokAlkoholNarkoba'),
+                    hubunganSeksual: detail.skrining_mental.includes('hubunganSeksual'),
+                    tidakAmanLingkungan: detail.skrining_mental.includes('tidakAmanLingkungan'),
+                    inginBunuhDiri: detail.skrining_mental.includes('inginBunuhDiri'),
+                };
+                prefilled.skrining_mental = mentalObj;
+            } else if (detail.skrining_mental && typeof detail.skrining_mental === 'object') {
+                prefilled.skrining_mental = {
+                    ...prev.skrining_mental,
+                    ...detail.skrining_mental
+                };
+            }
+
+            // Dewasa fields
+            if (detail.asam_urat) prefilled.asam_urat = String(detail.asam_urat);
+            if (detail.kolesterol) prefilled.kolesterol = String(detail.kolesterol);
+            if (detail.tes_mata) prefilled.tes_mata = detail.tes_mata;
+            if (detail.tes_telinga) prefilled.tes_telinga = detail.tes_telinga;
+            if (detail.alat_kontrasepsi) prefilled.alat_kontrasepsi = detail.alat_kontrasepsi;
+            
+            // PUMA screening
+            if (detail.skrining_puma && Array.isArray(detail.skrining_puma)) {
+                const pumaObj = {
+                    napasPendek: detail.skrining_puma.includes('napasPendek'),
+                    dahakSaatTidakFlu: detail.skrining_puma.includes('dahakSaatTidakFlu'),
+                    batukSaatTidakFlu: detail.skrining_puma.includes('batukSaatTidakFlu'),
+                    tesSpirometri: detail.skrining_puma.includes('tesSpirometri'),
+                };
+                prefilled.skrining_puma = pumaObj;
+                const pumaScore = Object.values(pumaObj).filter(v => v === true).length;
+                prefilled.jumlah_skor_puma = pumaScore;
+            } else if (detail.jumlah_skor_puma !== undefined) {
+                prefilled.jumlah_skor_puma = detail.jumlah_skor_puma;
+            }
+
+            // ADL for Lansia
+            if (detail.adl && Array.isArray(detail.adl)) {
+                const adlObj = {
+                    pengendalianBab: 0,
+                    pengendalianBak: 0,
+                    kebersihanDiri: 0,
+                    penggunaanWc: 0,
+                    makanMinum: 0,
+                    mobilitas: 0,
+                    berjalanTempatRata: 0,
+                    naikTurunTangga: 0,
+                };
+                
+                detail.adl.forEach((item: string) => {
+                    const [key, valueStr] = item.split(':');
+                    const value = parseInt(valueStr, 10);
+                    if (key in adlObj && !isNaN(value)) {
+                        (adlObj as any)[key] = value;
+                    }
+                });
+                
+                prefilled.adl = adlObj;
+                const totalScore = Object.values(adlObj).reduce((sum, val) => sum + val, 0);
+                prefilled.jumlah_skor_adl = totalScore;
+                
+                let tingkat = '';
+                if (totalScore > 15) tingkat = 'mandiri';
+                else if (totalScore >= 10) tingkat = 'ringan';
+                else if (totalScore >= 6) tingkat = 'sedang';
+                else if (totalScore >= 3) tingkat = 'berat';
+                else tingkat = 'total';
+                prefilled.tingkat_kemandirian = tingkat;
+            } else {
+                if (detail.jumlah_skor_adl !== undefined) {
+                    prefilled.jumlah_skor_adl = detail.jumlah_skor_adl;
+                }
+                if (detail.tingkat_kemandirian) {
+                    prefilled.tingkat_kemandirian = detail.tingkat_kemandirian;
+                }
+            }
+
+            return { ...prev, ...prefilled };
+        });
+        
+        // Save the pre-filled form data for reset functionality
+        setFormData(current => {
+            setSavedFormData(current);
+            return current;
+        });
+    }, [lastVisitData, pesertaData, isPreFilled]);
+
+    // Handle error from React Query
+    useEffect(() => {
+        if (pesertaError) {
+            setError('Data peserta tidak ditemukan.');
+        }
+    }, [pesertaError]);
 
     const handleFormChange = (field: keyof PemeriksaanFormData, value: any) => {
         setFormData((prev: PemeriksaanFormData) => ({ ...prev, [field]: value }));

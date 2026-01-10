@@ -103,20 +103,20 @@ export function FilterModal({
                         onClick={handleSelectAll}
                         className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border-2 transition-all mb-4 ${
                             tempFilters.length === 0
-                                ? 'border-blue-500 bg-blue-50'
+                                ? 'border-slate-800 bg-slate-50'
                                 : 'border-gray-200 hover:border-gray-300 bg-white'
                         }`}
                     >
                         <div className="flex items-center gap-3">
                             <div className={`w-5 h-5 rounded-lg border-2 flex items-center justify-center ${
                                 tempFilters.length === 0 
-                                    ? 'bg-blue-500 border-blue-500' 
+                                    ? 'bg-slate-800 border-slate-800' 
                                     : 'border-gray-300'
                             }`}>
                                 {tempFilters.length === 0 && <Check className="w-3 h-3 text-white" />}
                             </div>
                             <span className={`text-sm font-semibold ${
-                                tempFilters.length === 0 ? 'text-blue-700' : 'text-gray-700'
+                                tempFilters.length === 0 ? 'text-slate-800' : 'text-gray-700'
                             }`}>
                                 Semua Kategori
                             </span>

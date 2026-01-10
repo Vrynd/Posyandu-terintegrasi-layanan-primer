@@ -18,7 +18,6 @@ import {
     usePesertaDetail as usePesertaDetailQuery, 
     useUpdatePeserta, 
     useDeletePeserta,
-    useLatestVisit,
 } from '../../data/queries';
 
 // Format date to YYYY-MM-DD for HTML date input
@@ -73,9 +72,6 @@ export function usePesertaDetail(id: string | undefined) {
         error: queryError,
         refetch
     } = usePesertaDetailQuery(numericId);
-
-    // Use React Query for fetching latest visit (more efficient than full list)
-    const { data: lastVisit } = useLatestVisit(numericId);
 
     // Use React Query mutations
     const updateMutation = useUpdatePeserta();
@@ -184,7 +180,6 @@ export function usePesertaDetail(id: string | undefined) {
         peserta: peserta || null,
         config,
         editForm,
-        lastVisit,
         isLoading,
         error,
 

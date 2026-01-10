@@ -7,9 +7,11 @@
  * - Uses separate components for UI sections
  */
 
-import { useParams, Link } from 'react-router-dom';
-import { Home, ChevronRight, User, AlertTriangle, RefreshCw } from 'lucide-react';
+import { useState } from 'react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import { Home, ChevronRight, User, AlertTriangle, RefreshCw, Calendar, MapPin, Stethoscope, ArrowRight } from 'lucide-react';
 import { usePesertaDetail } from '../../hooks/usePesertaDetail';
+import { useLatestVisit } from '@/data/queries';
 import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 import {
     PesertaProfileHeader,
@@ -18,9 +20,11 @@ import {
     PesertaDeleteModal,
 } from '../../components/peserta';
 import { FullPageLoading } from '../../components/common';
+import { BeatLoader } from 'react-spinners';
 
 export function PesertaDetailPage() {
     const { id } = useParams();
+    const navigate = useNavigate();
     const {
         peserta,
         config,
@@ -42,12 +46,31 @@ export function PesertaDetailPage() {
         handleBack,
     } = usePesertaDetail(id);
 
+    // Fetch last visit data for display
+    const numericId = id ? parseInt(id, 10) : 0;
+    const { data: lastVisit, isLoading: isLastVisitLoading } = useLatestVisit(numericId);
+
+    // Navigation loading state
+    const [isNavigating, setIsNavigating] = useState(false);
+
+    const handleNavigateToPemeriksaan = (skipToStep2: boolean = false) => {
+        setIsNavigating(true);
+        const url = `/dashboard/examinations/${config?.urlSlug}/${id}${skipToStep2 ? '?step=2' : ''}`;
+        // Small delay to show loading overlay
+        setTimeout(() => navigate(url), 300);
+    };
+
     // Dynamic page title
     useDocumentTitle(peserta?.nama ? `Detail: ${peserta.nama}` : 'Detail Peserta');
 
     // Saving state - full screen overlay
     if (isSaving) {
         return <FullPageLoading message="Menyimpan perubahan..." />;
+    }
+
+    // Navigating state - full screen overlay
+    if (isNavigating) {
+        return <FullPageLoading message="Memuat halaman pemeriksaan..." />;
     }
 
     // Deleting state - full screen overlay
@@ -136,6 +159,84 @@ export function PesertaDetailPage() {
 
             {/* Info Cards */}
             <PesertaInfoCards peserta={peserta} />
+
+            {/* Last Examination Card */}
+            <div className="mt-6 bg-white rounded-2xl border border-gray-100 overflow-hidden">
+                <div className="px-5 py-3 border-b border-gray-100">
+                    <div className="flex items-center gap-2">
+                        <div className="w-7 h-7 bg-blue-100 rounded-lg flex items-center justify-center">
+                            <Stethoscope className="w-4 h-4 text-blue-600" />
+                        </div>
+                        <h3 className="font-semibold text-gray-900">Pemeriksaan Terakhir</h3>
+                    </div>
+                </div>
+                <div className="p-6">
+                    {isLastVisitLoading ? (
+                        <div className="flex items-center justify-center py-2">
+                            <BeatLoader color="#3B82F6" size={8} margin={2} />
+                        </div>
+                    ) : lastVisit ? (
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-start gap-8">
+                                {/* Tanggal */}
+                                <div>
+                                    <p className="text-[11px] font-medium text-gray-400 uppercase tracking-wide mb-1">Tanggal</p>
+                                    <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                                        <Calendar className="w-4 h-4 text-gray-400" />
+                                        <span>{new Date(lastVisit.tanggal_kunjungan).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+                                    </div>
+                                </div>
+                                {/* Waktu */}
+                                {(() => {
+                                    const date = new Date(lastVisit.tanggal_kunjungan);
+                                    const hasTime = date.getHours() !== 0 || date.getMinutes() !== 0;
+                                    if (hasTime) {
+                                        return (
+                                            <div>
+                                                <p className="text-[11px] font-medium text-gray-400 uppercase tracking-wide mb-1">Waktu</p>
+                                                <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                                                    <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <circle cx="12" cy="12" r="10" strokeWidth="2" />
+                                                        <path strokeWidth="2" strokeLinecap="round" d="M12 6v6l4 2" />
+                                                    </svg>
+                                                    <span>{date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}</span>
+                                                </div>
+                                            </div>
+                                        );
+                                    }
+                                    return null;
+                                })()}
+                                {/* Lokasi */}
+                                <div>
+                                    <p className="text-[11px] font-medium text-gray-400 uppercase tracking-wide mb-1">Lokasi</p>
+                                    <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                                        <MapPin className="w-4 h-4 text-gray-400" />
+                                        <span>{lastVisit.lokasi === 'posyandu' ? 'Posyandu' : 'Kunjungan Rumah'}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <button
+                                onClick={() => handleNavigateToPemeriksaan(true)}
+                                className="inline-flex items-center gap-2 px-4 py-2 bg-linear-to-r from-slate-800 to-slate-900 text-white text-sm font-medium rounded-lg hover:from-slate-700 hover:to-slate-800 transition-all"
+                            >
+                                <span>Lakukan Pemeriksaan</span>
+                                <ArrowRight className="w-4 h-4" />
+                            </button>
+                        </div>
+                    ) : (
+                        <div className="flex items-center justify-between">
+                            <p className="text-sm text-gray-500">Belum ada data pemeriksaan untuk peserta ini.</p>
+                            <button
+                                onClick={() => handleNavigateToPemeriksaan(false)}
+                                className="inline-flex items-center gap-2 px-4 py-2 bg-linear-to-r from-slate-800 to-slate-900 text-white text-sm font-medium rounded-lg hover:from-slate-700 hover:to-slate-800 transition-all"
+                            >
+                                <span>Pemeriksaan Pertama</span>
+                                <ArrowRight className="w-4 h-4" />
+                            </button>
+                        </div>
+                    )}
+                </div>
+            </div>
 
             {/* Delete Modal */}
             <PesertaDeleteModal

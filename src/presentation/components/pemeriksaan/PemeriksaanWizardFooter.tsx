@@ -23,7 +23,7 @@ export function PemeriksaanWizardFooter({
                 type="button"
                 onClick={currentStep === 1 ? onCancel : onBack}
                 disabled={isSaving}
-                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors disabled:opacity-50"
+                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 bg-gray-50 rounded-xl transition-all disabled:opacity-50"
             >
                 <ArrowLeft className="w-4 h-4" />
                 {currentStep === 1 ? "Batal" : "Kembali"}
