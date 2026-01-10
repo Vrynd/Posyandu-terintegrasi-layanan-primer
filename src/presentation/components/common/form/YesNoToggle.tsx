@@ -8,13 +8,15 @@ interface YesNoToggleProps {
     value: boolean | null;
     onChange: (value: boolean) => void;
     danger?: boolean;
+    disabled?: boolean;
 }
 
 export function YesNoToggle({
     label,
     value,
     onChange,
-    danger = false
+    danger = false,
+    disabled = false
 }: YesNoToggleProps) {
     // Handle null as unselected state
     const isYes = value === true;
@@ -28,24 +30,26 @@ export function YesNoToggle({
                     <button
                         type="button"
                         onClick={() => onChange(false)}
+                        disabled={disabled}
                         className={`px-3 py-1 text-xs rounded-full transition-all ${
                             isNo
                                 ? 'bg-green-600 text-white'
                                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                        }`}
+                        } ${disabled ? 'cursor-not-allowed' : ''}`}
                     >
                         Tidak
                     </button>
                     <button
                         type="button"
                         onClick={() => onChange(true)}
+                        disabled={disabled}
                         className={`px-3 py-1 text-xs rounded-full transition-all ${
                             isYes
                                 ? danger
                                     ? 'bg-red-600 text-white'
                                     : 'bg-green-600 text-white'
                                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                        }`}
+                        } ${disabled ? 'cursor-not-allowed' : ''}`}
                     >
                         Ya
                     </button>

@@ -1,6 +1,6 @@
 import { useParams, Link } from 'react-router-dom';
 import type { LucideIcon } from 'lucide-react';
-import { ChevronRight, Home, User, Stethoscope, Calendar, ClipboardCheck, ArrowLeft, RotateCcw } from 'lucide-react';
+import { ChevronRight, Home, User, Stethoscope, Calendar, ClipboardCheck, ArrowLeft, RotateCcw, History, Pencil } from 'lucide-react';
 import { usePemeriksaanForm } from '@/presentation/hooks/usePemeriksaanForm';
 import { useDocumentTitle } from '@/presentation/hooks/useDocumentTitle';
 import { StepIndicator, FullPageLoading } from '@/presentation/components/common';
@@ -29,6 +29,9 @@ export function PemeriksaanAddPage() {
         error,
         currentStep,
         formData,
+        lastVisitDate,
+        isPreFilled,
+        isEditing,
         handleFormChange,
         handleSkriningTbcChange,
         handleMentalChange,
@@ -39,6 +42,7 @@ export function PemeriksaanAddPage() {
         handleSubmit,
         handleBack,
         handleReset,
+        handleStartEditing,
     } = usePemeriksaanForm(id);
 
     // Dynamic page title
@@ -82,6 +86,7 @@ export function PemeriksaanAddPage() {
                     onMentalChange={handleMentalChange}
                     onPumaChange={handlePumaChange}
                     onAdlChange={handleAdlChange}
+                    readOnly={isPreFilled && !isEditing}
                 />
             );
             case 3: return <Step3WaktuLokasi formData={formData} onChange={handleFormChange} />;
@@ -134,16 +139,34 @@ export function PemeriksaanAddPage() {
                             {currentStep === 4 && 'Periksa kembali semua data sebelum disimpan ke sistem'}
                         </p>
                     </div>
-                    {currentStep === 2 && (
-                        <button
-                            type="button"
-                            onClick={handleReset}
-                            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-                        >
-                            <RotateCcw className="w-4 h-4" />
-                            Reset Form
-                        </button>
-                    )}
+                    <div className="flex items-center gap-3">
+                        {currentStep === 2 && isPreFilled && lastVisitDate && (
+                            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-amber-50 text-amber-700 rounded-full text-xs font-medium">
+                                <History className="w-3 h-3" />
+                                <span>Data terakhir: {new Date(lastVisitDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                            </div>
+                        )}
+                        {currentStep === 2 && isPreFilled && !isEditing && (
+                            <button
+                                type="button"
+                                onClick={handleStartEditing}
+                                title="Perbarui Data"
+                                className="inline-flex items-center justify-center w-9 h-9 text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
+                            >
+                                <Pencil className="w-4 h-4" />
+                            </button>
+                        )}
+                        {currentStep === 2 && isEditing && (
+                            <button
+                                type="button"
+                                onClick={handleReset}
+                                title="Reset Form"
+                                className="inline-flex items-center justify-center w-9 h-9 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                            >
+                                <RotateCcw className="w-4 h-4" />
+                            </button>
+                        )}
+                    </div>
                 </div>
                 <div className="p-6">
                     {renderStepContent()}

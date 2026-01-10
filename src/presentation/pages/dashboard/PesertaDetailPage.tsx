@@ -16,7 +16,6 @@ import {
     PesertaInfoCards,
     PesertaEditModal,
     PesertaDeleteModal,
-    LastVisitCard,
 } from '../../components/peserta';
 import { FullPageLoading } from '../../components/common';
 
@@ -41,7 +40,6 @@ export function PesertaDetailPage() {
         closeDeleteConfirm,
         handleDelete,
         handleBack,
-        lastVisit,
     } = usePesertaDetail(id);
 
     // Dynamic page title
@@ -138,11 +136,6 @@ export function PesertaDetailPage() {
 
             {/* Info Cards */}
             <PesertaInfoCards peserta={peserta} />
-
-            {/* Last Visit Card */}
-            <div className="mb-6">
-                <LastVisitCard lastVisit={lastVisit} />
-            </div>
 
             {/* Delete Modal */}
             <PesertaDeleteModal

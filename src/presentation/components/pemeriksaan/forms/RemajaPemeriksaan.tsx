@@ -16,6 +16,7 @@ interface RemajaPemeriksaanProps {
     onSkriningTbcChange: (tags: string[]) => void;
     onMentalChange: (key: string, value: boolean | null) => void;
     isPerempuan: boolean;
+    readOnly?: boolean;
 }
 
 const skriningMentalQuestions = [
@@ -34,7 +35,8 @@ export function RemajaPemeriksaan({
     onChange, 
     onSkriningTbcChange, 
     onMentalChange,
-    isPerempuan 
+    isPerempuan,
+    readOnly = false
 }: RemajaPemeriksaanProps) {
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -51,36 +53,42 @@ export function RemajaPemeriksaan({
                         value={formData.tinggi_badan}
                         onChange={(v: string) => onChange('tinggi_badan', v.replace(/[^\d.]/g, ''))}
                         placeholder="Contoh: 165"
+                        disabled={readOnly}
                     />
                     <FormInput
                         label="Berat Badan (kg)"
                         value={formData.berat_badan}
                         onChange={(v: string) => onChange('berat_badan', v.replace(/[^\d.]/g, ''))}
                         placeholder="Contoh: 55"
+                        disabled={readOnly}
                     />
                     <FormSelect
                         label="IMT"
                         value={formData.imt}
                         onChange={(v: string) => onChange('imt', v)}
                         options={imtOptions}
+                        disabled={readOnly}
                     />
                     <FormInput
                         label="Lingkar Perut (cm)"
                         value={formData.lingkar_perut}
                         onChange={(v: string) => onChange('lingkar_perut', v.replace(/[^\d.]/g, ''))}
                         placeholder="Contoh: 75"
+                        disabled={readOnly}
                     />
                     <FormInput
                         label="Tekanan Darah (mmHg)"
                         value={formData.tekanan_darah}
                         onChange={(v: string) => onChange('tekanan_darah', v)}
                         placeholder="Contoh: 120/80"
+                        disabled={readOnly}
                     />
                     <FormInput
                         label="Gula Darah (mg/dL)"
                         value={formData.gula_darah}
                         onChange={(v: string) => onChange('gula_darah', v.replace(/[^\d.]/g, ''))}
                         placeholder="Contoh: 100"
+                        disabled={readOnly}
                     />
                     {isPerempuan && (
                         <FormSelect
@@ -88,6 +96,7 @@ export function RemajaPemeriksaan({
                             value={formData.kadar_hb}
                             onChange={(v: string) => onChange('kadar_hb', v)}
                             options={kadarHbOptions}
+                            disabled={readOnly}
                         />
                     )}
                 </div>
@@ -105,6 +114,7 @@ export function RemajaPemeriksaan({
                     selectedTags={formData.skrining_tbc}
                     options={[...skriningTbcOptions]}
                     onChange={onSkriningTbcChange}
+                    disabled={readOnly}
                 />
                 
                 <div className="mt-6 pt-6 border-t border-gray-100">
@@ -116,6 +126,7 @@ export function RemajaPemeriksaan({
                                 label={q.label}
                                 value={formData.skrining_mental[q.key as keyof typeof formData.skrining_mental]}
                                 onChange={(v: boolean | null) => onMentalChange(q.key, v)}
+                                disabled={readOnly}
                             />
                         ))}
                     </div>
@@ -145,6 +156,7 @@ export function RemajaPemeriksaan({
                                 onChange('riwayat_keluarga', tags);
                             }
                         }}
+                        disabled={readOnly}
                     />
                     
                     <TagSelector
@@ -162,6 +174,7 @@ export function RemajaPemeriksaan({
                                 onChange('perilaku_berisiko', tags);
                             }
                         }}
+                        disabled={readOnly}
                     />
                 </div>
             </FormCard>
@@ -178,6 +191,7 @@ export function RemajaPemeriksaan({
                     selectedTags={formData.edukasi}
                     options={[...edukasiRemajaOptions]}
                     onChange={(tags: string[]) => onChange('edukasi', tags)}
+                    disabled={readOnly}
                 />
             </FormCard>
         </div>

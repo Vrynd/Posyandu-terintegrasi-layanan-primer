@@ -7,9 +7,10 @@ interface BalitaPemeriksaanProps {
     formData: PemeriksaanFormData;
     onChange: (field: keyof PemeriksaanFormData, value: any) => void;
     onSkriningTbcChange: (tags: string[]) => void;
+    readOnly?: boolean;
 }
 
-export function BalitaPemeriksaan({ formData, onChange, onSkriningTbcChange }: BalitaPemeriksaanProps) {
+export function BalitaPemeriksaan({ formData, onChange, onSkriningTbcChange, readOnly = false }: BalitaPemeriksaanProps) {
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
             {/* Card 1: Pemeriksaan Fisik */}
@@ -25,36 +26,42 @@ export function BalitaPemeriksaan({ formData, onChange, onSkriningTbcChange }: B
                         value={formData.umur_bulan}
                         onChange={(v: string) => onChange('umur_bulan', v.replace(/\D/g, ''))}
                         placeholder="Contoh: 24"
+                        disabled={readOnly}
                     />
                     <FormInput
                         label="Berat Badan (kg)"
                         value={formData.berat_badan}
                         onChange={(v: string) => onChange('berat_badan', v.replace(/[^\d.]/g, ''))}
                         placeholder="Contoh: 12.5"
+                        disabled={readOnly}
                     />
                     <FormSelect
                         label="Kesimpulan Berat Badan"
                         value={formData.kesimpulan_bb}
                         onChange={(v: string) => onChange('kesimpulan_bb', v)}
                         options={kesimpulanBbOptions}
+                        disabled={readOnly}
                     />
                     <FormInput
                         label="Panjang Badan (cm)"
                         value={formData.panjang_badan}
                         onChange={(v: string) => onChange('panjang_badan', v.replace(/[^\d.]/g, ''))}
                         placeholder="Contoh: 85.5"
+                        disabled={readOnly}
                     />
                     <FormInput
                         label="Lingkar Kepala (cm)"
                         value={formData.lingkar_kepala}
                         onChange={(v: string) => onChange('lingkar_kepala', v.replace(/[^\d.]/g, ''))}
                         placeholder="Contoh: 45"
+                        disabled={readOnly}
                     />
                     <FormInput
                         label="Lingkar Lengan (cm)"
                         value={formData.lingkar_lengan}
                         onChange={(v: string) => onChange('lingkar_lengan', v.replace(/[^\d.]/g, ''))}
                         placeholder="Contoh: 14.5"
+                        disabled={readOnly}
                     />
                 </div>
             </FormCard>
@@ -71,12 +78,14 @@ export function BalitaPemeriksaan({ formData, onChange, onSkriningTbcChange }: B
                     selectedTags={formData.skrining_tbc}
                     options={[...skriningTbcOptions]}
                     onChange={onSkriningTbcChange}
+                    disabled={readOnly}
                 />
                 <div className="mt-6 pt-6 border-t border-gray-100">
                     <YesNoToggle 
                         label="Ada Gejala Sakit?" 
                         value={formData.ada_gejala_sakit} 
-                        onChange={(v: boolean | null) => onChange('ada_gejala_sakit', v)} 
+                        onChange={(v: boolean | null) => onChange('ada_gejala_sakit', v)}
+                        disabled={readOnly}
                     />
                 </div>
             </FormCard>
@@ -93,6 +102,7 @@ export function BalitaPemeriksaan({ formData, onChange, onSkriningTbcChange }: B
                     selectedTags={formData.balita_mendapatkan}
                     options={[...balitaMendapatkanOptions]}
                     onChange={(tags: string[]) => onChange('balita_mendapatkan', tags)}
+                    disabled={readOnly}
                 />
             </FormCard>
 
@@ -108,6 +118,7 @@ export function BalitaPemeriksaan({ formData, onChange, onSkriningTbcChange }: B
                     selectedTags={formData.edukasi_konseling}
                     options={[...edukasiKonselingOptions]}
                     onChange={(tags: string[]) => onChange('edukasi_konseling', tags)}
+                    disabled={readOnly}
                 />
             </FormCard>
         </div>

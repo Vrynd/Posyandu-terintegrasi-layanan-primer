@@ -9,6 +9,7 @@ interface TagSelectorProps {
     options: readonly string[];
     onChange: (tags: string[]) => void;
     required?: boolean;
+    disabled?: boolean;
 }
 
 export function TagSelector({
@@ -16,9 +17,11 @@ export function TagSelector({
     selectedTags,
     options,
     onChange,
-    required = false
+    required = false,
+    disabled = false
 }: TagSelectorProps) {
     const toggleTag = (tag: string) => {
+        if (disabled) return;
         if (selectedTags.includes(tag)) {
             onChange(selectedTags.filter(t => t !== tag));
         } else {
@@ -27,6 +30,7 @@ export function TagSelector({
     };
 
     const removeTag = (tag: string) => {
+        if (disabled) return;
         onChange(selectedTags.filter(t => t !== tag));
     };
 
@@ -51,7 +55,8 @@ export function TagSelector({
                                 <button
                                     type="button"
                                     onClick={() => removeTag(tag)}
-                                    className="w-4 h-4 flex items-center justify-center rounded-full hover:bg-gray-600 transition-colors text-xs"
+                                    disabled={disabled}
+                                    className={`w-4 h-4 flex items-center justify-center rounded-full hover:bg-gray-600 transition-colors text-xs ${disabled ? 'cursor-not-allowed' : ''}`}
                                 >
                                     ×
                                 </button>
@@ -69,10 +74,11 @@ export function TagSelector({
                                 key={option}
                                 type="button"
                                 onClick={() => toggleTag(option)}
+                                disabled={disabled}
                                 className={`px-3 py-1.5 rounded-full border text-sm transition-all ${isSelected
                                         ? 'bg-gray-200 border-gray-400 text-gray-600'
                                         : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400'
-                                    }`}
+                                    } ${disabled ? 'cursor-not-allowed' : ''}`}
                             >
                                 {isSelected && <span className="mr-1">✓</span>}
                                 {option}

@@ -13,6 +13,7 @@ interface Step2PemeriksaanProps {
     onMentalChange: (key: string, value: boolean | null) => void;
     onPumaChange: (key: string, value: boolean | null) => void;
     onAdlChange: (key: string, value: number) => void;
+    readOnly?: boolean;
 }
 
 export function Step2Pemeriksaan({
@@ -22,7 +23,8 @@ export function Step2Pemeriksaan({
     onSkriningTbcChange,
     onMentalChange,
     onPumaChange,
-    onAdlChange
+    onAdlChange,
+    readOnly = false
 }: Step2PemeriksaanProps) {
     const kategori = peserta.kategori;
     const jenisKelamin = peserta.identity?.jenisKelamin || '';
@@ -34,7 +36,8 @@ export function Step2Pemeriksaan({
                 <BumilPemeriksaan 
                     formData={formData} 
                     onChange={onChange} 
-                    onSkriningTbcChange={onSkriningTbcChange} 
+                    onSkriningTbcChange={onSkriningTbcChange}
+                    readOnly={readOnly}
                 />
             );
         case 'balita':
@@ -42,7 +45,8 @@ export function Step2Pemeriksaan({
                 <BalitaPemeriksaan 
                     formData={formData} 
                     onChange={onChange} 
-                    onSkriningTbcChange={onSkriningTbcChange} 
+                    onSkriningTbcChange={onSkriningTbcChange}
+                    readOnly={readOnly}
                 />
             );
         case 'remaja':
@@ -53,6 +57,7 @@ export function Step2Pemeriksaan({
                     onSkriningTbcChange={onSkriningTbcChange}
                     onMentalChange={onMentalChange}
                     isPerempuan={isPerempuan}
+                    readOnly={readOnly}
                 />
             );
         case 'produktif':
@@ -66,6 +71,7 @@ export function Step2Pemeriksaan({
                     onAdlChange={onAdlChange}
                     isLansia={kategori === 'lansia'}
                     isPerempuan={isPerempuan}
+                    readOnly={readOnly}
                 />
             );
         default:

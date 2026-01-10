@@ -27,6 +27,7 @@ interface DewasaPemeriksaanProps {
     onAdlChange: (key: string, value: number) => void;
     isLansia: boolean;
     isPerempuan: boolean;
+    readOnly?: boolean;
 }
 
 export function DewasaPemeriksaan({ 
@@ -36,7 +37,8 @@ export function DewasaPemeriksaan({
     onPumaChange,
     onAdlChange,
     isLansia,
-    isPerempuan 
+    isPerempuan,
+    readOnly = false
 }: DewasaPemeriksaanProps) {
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -52,67 +54,78 @@ export function DewasaPemeriksaan({
                         label="Tinggi Badan (cm)" 
                         value={formData.tinggi_badan} 
                         onChange={(v: string) => onChange('tinggi_badan', v.replace(/[^\d.]/g, ''))} 
-                        placeholder="Contoh: 165" 
+                        placeholder="Contoh: 165"
+                        disabled={readOnly}
                     />
                     <FormInput 
                         label="Berat Badan (kg)" 
                         value={formData.berat_badan} 
                         onChange={(v: string) => onChange('berat_badan', v.replace(/[^\d.]/g, ''))} 
-                        placeholder="Contoh: 55" 
+                        placeholder="Contoh: 55"
+                        disabled={readOnly}
                     />
                     <FormSelect 
                         label="IMT" 
                         value={formData.imt} 
                         onChange={(v: string) => onChange('imt', v)} 
-                        options={imtOptions} 
+                        options={imtOptions}
+                        disabled={readOnly}
                     />
                     <FormInput 
                         label="Lingkar Perut (cm)" 
                         value={formData.lingkar_perut} 
                         onChange={(v: string) => onChange('lingkar_perut', v.replace(/[^\d.]/g, ''))} 
-                        placeholder="Contoh: 85" 
+                        placeholder="Contoh: 85"
+                        disabled={readOnly}
                     />
                     <FormInput 
                         label="Tekanan Darah (mmHg)" 
                         value={formData.tekanan_darah} 
                         onChange={(v: string) => onChange('tekanan_darah', v)} 
-                        placeholder="Contoh: 120/80" 
+                        placeholder="Contoh: 120/80"
+                        disabled={readOnly}
                     />
                     <FormInput 
                         label="Gula Darah (mg/dL)" 
                         value={formData.gula_darah} 
                         onChange={(v: string) => onChange('gula_darah', v.replace(/[^\d.]/g, ''))} 
-                        placeholder="Contoh: 100" 
+                        placeholder="Contoh: 100"
+                        disabled={readOnly}
                     />
                     <FormInput 
                         label="Asam Urat (mg/dL)" 
                         value={formData.asam_urat} 
                         onChange={(v: string) => onChange('asam_urat', v.replace(/[^\d.]/g, ''))} 
-                        placeholder="Contoh: 5.5" 
+                        placeholder="Contoh: 5.5"
+                        disabled={readOnly}
                     />
                     <FormInput 
                         label="Kolesterol (mg/dL)" 
                         value={formData.kolesterol} 
                         onChange={(v: string) => onChange('kolesterol', v.replace(/[^\d.]/g, ''))} 
-                        placeholder="Contoh: 180" 
+                        placeholder="Contoh: 180"
+                        disabled={readOnly}
                     />
                     <FormSelect 
                         label="Tes Mata" 
                         value={formData.tes_mata} 
                         onChange={(v: string) => onChange('tes_mata', v)} 
-                        options={tesMataTelingaOptions} 
+                        options={tesMataTelingaOptions}
+                        disabled={readOnly}
                     />
                     <FormSelect 
                         label="Tes Telinga" 
                         value={formData.tes_telinga} 
                         onChange={(v: string) => onChange('tes_telinga', v)} 
-                        options={tesMataTelingaOptions} 
+                        options={tesMataTelingaOptions}
+                        disabled={readOnly}
                     />
                     <FormSelect
                         label="Status Perkawinan"
                         value={formData.status_perkawinan}
                         onChange={(v: string) => onChange('status_perkawinan', v)}
                         options={statusPerkawinanOptions}
+                        disabled={readOnly}
                     />
                 </div>
             </FormCard>
@@ -128,7 +141,8 @@ export function DewasaPemeriksaan({
                     label="Skrining TBC" 
                     selectedTags={formData.skrining_tbc} 
                     options={[...skriningTbcOptions]} 
-                    onChange={onSkriningTbcChange} 
+                    onChange={onSkriningTbcChange}
+                    disabled={readOnly}
                 />
 
                 {/* PUMA untuk Produktif */}
@@ -136,10 +150,10 @@ export function DewasaPemeriksaan({
                     <div className="mt-6 pt-6 border-t border-gray-100">
                         <h4 className="text-sm font-semibold text-gray-700 mb-4">Skrining PUMA (PPOK)</h4>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <YesNoToggle label="Sering napas pendek?" value={formData.skrining_puma?.napasPendek} onChange={(v: boolean | null) => onPumaChange('napasPendek', v)} />
-                            <YesNoToggle label="Sering berdahak saat tidak flu?" value={formData.skrining_puma?.dahakSaatTidakFlu} onChange={(v: boolean | null) => onPumaChange('dahakSaatTidakFlu', v)} />
-                            <YesNoToggle label="Sering batuk saat tidak flu?" value={formData.skrining_puma?.batukSaatTidakFlu} onChange={(v: boolean | null) => onPumaChange('batukSaatTidakFlu', v)} />
-                            <YesNoToggle label="Sudah tes spirometri?" value={formData.skrining_puma?.tesSpirometri} onChange={(v: boolean | null) => onPumaChange('tesSpirometri', v)} />
+                            <YesNoToggle label="Sering napas pendek?" value={formData.skrining_puma?.napasPendek} onChange={(v: boolean | null) => onPumaChange('napasPendek', v)} disabled={readOnly} />
+                            <YesNoToggle label="Sering berdahak saat tidak flu?" value={formData.skrining_puma?.dahakSaatTidakFlu} onChange={(v: boolean | null) => onPumaChange('dahakSaatTidakFlu', v)} disabled={readOnly} />
+                            <YesNoToggle label="Sering batuk saat tidak flu?" value={formData.skrining_puma?.batukSaatTidakFlu} onChange={(v: boolean | null) => onPumaChange('batukSaatTidakFlu', v)} disabled={readOnly} />
+                            <YesNoToggle label="Sudah tes spirometri?" value={formData.skrining_puma?.tesSpirometri} onChange={(v: boolean | null) => onPumaChange('tesSpirometri', v)} disabled={readOnly} />
                         </div>
                         <div className="mt-4 p-4 bg-rose-50 rounded-xl border border-rose-100">
                             <div className="flex items-center justify-between">
@@ -161,14 +175,14 @@ export function DewasaPemeriksaan({
                     <div className="mt-6 pt-6 border-t border-gray-100">
                         <h4 className="text-sm font-semibold text-gray-700 mb-4">ADL - Indeks Barthel</h4>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <FormSelect label="Pengendalian BAB" value={String(formData.adl?.pengendalianBab ?? '')} onChange={(v) => onAdlChange('pengendalianBab', parseInt(v) || 0)} options={adlPengendalianBabOptions} />
-                            <FormSelect label="Pengendalian BAK" value={String(formData.adl?.pengendalianBak ?? '')} onChange={(v) => onAdlChange('pengendalianBak', parseInt(v) || 0)} options={adlPengendalianBakOptions} />
-                            <FormSelect label="Kebersihan Diri" value={String(formData.adl?.kebersihanDiri ?? '')} onChange={(v) => onAdlChange('kebersihanDiri', parseInt(v) || 0)} options={adlKebersihanDiriOptions} />
-                            <FormSelect label="Penggunaan WC" value={String(formData.adl?.penggunaanWc ?? '')} onChange={(v) => onAdlChange('penggunaanWc', parseInt(v) || 0)} options={adlPenggunaanWcOptions} />
-                            <FormSelect label="Makan & Minum" value={String(formData.adl?.makanMinum ?? '')} onChange={(v) => onAdlChange('makanMinum', parseInt(v) || 0)} options={adlMakanMinumOptions} />
-                            <FormSelect label="Mobilitas" value={String(formData.adl?.mobilitas ?? '')} onChange={(v) => onAdlChange('mobilitas', parseInt(v) || 0)} options={adlMobilitasOptions} />
-                            <FormSelect label="Berjalan Tempat Rata" value={String(formData.adl?.berjalanTempatRata ?? '')} onChange={(v) => onAdlChange('berjalanTempatRata', parseInt(v) || 0)} options={adlBerjalanOptions} />
-                            <FormSelect label="Naik/Turun Tangga" value={String(formData.adl?.naikTurunTangga ?? '')} onChange={(v) => onAdlChange('naikTurunTangga', parseInt(v) || 0)} options={adlNaikTurunTanggaOptions} />
+                            <FormSelect label="Pengendalian BAB" value={String(formData.adl?.pengendalianBab ?? '')} onChange={(v) => onAdlChange('pengendalianBab', parseInt(v) || 0)} options={adlPengendalianBabOptions} disabled={readOnly} />
+                            <FormSelect label="Pengendalian BAK" value={String(formData.adl?.pengendalianBak ?? '')} onChange={(v) => onAdlChange('pengendalianBak', parseInt(v) || 0)} options={adlPengendalianBakOptions} disabled={readOnly} />
+                            <FormSelect label="Kebersihan Diri" value={String(formData.adl?.kebersihanDiri ?? '')} onChange={(v) => onAdlChange('kebersihanDiri', parseInt(v) || 0)} options={adlKebersihanDiriOptions} disabled={readOnly} />
+                            <FormSelect label="Penggunaan WC" value={String(formData.adl?.penggunaanWc ?? '')} onChange={(v) => onAdlChange('penggunaanWc', parseInt(v) || 0)} options={adlPenggunaanWcOptions} disabled={readOnly} />
+                            <FormSelect label="Makan & Minum" value={String(formData.adl?.makanMinum ?? '')} onChange={(v) => onAdlChange('makanMinum', parseInt(v) || 0)} options={adlMakanMinumOptions} disabled={readOnly} />
+                            <FormSelect label="Mobilitas" value={String(formData.adl?.mobilitas ?? '')} onChange={(v) => onAdlChange('mobilitas', parseInt(v) || 0)} options={adlMobilitasOptions} disabled={readOnly} />
+                            <FormSelect label="Berjalan Tempat Rata" value={String(formData.adl?.berjalanTempatRata ?? '')} onChange={(v) => onAdlChange('berjalanTempatRata', parseInt(v) || 0)} options={adlBerjalanOptions} disabled={readOnly} />
+                            <FormSelect label="Naik/Turun Tangga" value={String(formData.adl?.naikTurunTangga ?? '')} onChange={(v) => onAdlChange('naikTurunTangga', parseInt(v) || 0)} options={adlNaikTurunTanggaOptions} disabled={readOnly} />
                         </div>
                         <div className="mt-4 p-4 bg-amber-50 rounded-xl border border-amber-100">
                             <div className="flex items-center justify-between">
@@ -208,15 +222,16 @@ export function DewasaPemeriksaan({
                             onChange('riwayat_diri', tags);
                         }
                     }}
+                    disabled={readOnly}
                 />
 
                 <div className="mt-6 pt-6 border-t border-gray-100">
                     <h4 className="text-sm font-semibold text-gray-700 mb-4">Gaya Hidup</h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <YesNoToggle label="Merokok?" value={formData.merokok} onChange={(v: boolean | null) => onChange('merokok', v)} />
-                        <YesNoToggle label="Konsumsi Gula >4 sdm/hari?" value={formData.konsumsi_gula} onChange={(v: boolean | null) => onChange('konsumsi_gula', v)} />
-                        <YesNoToggle label="Konsumsi Garam >1 sdt/hari?" value={formData.konsumsi_garam} onChange={(v: boolean | null) => onChange('konsumsi_garam', v)} />
-                        <YesNoToggle label="Konsumsi Lemak >5 sdm/hari?" value={formData.konsumsi_lemak} onChange={(v: boolean | null) => onChange('konsumsi_lemak', v)} />
+                        <YesNoToggle label="Merokok?" value={formData.merokok} onChange={(v: boolean | null) => onChange('merokok', v)} disabled={readOnly} />
+                        <YesNoToggle label="Konsumsi Gula >4 sdm/hari?" value={formData.konsumsi_gula} onChange={(v: boolean | null) => onChange('konsumsi_gula', v)} disabled={readOnly} />
+                        <YesNoToggle label="Konsumsi Garam >1 sdt/hari?" value={formData.konsumsi_garam} onChange={(v: boolean | null) => onChange('konsumsi_garam', v)} disabled={readOnly} />
+                        <YesNoToggle label="Konsumsi Lemak >5 sdm/hari?" value={formData.konsumsi_lemak} onChange={(v: boolean | null) => onChange('konsumsi_lemak', v)} disabled={readOnly} />
                     </div>
                 </div>
 
@@ -226,7 +241,8 @@ export function DewasaPemeriksaan({
                             label="Alat Kontrasepsi" 
                             value={formData.alat_kontrasepsi} 
                             onChange={(v) => onChange('alat_kontrasepsi', v)} 
-                            options={[{ value: '', label: 'Pilih...' }, ...alatKontrasepsiOptions]} 
+                            options={[{ value: '', label: 'Pilih...' }, ...alatKontrasepsiOptions]}
+                            disabled={readOnly}
                         />
                     </div>
                 )}
@@ -243,7 +259,8 @@ export function DewasaPemeriksaan({
                     label="Edukasi yang Diberikan" 
                     selectedTags={formData.edukasi} 
                     options={[...edukasiProduktifOptions]} 
-                    onChange={(tags: string[]) => onChange('edukasi', tags)} 
+                    onChange={(tags: string[]) => onChange('edukasi', tags)}
+                    disabled={readOnly}
                 />
             </FormCard>
         </div>
