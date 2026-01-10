@@ -13,6 +13,12 @@ export interface DashboardStats {
 export interface DashboardChartItem {
     label: string;
     total: number;
+    // Per-category breakdown for multi-line chart
+    bumil?: number;
+    balita?: number;
+    remaja?: number;
+    produktif?: number;
+    lansia?: number;
 }
 
 export interface DashboardStatsResponse {
