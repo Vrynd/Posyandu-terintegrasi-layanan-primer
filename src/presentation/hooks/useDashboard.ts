@@ -5,7 +5,7 @@
  */
 
 import { useCallback } from 'react';
-import { useDashboardStats, useDashboardChart, queryClient, queryKeys } from '../../data/queries';
+import { useDashboardStats, useDashboardChart, useDashboardRegistrations, queryClient, queryKeys } from '../../data/queries';
 import type { DashboardStats } from '../../data/models/DashboardApiTypes';
 
 export function useDashboard() {
@@ -22,11 +22,18 @@ export function useDashboard() {
         error: chartError 
     } = useDashboardChart();
 
+    const {
+        data: registrationsData,
+        isLoading: isRegistrationsLoading,
+        error: registrationsError
+    } = useDashboardRegistrations();
+
     // Refresh function for force reload
     const refresh = useCallback(async () => {
         await Promise.all([
             queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.stats() }),
             queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.chart() }),
+            queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.registrationChart() }),
         ]);
     }, []);
 
@@ -40,8 +47,9 @@ export function useDashboard() {
     return {
         stats,
         chartData: chartData || [],
-        isLoading: isStatsLoading || isChartLoading,
-        error: statsError?.message || chartError?.message || null,
+        registrationsChartData: registrationsData || [],
+        isLoading: isStatsLoading || isChartLoading || isRegistrationsLoading,
+        error: statsError?.message || chartError?.message || registrationsError?.message || null,
         refresh
     };
 }

@@ -39,6 +39,7 @@ export const queryKeys = {
         all: ['dashboard'] as const,
         stats: () => [...queryKeys.dashboard.all, 'stats'] as const,
         chart: (year?: number) => [...queryKeys.dashboard.all, 'chart', { year }] as const,
+        registrationChart: (year?: number) => [...queryKeys.dashboard.all, 'registrations-chart', { year }] as const,
     },
 
     // Peserta

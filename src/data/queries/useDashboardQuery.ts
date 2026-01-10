@@ -35,3 +35,17 @@ export function useDashboardChart(year?: number) {
         },
     });
 }
+
+/**
+ * Hook untuk fetch data pendaftaran peserta baru
+ * @param year - Tahun untuk data chart (optional)
+ */
+export function useDashboardRegistrations(year?: number) {
+    return useQuery({
+        queryKey: queryKeys.dashboard.registrationChart(year),
+        queryFn: async () => {
+            const response = await dashboardApiDataSource.getRegistrationChartData(year);
+            return response.data;
+        },
+    });
+}

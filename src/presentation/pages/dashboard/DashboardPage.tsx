@@ -6,6 +6,8 @@
 import { HeroOverview } from '../../components/dashboard/HeroOverview';
 import { QuickActions } from '../../components/dashboard/QuickActions';
 import { VisitChart } from '../../components/dashboard/VisitChart';
+import { ParticipantDistributionChart } from '../../components/dashboard/ParticipantDistributionChart';
+import { NewParticipantChart } from '../../components/dashboard/NewParticipantChart';
 import { SystemFlow } from '../../components/dashboard/SystemFlow';
 import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 
@@ -19,11 +21,21 @@ export function DashboardPage() {
                 <HeroOverview />
             </section>
 
-            {/* Quick Actions + Chart Row */}
+            {/* Main Charts & Quick Actions Row */}
             <section className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
                 <QuickActions />
-                <div className="lg:col-span-2 h-full">
+                <div className="lg:col-span-2">
                     <VisitChart />
+                </div>
+            </section>
+
+            {/* Secondary Stats Row */}
+            <section className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
+                <div className="lg:col-span-2">
+                    <NewParticipantChart />
+                </div>
+                <div className="lg:col-span-1">
+                    <ParticipantDistributionChart />
                 </div>
             </section>
 
@@ -34,4 +46,7 @@ export function DashboardPage() {
         </div>
     );
 }
+
+
+
 

@@ -26,3 +26,9 @@ export interface DashboardChartResponse {
     message: string;
     data: DashboardChartItem[];
 }
+
+export interface DashboardRegistrationResponse {
+    success: boolean;
+    message: string;
+    data: DashboardChartItem[];
+}

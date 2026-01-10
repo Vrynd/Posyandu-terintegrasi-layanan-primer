@@ -7,7 +7,7 @@
 export { queryClient, queryKeys } from '../core/queryClient';
 
 // Dashboard Queries
-export { useDashboardStats, useDashboardChart } from './useDashboardQuery';
+export { useDashboardStats, useDashboardChart, useDashboardRegistrations } from './useDashboardQuery';
 
 export {
     usePesertaList,
