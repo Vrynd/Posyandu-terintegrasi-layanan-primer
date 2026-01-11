@@ -11,7 +11,7 @@ import { pemeriksaanApiDataSource } from '@/data/datasources/PemeriksaanApiDataS
 import { pesertaApiDataSource } from '@/data/datasources/PesertaApiDataSource';
 import { kategoriConfig } from '@/presentation/constants/kategoriConfig';
 import type { ParticipantType } from '@/domain/entities/Pemeriksaan';
-import { usePesertaDetail, useLatestVisit } from '@/data/queries';
+import { usePesertaDetail, useLatestVisit, queryClient, queryKeys } from '@/data/queries';
 
 // Combined form data type
 export interface PemeriksaanFormData {
@@ -734,6 +734,12 @@ export function usePemeriksaanForm(id: string | undefined): UsePemeriksaanFormRe
             if (!kunjunganRes.success) throw new Error(kunjunganRes.message || 'Gagal menyimpan hasil pemeriksaan');
 
             toast.success('Data pemeriksaan berhasil disimpan');
+            
+            // Auto-invalidate related queries to refresh dashboard and history
+            queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all });
+            queryClient.invalidateQueries({ queryKey: queryKeys.peserta.all });
+            queryClient.invalidateQueries({ queryKey: queryKeys.pemeriksaan.all });
+
             navigate('/dashboard/examinations');
 
         } catch (err: any) {

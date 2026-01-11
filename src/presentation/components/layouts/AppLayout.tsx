@@ -7,7 +7,6 @@ import { useState } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import { Stethoscope } from 'lucide-react';
 import { UserDropdown, LogoutConfirmModal, FullPageLoading } from '../common';
-import { SyncLoadingOverlay } from '../common/SyncLoadingOverlay';
 import { useAuth } from '../../hooks/useAuth';
 
 export function AppLayout() {
@@ -40,9 +39,6 @@ export function AppLayout() {
 
     return (
         <div className="min-h-screen bg-slate-100 relative">
-            {/* Sync Loading Overlay */}
-            <SyncLoadingOverlay />
-            
             {/* Logout Loading Overlay */}
             {isLoggingOut && <FullPageLoading message="Keluar dari akun..." />}
 

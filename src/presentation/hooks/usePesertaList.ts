@@ -56,15 +56,22 @@ export function usePesertaList() {
         return (apiData.data || []) as PesertaDisplay[];
     }, [apiData]);
 
-    // Banner logic
+    // Banner & Initial Search logic
     useEffect(() => {
         const success = searchParams.get('success');
         const nama = searchParams.get('nama');
         const nik = searchParams.get('nik');
+        const search = searchParams.get('search');
         
         if (success === '1' && nama && nik) {
             setSuccessData({ nama, nik });
             setSearchParams({}, { replace: true });
+        }
+
+        if (search) {
+            setSearchQuery(search);
+            // Optional: clear param after reading to keep URL clean, 
+            // but usually better to keep it for bookmarking.
         }
     }, [searchParams, setSearchParams]);
 

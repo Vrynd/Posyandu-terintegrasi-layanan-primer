@@ -1,10 +1,11 @@
-import { Heart, Baby, GraduationCap, Briefcase, PersonStanding, Zap, Users, Calendar, CloudSun } from 'lucide-react';
+import { Heart, Baby, GraduationCap, Briefcase, PersonStanding, Calendar, CloudSun, Search, Clock, Moon } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { useDashboard } from '../../hooks/useDashboard';
 import { useState, useEffect } from 'react';
 import { BeatLoader } from 'react-spinners';
-import { SyncStatus } from '../common/SyncStatus';
+import { SearchModal } from './SearchModal';
+import { toast } from 'react-hot-toast';
 
 interface SasaranItem {
     id: string;
@@ -22,6 +23,7 @@ interface SasaranItem {
  */
 export function HeroOverview() {
     const { user } = useAuth();
+    const [isSearchOpen, setIsSearchOpen] = useState(false);
 
     const { stats, isLoading: isStatsLoading } = useDashboard();
 
@@ -31,15 +33,27 @@ export function HeroOverview() {
 
     const userRole = user?.role === 'admin' ? 'Admin' : 'Kader';
 
-    // Weather state
+    // Weather & Time state
     const [weather, setWeather] = useState<{ temp: number; desc: string } | null>(null);
+    const [currentTime, setCurrentTime] = useState(new Date());
 
-    // Format current date
+    // Update time every minute
+    useEffect(() => {
+        const timer = setInterval(() => {
+            setCurrentTime(new Date());
+        }, 60000);
+        return () => clearInterval(timer);
+    }, []);
+
+    // Format current date and time
     const formatDate = () => {
-        const now = new Date();
         const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
         const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
-        return `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
+        return `${days[currentTime.getDay()]}, ${currentTime.getDate()} ${months[currentTime.getMonth()]} ${currentTime.getFullYear()}`;
+    };
+
+    const formatTime = () => {
+        return currentTime.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }).replace('.', ':');
     };
 
     // Fetch weather for Pati, Jawa Tengah
@@ -88,6 +102,19 @@ export function HeroOverview() {
         };
 
         fetchWeather();
+    }, []);
+
+    // Global Keyboard Shortcut (Cmd+K / Ctrl+K)
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+                e.preventDefault();
+                setIsSearchOpen(true);
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
     }, []);
 
     const sasaran: SasaranItem[] = [
@@ -148,10 +175,10 @@ export function HeroOverview() {
                     <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-purple-500/20 rounded-full blur-3xl" />
                 </div>
 
-                {/* Main Content - Different layout for mobile vs desktop */}
-                <div className="relative flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                    {/* Left - Welcome */}
-                    <div>
+                {/* Main Content - Welcome & Compact Search */}
+                <div className="relative flex items-center justify-between">
+                    {/* Welcome Message */}
+                    <div className="shrink-0 flex flex-col">
                         <h1 className="text-xl sm:text-2xl font-bold text-white mb-0.5 sm:mb-1">
                             Selamat Datang, {firstName}!
                         </h1>
@@ -160,68 +187,56 @@ export function HeroOverview() {
                         </p>
                     </div>
 
-                    {/* Right - Stats Summary (Desktop: inline, Mobile: grid) */}
-                    <div className="grid grid-cols-2 lg:flex lg:items-center gap-2 sm:gap-3">
-                        {/* Total Peserta */}
-                        <div className="flex items-center gap-2.5 lg:gap-3 bg-white/5 backdrop-blur-sm rounded-xl px-3 lg:px-4 py-2.5 lg:py-3 border border-white/10">
-                            <div className="w-9 h-9 lg:w-10 lg:h-10 rounded-lg lg:rounded-xl bg-linear-to-br from-blue-500 to-indigo-600 flex items-center justify-center shrink-0">
-                                <Users className="w-4 h-4 lg:w-5 lg:h-5 text-white" />
-                            </div>
-                            <div className="min-w-0">
-                                {isStatsLoading ? (
-                                    <BeatLoader color="#ffffff" size={6} margin={2} />
-                                ) : (
-                                    <>
-                                        <p className="text-lg sm:text-xl lg:text-2xl font-bold text-white leading-none">
-                                            {stats?.total_peserta || 0}
-                                        </p>
-                                        <p className="text-xs lg:text-xs text-slate-400">Total Peserta</p>
-                                    </>
-                                )}
-                            </div>
-                        </div>
+                    {/* Actions: Theme Toggle & Search */}
+                    <div className="flex items-center gap-2">
+                        {/* Theme Toggle - Placeholder behavior */}
+                        <button 
+                            onClick={() => toast('Fitur Mode Gelap akan segera hadir! 🌙', { icon: '✨' })}
+                            className="p-1.5 sm:p-2 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl transition-all group"
+                            title="Mode Gelap (Segera Hadir)"
+                        >
+                            <Moon className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-300 group-hover:-rotate-12 transition-transform" />
+                        </button>
 
-                        {/* Kunjungan Hari Ini */}
-                        <div className="flex items-center gap-2.5 lg:gap-3 bg-white/5 backdrop-blur-sm rounded-xl px-3 lg:px-4 py-2.5 lg:py-3 border border-white/10">
-                            <div className="w-9 h-9 lg:w-10 lg:h-10 rounded-lg lg:rounded-xl bg-linear-to-br from-emerald-500 to-teal-600 flex items-center justify-center shrink-0">
-                                <Zap className="w-4 h-4 lg:w-5 lg:h-5 text-white" />
-                            </div>
-                            <div className="min-w-0">
-                                {isStatsLoading ? (
-                                    <BeatLoader color="#ffffff" size={6} margin={2} />
-                                ) : (
-                                    <>
-                                        <p className="text-lg sm:text-xl lg:text-2xl font-bold text-white leading-none">
-                                            {stats?.kunjungan_hari_ini || 0}
-                                        </p>
-                                        <p className="text-xs lg:text-xs text-slate-400">Hari ini</p>
-                                    </>
-                                )}
-                            </div>
-                        </div>
+                        {/* Search Trigger Icon Button */}
+                        <button 
+                            onClick={() => setIsSearchOpen(true)}
+                            className="p-1.5 sm:p-2 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl transition-all group"
+                            title="Cari Peserta (Ctrl+K)"
+                        >
+                            <Search className="w-4 h-4 sm:w-5 sm:h-5 text-white group-hover:scale-110 transition-transform" />
+                        </button>
                     </div>
                 </div>
 
-                {/* Date & Weather Info + Sync Button */}
-                <div className="relative mt-4 pt-4 border-t border-white/10">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2 lg:gap-4 text-slate-400">
-                            <Calendar className="w-3.5 h-3.5 lg:w-4 lg:h-4 shrink-0" />
-                            <span className="text-xs sm:text-sm truncate">
+                {/* Date, Time & Weather Info */}
+                <div className="relative mt-4 pt-4 border-t border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="flex flex-wrap items-center gap-3 text-slate-400">
+                        {/* Date Container */}
+                        <div className="flex items-center gap-2 px-3 py-1.5 bg-white/5 border border-white/10 rounded-xl backdrop-blur-sm">
+                            <Calendar className="w-3.5 h-3.5 lg:w-4 lg:h-4 text-blue-400 shrink-0" />
+                            <span className="text-xs sm:text-sm font-medium text-slate-200 truncate">
                                 {formatDate()}
                             </span>
-                            {weather && (
-                                <div className="flex items-center gap-1.5 lg:gap-2 px-2 lg:px-3 py-1 bg-white/5 rounded-lg">
-                                    <CloudSun className="w-3.5 h-3.5 lg:w-4 lg:h-4 text-amber-400 shrink-0" />
-                                    <span className="text-xs sm:text-sm text-slate-300">
-                                        {weather.temp}°C <span className="hidden sm:inline">• {weather.desc}</span>
-                                    </span>
-                                </div>
-                            )}
                         </div>
                         
-                        {/* Sync Button - Glass style */}
-                        <SyncStatus variant="glass" />
+                        {/* Time Container */}
+                        <div className="flex items-center gap-2 px-3 py-1.5 bg-white/5 border border-white/10 rounded-xl backdrop-blur-sm">
+                            <Clock className="w-3.5 h-3.5 lg:w-4 lg:h-4 text-emerald-400 shrink-0" />
+                            <span className="text-xs sm:text-sm font-medium text-slate-200">
+                                {formatTime()}
+                            </span>
+                        </div>
+
+                        {/* Weather Container */}
+                        {weather && (
+                            <div className="flex items-center gap-2 px-3 py-1.5 bg-white/5 border border-white/10 rounded-xl backdrop-blur-sm">
+                                <CloudSun className="w-3.5 h-3.5 lg:w-4 lg:h-4 text-amber-400 shrink-0" />
+                                <span className="text-xs sm:text-sm font-medium text-slate-200">
+                                    {weather.temp}°C <span className="hidden sm:inline text-slate-500">• {weather.desc}</span>
+                                </span>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
@@ -273,6 +288,12 @@ export function HeroOverview() {
                     );
                 })}
             </div>
+
+            {/* Search Modal (Command Palette) */}
+            <SearchModal 
+                isOpen={isSearchOpen} 
+                onClose={() => setIsSearchOpen(false)} 
+            />
         </div>
     );
 }

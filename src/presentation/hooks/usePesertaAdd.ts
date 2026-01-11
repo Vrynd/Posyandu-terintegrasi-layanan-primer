@@ -9,6 +9,7 @@ import toast from "react-hot-toast";
 import type { KategoriKey } from "@/domain/entities/Peserta";
 import type { CreatePesertaRequest } from "@/data/models/PesertaApiTypes";
 import { pesertaApiDataSource } from "@/data/datasources/PesertaApiDataSource";
+import { queryClient, queryKeys } from "@/data/queries";
 
 export interface FormData {
   // Base fields
@@ -215,6 +216,10 @@ export function usePesertaAdd(): UsePesertaAddReturn {
       const response = await pesertaApiDataSource.createPeserta(request);
       
       if (response.success) {
+        // Auto-invalidate related queries to refresh dashboard and list
+        queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all });
+        queryClient.invalidateQueries({ queryKey: queryKeys.peserta.all });
+
         toast.success(`Berhasil! ${form.nama} telah terdaftar sebagai peserta.`);
         // Direct redirect to participant list
         navigate(`/dashboard/participants?success=1&nama=${encodeURIComponent(form.nama)}&nik=${encodeURIComponent(form.nik)}`, { replace: true });
