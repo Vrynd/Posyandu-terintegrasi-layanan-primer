@@ -8,7 +8,7 @@
  */
 
 import { useState } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
 import { Home, ChevronRight, User, AlertTriangle, RefreshCw, Calendar, MapPin, Stethoscope, ArrowRight } from 'lucide-react';
 import { usePesertaDetail } from '../../hooks/usePesertaDetail';
 import { useLatestVisit } from '@/data/queries';
@@ -23,8 +23,12 @@ import { FullPageLoading } from '../../components/common';
 import { BeatLoader } from 'react-spinners';
 
 export function PesertaDetailPage() {
-    const { id } = useParams();
+    const { category, id } = useParams();
     const navigate = useNavigate();
+    const location = useLocation();
+    
+    // Get search state from navigation if available
+    const searchPath = location.state?.search ? `/dashboard/participants?${location.state.search}` : '/dashboard/participants';
     const {
         peserta,
         config,
@@ -43,7 +47,6 @@ export function PesertaDetailPage() {
         openDeleteConfirm,
         closeDeleteConfirm,
         handleDelete,
-        handleBack,
     } = usePesertaDetail(id);
 
     // Fetch last visit data for display
@@ -55,7 +58,7 @@ export function PesertaDetailPage() {
 
     const handleNavigateToPemeriksaan = (skipToStep2: boolean = false) => {
         setIsNavigating(true);
-        const url = `/dashboard/examinations/${config?.urlSlug}/${id}${skipToStep2 ? '?step=2' : ''}`;
+        const url = `/dashboard/examinations/${category}/${id}${skipToStep2 ? '?step=2' : ''}`;
         // Small delay to show loading overlay
         setTimeout(() => navigate(url), 300);
     };
@@ -99,7 +102,7 @@ export function PesertaDetailPage() {
                         Coba Lagi
                     </button>
                     <button
-                        onClick={handleBack}
+                        onClick={() => navigate(searchPath)}
                         className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
                     >
                         Kembali
@@ -117,7 +120,7 @@ export function PesertaDetailPage() {
                 <h2 className="text-xl font-bold text-gray-900 mb-2">Peserta Tidak Ditemukan</h2>
                 <p className="text-gray-500 mb-6">Data peserta dengan ID {id} tidak ditemukan.</p>
                 <button
-                    onClick={handleBack}
+                    onClick={() => navigate(searchPath)}
                     className="px-6 py-2.5 bg-gray-900 text-white rounded-xl font-medium hover:bg-gray-800 transition-colors"
                 >
                     Kembali ke Daftar
@@ -134,13 +137,13 @@ export function PesertaDetailPage() {
                     <h1 className="text-2xl font-bold text-gray-900">Detail Peserta</h1>
                     <p className="text-gray-500 text-sm mt-1">Informasi lengkap peserta posyandu</p>
                 </div>
-                <nav className="flex items-center gap-2 text-sm">
+                <nav className="hidden sm:flex items-center gap-2 text-sm">
                     <Link to="/dashboard" className="flex items-center gap-1 text-gray-500 hover:text-gray-700 transition-colors">
                         <Home className="w-4 h-4" />
                         <span>Dashboard</span>
                     </Link>
                     <ChevronRight className="w-4 h-4 text-gray-400" />
-                    <Link to="/dashboard/participants" className="text-gray-500 hover:text-gray-700 transition-colors">
+                    <Link to={searchPath} className="text-gray-500 hover:text-gray-700 transition-colors">
                         Daftar Peserta
                     </Link>
                     <ChevronRight className="w-4 h-4 text-gray-400" />
@@ -176,12 +179,12 @@ export function PesertaDetailPage() {
                             <BeatLoader color="#3B82F6" size={8} margin={2} />
                         </div>
                     ) : lastVisit ? (
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-start gap-8">
+                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                            <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-start gap-y-4 gap-x-6 sm:gap-8">
                                 {/* Tanggal */}
                                 <div>
-                                    <p className="text-[11px] font-medium text-gray-400 uppercase tracking-wide mb-1">Tanggal</p>
-                                    <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                                    <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Tanggal</p>
+                                    <div className="flex items-center gap-2 font-medium text-gray-900">
                                         <Calendar className="w-4 h-4 text-gray-400" />
                                         <span>{new Date(lastVisit.tanggal_kunjungan).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
                                     </div>
@@ -193,8 +196,8 @@ export function PesertaDetailPage() {
                                     if (hasTime) {
                                         return (
                                             <div>
-                                                <p className="text-[11px] font-medium text-gray-400 uppercase tracking-wide mb-1">Waktu</p>
-                                                <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                                                <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Waktu</p>
+                                                <div className="flex items-center gap-2 font-medium text-gray-900">
                                                     <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                         <circle cx="12" cy="12" r="10" strokeWidth="2" />
                                                         <path strokeWidth="2" strokeLinecap="round" d="M12 6v6l4 2" />
@@ -208,8 +211,8 @@ export function PesertaDetailPage() {
                                 })()}
                                 {/* Lokasi */}
                                 <div>
-                                    <p className="text-[11px] font-medium text-gray-400 uppercase tracking-wide mb-1">Lokasi</p>
-                                    <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                                    <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Lokasi</p>
+                                    <div className="flex items-center gap-2 font-medium text-gray-900">
                                         <MapPin className="w-4 h-4 text-gray-400" />
                                         <span>{lastVisit.lokasi === 'posyandu' ? 'Posyandu' : 'Kunjungan Rumah'}</span>
                                     </div>
@@ -217,18 +220,18 @@ export function PesertaDetailPage() {
                             </div>
                             <button
                                 onClick={() => handleNavigateToPemeriksaan(true)}
-                                className="inline-flex items-center gap-2 px-4 py-2 bg-linear-to-r from-slate-800 to-slate-900 text-white text-sm font-medium rounded-lg hover:from-slate-700 hover:to-slate-800 transition-all"
+                                className="w-full md:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 sm:py-2 bg-linear-to-r from-slate-800 to-slate-900 text-white text-sm font-medium rounded-lg hover:from-slate-700 hover:to-slate-800 transition-all shrink-0"
                             >
                                 <span>Lakukan Pemeriksaan</span>
                                 <ArrowRight className="w-4 h-4" />
                             </button>
                         </div>
                     ) : (
-                        <div className="flex items-center justify-between">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                             <p className="text-sm text-gray-500">Belum ada data pemeriksaan untuk peserta ini.</p>
                             <button
                                 onClick={() => handleNavigateToPemeriksaan(false)}
-                                className="inline-flex items-center gap-2 px-4 py-2 bg-linear-to-r from-slate-800 to-slate-900 text-white text-sm font-medium rounded-lg hover:from-slate-700 hover:to-slate-800 transition-all"
+                                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 sm:py-2 bg-linear-to-r from-slate-800 to-slate-900 text-white text-sm font-medium rounded-lg hover:from-slate-700 hover:to-slate-800 transition-all"
                             >
                                 <span>Pemeriksaan Pertama</span>
                                 <ArrowRight className="w-4 h-4" />

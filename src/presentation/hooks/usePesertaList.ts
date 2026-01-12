@@ -10,6 +10,7 @@ import { calculateAge, type KategoriKey } from '../../domain/entities/Peserta';
 import { kategoriConfig } from '../constants/kategoriConfig';
 import type { PesertaListItem } from '../../data/models/PesertaApiTypes';
 import { usePesertaList as usePesertaListQuery, usePrefetchPeserta, queryClient, queryKeys } from '../../data/queries';
+import { useDebounce } from './useDebounce';
 
 const ITEMS_PER_PAGE = 5;
 
@@ -38,14 +39,24 @@ export function usePesertaList() {
     const navigate = useNavigate();
     const [searchParams, setSearchParams] = useSearchParams();
     
-    // State for filtering/sorting (client-side)
-    const [searchQuery, setSearchQuery] = useState('');
-    const [selectedKategori, setSelectedKategori] = useState<KategoriKey | null>(null);
-    const [selectedSort, setSelectedSort] = useState<SortType>('terbaru');
-    const [selectedGender, setSelectedGender] = useState<GenderFilter>('all');
-    const [selectedAgeRange, setSelectedAgeRange] = useState<AgeRange>({ min: null, max: null });
-    const [currentPage, setCurrentPage] = useState(1);
+    // State for filtering/sorting
+    const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
+    const [selectedKategori, setSelectedKategori] = useState<KategoriKey | null>(searchParams.get('category') as KategoriKey || null);
+    const [selectedSort, setSelectedSort] = useState<SortType>(searchParams.get('sort') as SortType || 'terbaru');
+    const [selectedGender, setSelectedGender] = useState<GenderFilter>(searchParams.get('gender') as GenderFilter || 'all');
+    
+    const initialMinAge = searchParams.get('minAge');
+    const initialMaxAge = searchParams.get('maxAge');
+    const [selectedAgeRange, setSelectedAgeRange] = useState<AgeRange>({ 
+        min: initialMinAge ? parseInt(initialMinAge) : null, 
+        max: initialMaxAge ? parseInt(initialMaxAge) : null 
+    });
+    
+    const [currentPage, setCurrentPage] = useState(parseInt(searchParams.get('page') || '1'));
     const [successData, setSuccessData] = useState<{ nama: string; nik: string } | null>(null);
+
+    // Debounce search query for URL synchronization
+    const debouncedSearchQuery = useDebounce(searchQuery, 500);
 
     // Use React Query for fetching peserta list
     const { data: apiData, isLoading, error: queryError } = usePesertaListQuery({ limit: 100 });
@@ -56,24 +67,45 @@ export function usePesertaList() {
         return (apiData.data || []) as PesertaDisplay[];
     }, [apiData]);
 
-    // Banner & Initial Search logic
+    // Sync states to URL
+    useEffect(() => {
+        const params = new URLSearchParams();
+        
+        if (debouncedSearchQuery) params.set('q', debouncedSearchQuery);
+        if (selectedKategori) params.set('category', selectedKategori);
+        if (selectedSort !== 'terbaru') params.set('sort', selectedSort);
+        if (selectedGender !== 'all') params.set('gender', selectedGender);
+        if (selectedAgeRange.min !== null) params.set('minAge', selectedAgeRange.min.toString());
+        if (selectedAgeRange.max !== null) params.set('maxAge', selectedAgeRange.max.toString());
+        if (currentPage > 1) params.set('page', currentPage.toString());
+
+        // Preserve success data if any (usually from redirect)
+        const success = searchParams.get('success');
+        const nama = searchParams.get('nama');
+        const nik = searchParams.get('nik');
+        if (success) params.set('success', success);
+        if (nama) params.set('nama', nama);
+        if (nik) params.set('nik', nik);
+
+        setSearchParams(params, { replace: true });
+    }, [debouncedSearchQuery, selectedKategori, selectedSort, selectedGender, selectedAgeRange, currentPage, setSearchParams]);
+
+    // Banner logic (one-time read and clear)
     useEffect(() => {
         const success = searchParams.get('success');
         const nama = searchParams.get('nama');
         const nik = searchParams.get('nik');
-        const search = searchParams.get('search');
         
         if (success === '1' && nama && nik) {
             setSuccessData({ nama, nik });
-            setSearchParams({}, { replace: true });
+            // Remove success params from URL after reading
+            const newParams = new URLSearchParams(searchParams);
+            newParams.delete('success');
+            newParams.delete('nama');
+            newParams.delete('nik');
+            setSearchParams(newParams, { replace: true });
         }
-
-        if (search) {
-            setSearchQuery(search);
-            // Optional: clear param after reading to keep URL clean, 
-            // but usually better to keep it for bookmarking.
-        }
-    }, [searchParams, setSearchParams]);
+    }, []); // Only on mount
 
     // Filter and Sort peserta (client-side)
     const filteredPeserta = useMemo(() => {
@@ -162,9 +194,10 @@ export function usePesertaList() {
         setCurrentPage(1);
     }, []);
 
-    const handleNavigateToDetail = useCallback((id: string | number) => {
-        navigate(`/dashboard/participants/${id}`);
-    }, [navigate]);
+    const handleNavigateToDetail = useCallback((id: string | number, category: KategoriKey) => {
+        const slug = kategoriConfig[category].urlSlug;
+        navigate(`/dashboard/participants/${slug}/${id}`, { state: { search: searchParams.toString() } });
+    }, [navigate, searchParams]);
 
     const handleAddPeserta = useCallback(() => {
         navigate('/dashboard/participants/register');

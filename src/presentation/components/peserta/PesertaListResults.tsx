@@ -15,7 +15,7 @@ interface PesertaListResultsProps {
     onPrevPage: () => void;
     onNextPage: () => void;
     onGoToPage: (page: number) => void;
-    onNavigateToDetail: (id: string | number) => void;
+    onNavigateToDetail: (id: string | number, category: any) => void;
     onHoverPeserta?: (id: number) => void; // Prefetch on hover
     calculateAge: (birthDate: string) => number;
 }
@@ -80,7 +80,7 @@ export function PesertaListResults({
                                 peserta={peserta}
                                 config={kategoriConfig[peserta.kategori]}
                                 age={calculateAge(peserta.tanggal_lahir)}
-                                onClick={() => onNavigateToDetail(peserta.id)}
+                                onClick={() => onNavigateToDetail(peserta.id, peserta.kategori)}
                                 onMouseEnter={() => onHoverPeserta?.(peserta.id)}
                             />
                         ))}

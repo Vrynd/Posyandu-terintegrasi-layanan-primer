@@ -140,7 +140,7 @@ export const router = createBrowserRouter([
                         element: <PesertaAddPage />,
                     },
                     {
-                        path: '/dashboard/participants/:id',
+                        path: '/dashboard/participants/:category/:id',
                         element: <PesertaDetailPage />,
                     },
 
