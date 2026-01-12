@@ -9,6 +9,7 @@ interface FormSelectProps {
     options: { value: string; label: string }[] | readonly { value: string; label: string }[];
     required?: boolean;
     disabled?: boolean;
+    error?: string;
 }
 
 export function FormSelect({
@@ -17,11 +18,12 @@ export function FormSelect({
     onChange,
     options,
     required = false,
-    disabled = false
+    disabled = false,
+    error
 }: FormSelectProps) {
     return (
         <div className="relative">
-            <label className="block text-xs font-medium text-gray-600 mb-1">
+            <label className="block text-[13px] font-normal tracking-wide mb-2">
                 {label} {required && <span className="text-red-500">*</span>}
             </label>
             <div className="relative">
@@ -29,7 +31,11 @@ export function FormSelect({
                     value={value}
                     onChange={(e) => onChange(e.target.value)}
                     disabled={disabled}
-                    className={`w-full px-3 py-2 text-sm border border-gray-200 rounded-lg bg-white focus:border-blue-400 focus:ring-2 focus:ring-blue-100 outline-none transition-all appearance-none cursor-pointer ${disabled ? 'bg-gray-50 text-gray-500 cursor-not-allowed' : ''}`}
+                    className={`w-full px-3 py-2 text-sm text-gray-600 border rounded-lg bg-white focus:ring-2 outline-none transition-all appearance-none cursor-pointer ${
+                        error 
+                            ? 'border-red-400 focus:border-red-400 focus:ring-red-100' 
+                            : 'border-gray-200 focus:border-blue-400 focus:ring-blue-100'
+                    } ${disabled ? 'bg-gray-50 text-gray-500 cursor-not-allowed' : ''}`}
                 >
                     <option value="">Pilih</option>
                     {options.map(opt => (
@@ -42,6 +48,9 @@ export function FormSelect({
                     </svg>
                 </div>
             </div>
+            {error && (
+                <p className="mt-1 text-xs text-red-500 font-normal">{error}</p>
+            )}
         </div>
     );
 }

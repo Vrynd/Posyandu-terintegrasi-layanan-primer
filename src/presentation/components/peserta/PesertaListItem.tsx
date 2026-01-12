@@ -16,7 +16,7 @@ export function PesertaListItem({ peserta, config, age, onClick, onMouseEnter }:
         <button
             onClick={onClick}
             onMouseEnter={onMouseEnter}
-            className="w-full px-4 py-4 border border-gray-100 rounded-xl hover:border-gray-200 hover:bg-gray-50 transition-all duration-200 text-left group flex items-center gap-4"
+            className="w-full px-4 cursor-pointer py-4 border border-gray-100 rounded-xl hover:border-gray-200 hover:bg-gray-50 transition-all duration-200 text-left group flex items-center gap-4"
         >
             {/* Avatar */}
             <div className={`w-12 h-12 ${config.bg} rounded-xl flex items-center justify-center shrink-0`}>

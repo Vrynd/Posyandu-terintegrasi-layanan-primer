@@ -42,7 +42,7 @@ export function CategoryStep({ selectedKategori, onKategoriChange }: CategorySte
                 key={key}
                 type="button"
                 onClick={() => onKategoriChange(isSelected ? null : key)}
-                className={`group relative flex flex-col items-start p-5 rounded-2xl border-2 transition-all duration-300 bg-white ${
+                className={`group relative flex cursor-pointer flex-col items-start p-5 rounded-2xl border-2 transition-all duration-300 bg-white ${
                   isSelected
                     ? "border-blue-600 bg-blue-50/40"
                     : "border-gray-200 hover:border-gray-300"

@@ -118,7 +118,7 @@ export function PesertaFilterModal({
                     </div>
                     <button
                         onClick={onClose}
-                        className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                        className="p-2 cursor-pointer rounded-lg hover:bg-gray-100 transition-colors"
                     >
                         <X className="w-5 h-5 text-gray-400" />
                     </button>
@@ -136,7 +136,7 @@ export function PesertaFilterModal({
                                     <button
                                         key={option.value}
                                         onClick={() => setTempGender(option.value)}
-                                        className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 transition-all ${
+                                        className={`flex-1 cursor-pointer flex items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 transition-all ${
                                             isSelected
                                                 ? 'border-slate-800 bg-slate-50'
                                                 : 'border-gray-200 hover:border-gray-300 bg-white'
@@ -170,7 +170,7 @@ export function PesertaFilterModal({
                                     <button
                                         key={preset.label}
                                         onClick={() => handleAgePreset(preset.min, preset.max)}
-                                        className={`py-2.5 px-3 rounded-xl border-2 text-center transition-all ${
+                                        className={`py-2.5 px-3 cursor-pointer rounded-xl border-2 text-center transition-all ${
                                             isSelected
                                                 ? 'border-slate-800 bg-slate-800 text-white'
                                                 : 'border-gray-200 hover:border-gray-300 bg-white text-gray-700'
@@ -195,14 +195,14 @@ export function PesertaFilterModal({
                     <div className="flex items-center gap-3">
                         <button
                             onClick={handleReset}
-                            className="flex-1 py-3 px-4 bg-white border border-gray-300 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 transition-all"
+                            className="flex-1 cursor-pointer py-3 px-4 bg-white border border-gray-300 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 transition-all"
                         >
                             Reset
                         </button>
                         <button
                             onClick={handleApply}
                             disabled={!hasChanges}
-                            className={`flex-1 py-3 px-4 font-semibold rounded-xl transition-all ${
+                            className={`flex-1 cursor-pointer py-3 px-4 font-semibold rounded-xl transition-all ${
                                 hasChanges
                                     ? 'bg-linear-to-r from-slate-800 to-slate-900 hover:from-slate-700 hover:to-slate-800 text-white shadow-lg shadow-slate-300'
                                     : 'bg-gray-200 text-gray-400 cursor-not-allowed'

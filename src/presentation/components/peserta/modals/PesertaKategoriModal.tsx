@@ -87,7 +87,7 @@ export function PesertaKategoriModal({
                     </div>
                     <button
                         onClick={onClose}
-                        className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                        className="p-2 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors"
                     >
                         <X className="w-5 h-5 text-gray-400" />
                     </button>
@@ -98,7 +98,7 @@ export function PesertaKategoriModal({
                     {/* Semua Kategori Option */}
                     <button
                         onClick={() => setTempKategori(null)}
-                        className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border-2 transition-all mb-4 ${
+                        className={`w-full cursor-pointer flex items-center justify-between px-4 py-3 rounded-xl border-2 transition-all mb-4 ${
                             tempKategori === null
                                 ? 'border-slate-800 bg-slate-50'
                                 : 'border-gray-200 hover:border-gray-300 bg-white'
@@ -131,7 +131,7 @@ export function PesertaKategoriModal({
                                 <button
                                     key={key}
                                     onClick={() => setTempKategori(key)}
-                                    className={`flex items-center gap-2.5 px-3 py-3 rounded-xl border-2 transition-all text-left ${
+                                    className={`flex cursor-pointer items-center gap-2.5 px-3 py-3 rounded-xl border-2 transition-all text-left ${
                                         isSelected
                                             ? 'border-slate-800 bg-slate-50'
                                             : 'border-gray-200 hover:border-gray-300 bg-white'
@@ -165,14 +165,14 @@ export function PesertaKategoriModal({
                     <div className="flex items-center gap-3">
                         <button
                             onClick={handleReset}
-                            className="flex-1 py-3 px-4 bg-white border border-gray-300 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 transition-all"
+                            className="flex-1 cursor-pointer py-3 px-4 bg-white border border-gray-300 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 transition-all"
                         >
                             Reset
                         </button>
                         <button
                             onClick={handleApply}
                             disabled={!hasChanges}
-                            className={`flex-1 py-3 px-4 font-semibold rounded-xl transition-all ${
+                            className={`flex-1 cursor-pointer py-3 px-4 font-semibold rounded-xl transition-all ${
                                 hasChanges
                                     ? 'bg-linear-to-r from-slate-800 to-slate-900 hover:from-slate-700 hover:to-slate-800 text-white shadow-lg shadow-slate-300'
                                     : 'bg-gray-200 text-gray-400 cursor-not-allowed'

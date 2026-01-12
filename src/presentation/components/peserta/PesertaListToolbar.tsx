@@ -78,7 +78,7 @@ export function PesertaListToolbar({
                             {searchQuery && (
                                 <button
                                     onClick={() => onSearchChange('')}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-100 rounded-full text-gray-400 hover:text-gray-600 transition-colors"
+                                    className="absolute  right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-100 rounded-full text-gray-400 hover:text-gray-600 transition-colors"
                                 >
                                     <X className="w-4 h-4" />
                                 </button>
@@ -86,7 +86,7 @@ export function PesertaListToolbar({
                         </div>
                         <button
                             onClick={onAddPeserta}
-                            className="px-6 py-2 bg-linear-to-r from-slate-800 to-slate-900 hover:from-slate-700 hover:to-slate-800 text-white text-sm font-medium rounded-xl flex items-center gap-2 transition-colors whitespace-nowrap"
+                            className="px-6 py-2 cursor-pointer bg-linear-to-r from-slate-800 to-slate-900 hover:from-slate-700 hover:to-slate-800 text-white text-sm font-medium rounded-xl flex items-center gap-2 transition-colors whitespace-nowrap"
                         >
                             <Plus className="w-5 h-5" />
                             <span className="hidden sm:inline">Peserta Baru</span>
@@ -98,7 +98,7 @@ export function PesertaListToolbar({
                         {/* Category Filter Button */}
                         <button
                             onClick={() => setIsKategoriOpen(true)}
-                            className="flex-1 flex items-center justify-between px-4 py-2.5 border border-gray-200 rounded-xl bg-white text-sm font-medium text-gray-700 hover:border-gray-300 transition-all"
+                            className="flex-1 cursor-pointer flex items-center justify-between px-4 py-2.5 border border-gray-200 rounded-xl bg-white text-sm font-medium text-gray-700 hover:border-gray-300 transition-all"
                         >
                             <div className="flex items-center gap-2">
                                 <Filter className="w-4 h-4 text-gray-400" />
@@ -115,7 +115,7 @@ export function PesertaListToolbar({
                         {/* Sort Button */}
                         <button
                             onClick={() => setIsSortOpen(true)}
-                            className="flex-1 flex items-center justify-between px-4 py-2.5 border border-gray-200 rounded-xl bg-white text-sm font-medium text-gray-700 hover:border-gray-300 transition-all"
+                            className="flex-1 cursor-pointer flex items-center justify-between px-4 py-2.5 border border-gray-200 rounded-xl bg-white text-sm font-medium text-gray-700 hover:border-gray-300 transition-all"
                         >
                             <div className="flex items-center gap-2">
                                 <ArrowUpDown className="w-4 h-4 text-gray-400" />
@@ -127,7 +127,7 @@ export function PesertaListToolbar({
                         {/* Advanced Filter Button */}
                         <button
                             onClick={() => setIsFilterOpen(true)}
-                            className={`flex-1 flex items-center justify-between px-4 py-2.5 border rounded-xl text-sm font-medium transition-all ${
+                            className={`flex-1 cursor-pointer flex items-center justify-between px-4 py-2.5 border rounded-xl text-sm font-medium transition-all ${
                                 filterCount > 0
                                     ? 'border-slate-800 bg-slate-50 text-slate-800'
                                     : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'

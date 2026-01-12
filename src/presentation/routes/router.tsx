@@ -136,7 +136,7 @@ export const router = createBrowserRouter([
                         element: <PesertaPage />,
                     },
                     {
-                        path: '/dashboard/participants/register',
+                        path: '/dashboard/participants/register/:category?',
                         element: <PesertaAddPage />,
                     },
                     {

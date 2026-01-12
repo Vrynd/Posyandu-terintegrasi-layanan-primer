@@ -44,7 +44,7 @@ export function PesertaListResults({
                         <Users className="w-5 h-5 text-gray-400" />
                         <span className="font-semibold text-gray-900">Daftar Peserta</span>
                     </div>
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-gray-500 cursor-pointer">
                         Menampilkan{' '}
                         <span className="font-semibold text-blue-600">{paginatedPeserta.length}</span>
                         {' '}dari{' '}

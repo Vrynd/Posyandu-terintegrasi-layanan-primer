@@ -3,13 +3,14 @@
  * Logic for multi-step participant registration form
  */
 
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect, useRef } from "react";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import toast from "react-hot-toast";
 import type { KategoriKey } from "@/domain/entities/Peserta";
 import type { CreatePesertaRequest } from "@/data/models/PesertaApiTypes";
 import { pesertaApiDataSource } from "@/data/datasources/PesertaApiDataSource";
 import { queryClient, queryKeys } from "@/data/queries";
+import { kategoriConfig } from "@/presentation/constants/kategoriConfig";
 
 export interface FormData {
   // Base fields
@@ -18,7 +19,7 @@ export interface FormData {
   nik: string;
   tanggalLahir: Date | null;
   jenisKelamin: "Laki-Laki" | "Perempuan" | "";
-  kepesertaanBpjs: boolean;
+  kepesertaanBpjs: boolean | null;
   nomorBpjs: string;
   alamat: string;
   rt: string;
@@ -41,11 +42,21 @@ export interface UsePesertaAddReturn {
   getCategoryRequiredLabel: () => { field: keyof FormData; label: string; placeholder: string } | null;
   getCategoryFieldValue: () => string;
   setCurrentStep: (step: number) => void;
+  handleResetStep: (step: number) => void;
+  errors: Partial<Record<keyof FormData, string>>;
 }
 
 export function usePesertaAdd(): UsePesertaAddReturn {
   const navigate = useNavigate();
-  const [currentStep, setCurrentStep] = useState(1);
+  const { category } = useParams<{ category: string }>();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const isInitialMount = useRef(true);
+
+  const [currentStep, setCurrentStep] = useState(() => {
+    const step = searchParams.get("step");
+    return step ? parseInt(step, 10) : 1;
+  });
+
   const [isLoading, setIsLoading] = useState(false);
   const [form, setForm] = useState<FormData>({
     kategori: null,
@@ -53,7 +64,7 @@ export function usePesertaAdd(): UsePesertaAddReturn {
     nik: "",
     tanggalLahir: null,
     jenisKelamin: "",
-    kepesertaanBpjs: false,
+    kepesertaanBpjs: null,
     nomorBpjs: "",
     alamat: "",
     rt: "",
@@ -63,9 +74,85 @@ export function usePesertaAdd(): UsePesertaAddReturn {
     namaOrtu: "",
     pekerjaan: "",
   });
+  const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
+
+  // Synchronize state with URL on mount or URL change
+  useEffect(() => {
+    if (category) {
+      // Find internal category key from URL slug
+      const internalKategori = (Object.keys(kategoriConfig) as KategoriKey[]).find(
+        (key) => kategoriConfig[key].urlSlug === category
+      );
+
+      if (internalKategori) {
+        setForm(prev => ({ ...prev, kategori: internalKategori }));
+        
+        // Auto-advance ONLY on INITIAL MOUNT for deep links
+        if (isInitialMount.current && currentStep === 1) {
+          setCurrentStep(2);
+        }
+      }
+    } else {
+      // If no category in URL and we are at step 1, reset category
+      if (currentStep === 1) {
+        setForm(prev => ({ ...prev, kategori: null }));
+      }
+    }
+    
+    // After first run, it's no longer the initial mount
+    isInitialMount.current = false;
+  }, [category]);
+
+  // Sync currentStep to URL search params
+  useEffect(() => {
+    const stepInUrl = searchParams.get("step");
+    if (stepInUrl !== currentStep.toString()) {
+      setSearchParams(
+        (prev: URLSearchParams) => {
+          prev.set("step", currentStep.toString());
+          return prev;
+        },
+        { replace: true }
+      );
+    }
+  }, [currentStep, searchParams, setSearchParams]);
 
   const handleChange = (field: keyof FormData, value: string | boolean | Date | null) => {
-    setForm((prev) => ({ ...prev, [field]: value }));
+    let finalValue = value;
+
+    // Input Restrictions based on field type
+    if (typeof value === "string") {
+      if (["nama", "namaSuami", "namaOrtu", "pekerjaan"].includes(field)) {
+        // Only letters and spaces
+        finalValue = value.replace(/[^a-zA-Z\s]/g, "");
+      } else if (["nik", "nomorBpjs", "telepon", "rt", "rw"].includes(field)) {
+        // Only numbers and enforce max length
+        const numericValue = value.replace(/\D/g, "");
+        if (field === "nik") finalValue = numericValue.slice(0, 16);
+        else if (field === "nomorBpjs" || field === "telepon") finalValue = numericValue.slice(0, 13);
+        else if (["rt", "rw"].includes(field)) finalValue = numericValue.slice(0, 3);
+        else finalValue = numericValue;
+      }
+    }
+
+    setForm((prev) => ({ ...prev, [field]: finalValue }));
+    
+    // Clear error for the field being changed
+    if (errors[field]) {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[field];
+        return newErrors;
+      });
+    }
+    
+    // If category changes, update URL but DO NOT advance step automatically
+    if (field === "kategori" && finalValue) {
+      const config = kategoriConfig[finalValue as KategoriKey];
+      if (config?.urlSlug) {
+        navigate(`/dashboard/participants/register/${config.urlSlug}?step=${currentStep}`, { replace: true });
+      }
+    }
   };
 
   const getCategoryRequiredLabel = (): { field: keyof FormData; label: string; placeholder: string } | null => {
@@ -99,6 +186,8 @@ export function usePesertaAdd(): UsePesertaAddReturn {
   };
 
   const validateStep = (step: number): boolean => {
+    const newErrors: Partial<Record<keyof FormData, string>> = {};
+
     switch (step) {
       case 1:
         if (!form.kategori) {
@@ -108,55 +197,55 @@ export function usePesertaAdd(): UsePesertaAddReturn {
         return true;
       case 2:
         if (!form.nama.trim()) {
-          toast.error("Nama wajib diisi");
-          return false;
+          newErrors.nama = "Nama lengkap wajib diisi";
         }
-        if (!form.nik.trim() || form.nik.length !== 16) {
-          toast.error("NIK harus 16 digit");
-          return false;
+        if (!form.nik.trim()) {
+          newErrors.nik = "Nomor induk kependudukan wajib diisi";
+        } else if (form.nik.length !== 16) {
+          newErrors.nik = "NIK harus 16 digit";
         }
         if (!form.tanggalLahir) {
-          toast.error("Tanggal lahir wajib diisi");
-          return false;
+          newErrors.tanggalLahir = "Tanggal lahir wajib diisi" as any;
         }
         if (!form.jenisKelamin) {
-          toast.error("Jenis kelamin wajib diisi");
-          return false;
+          newErrors.jenisKelamin = "Jenis kelamin wajib diisi" as any;
         }
-        if (form.kepesertaanBpjs && form.nomorBpjs.length !== 13) {
-          toast.error("Nomor BPJS harus 13 digit");
-          return false;
+        if (form.kepesertaanBpjs === null) {
+          newErrors.kepesertaanBpjs = "Status BPJS wajib dipilih" as any;
+        }
+        if (form.kepesertaanBpjs) {
+          if (!form.nomorBpjs.trim()) {
+            newErrors.nomorBpjs = "Nomor BPJS wajib diisi";
+          } else if (form.nomorBpjs.length !== 13) {
+            newErrors.nomorBpjs = "Nomor BPJS harus 13 digit";
+          }
         }
         // Validate category-specific required field
         const categoryField = getCategoryRequiredLabel();
         if (categoryField && !getCategoryFieldValue().trim()) {
-          toast.error(`${categoryField.label} wajib diisi`);
-          return false;
+          newErrors[categoryField.field] = `${categoryField.label} wajib diisi`;
         }
-        return true;
+        break;
       case 3:
         if (!form.alamat.trim()) {
-          toast.error("Alamat wajib diisi");
-          return false;
+          newErrors.alamat = "Alamat wajib diisi";
         }
         if (!form.rt.trim()) {
-          toast.error("RT wajib diisi");
-          return false;
+          newErrors.rt = "RT wajib diisi";
         }
         if (!form.rw.trim()) {
-          toast.error("RW wajib diisi");
-          return false;
+          newErrors.rw = "RW wajib diisi";
         }
-        if (!form.telepon.trim() || form.telepon.length < 10) {
-          toast.error("Nomor telepon wajib diisi (min. 10 digit)");
-          return false;
+        if (!form.telepon.trim()) {
+          newErrors.telepon = "Nomor telepon wajib diisi";
+        } else if (form.telepon.length < 10) {
+          newErrors.telepon = "Nomor telepon minimal 10 digit";
         }
-        return true;
-      case 4:
-        return true;
-      default:
-        return true;
+        break;
     }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleNext = () => {
@@ -166,7 +255,54 @@ export function usePesertaAdd(): UsePesertaAddReturn {
   };
 
   const handlePrev = () => {
-    setCurrentStep((prev) => Math.max(prev - 1, 1));
+    const prevStep = Math.max(currentStep - 1, 1);
+    setCurrentStep(prevStep);
+    
+    // If going back to step 1, clear category from URL
+    if (prevStep === 1) {
+      navigate("/dashboard/participants/register?step=1", { replace: true });
+    }
+  };
+
+  const handleResetStep = (step: number) => {
+    if (step === 2) {
+      setForm((prev) => ({
+        ...prev,
+        nama: "",
+        nik: "",
+        tanggalLahir: null,
+        jenisKelamin: "",
+        kepesertaanBpjs: null,
+        nomorBpjs: "",
+        namaSuami: "",
+        namaOrtu: "",
+        pekerjaan: "",
+      }));
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        ["nama", "nik", "tanggalLahir", "jenisKelamin", "kepesertaanBpjs", "nomorBpjs", "namaSuami", "namaOrtu", "pekerjaan"].forEach(field => {
+          delete newErrors[field as keyof FormData];
+        });
+        return newErrors;
+      });
+      toast.success("Form berhasil direset");
+    } else if (step === 3) {
+      setForm((prev) => ({
+        ...prev,
+        alamat: "",
+        rt: "",
+        rw: "",
+        telepon: "",
+      }));
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        ["alamat", "rt", "rw", "telepon"].forEach(field => {
+          delete newErrors[field as keyof FormData];
+        });
+        return newErrors;
+      });
+      toast.success("Form berhasil direset");
+    }
   };
 
   const buildApiRequest = (): CreatePesertaRequest => {
@@ -182,7 +318,7 @@ export function usePesertaAdd(): UsePesertaAddReturn {
       rt: form.rt,
       rw: form.rw,
       telepon: form.telepon,
-      kepesertaan_bpjs: form.kepesertaanBpjs,
+      kepesertaan_bpjs: form.kepesertaanBpjs ?? false,
     };
 
     if (form.kepesertaanBpjs && form.nomorBpjs) {
@@ -265,5 +401,7 @@ export function usePesertaAdd(): UsePesertaAddReturn {
     getCategoryRequiredLabel,
     getCategoryFieldValue,
     setCurrentStep,
+    handleResetStep,
+    errors,
   };
 }

@@ -10,6 +10,7 @@ import { Home, ChevronRight, Users, User, MapPin, ClipboardCheck } from "lucide-
 import { usePesertaAdd } from "@/presentation/hooks/usePesertaAdd";
 import { useDocumentTitle } from "@/presentation/hooks/useDocumentTitle";
 import { StepIndicator, FullPageLoading, type Step } from "@/presentation/components/common";
+import { kategoriConfig } from "@/presentation/constants/kategoriConfig";
 import { 
   CategoryStep, 
   PersonalDataStep, 
@@ -38,6 +39,8 @@ export function PesertaAddPage() {
     handleSubmit,
     getCategoryRequiredLabel,
     getCategoryFieldValue,
+    handleResetStep,
+    errors,
   } = usePesertaAdd();
 
   const handleBatal = () => navigate("/dashboard/participants");
@@ -63,7 +66,9 @@ export function PesertaAddPage() {
             Daftar Peserta
           </Link>
           <ChevronRight className="w-4 h-4 text-gray-400" />
-          <span className="font-medium text-gray-900">Tambah</span>
+          <span className="font-medium text-gray-900">
+            {form.kategori ? `Tambah ${kategoriConfig[form.kategori].label}` : "Tambah"}
+          </span>
         </nav>
       </div>
 
@@ -85,6 +90,8 @@ export function PesertaAddPage() {
             handleChange={handleChange}
             categoryRequiredLabel={getCategoryRequiredLabel()}
             categoryFieldValue={getCategoryFieldValue()}
+            onReset={() => handleResetStep(2)}
+            errors={errors}
           />
         )}
 
@@ -92,6 +99,8 @@ export function PesertaAddPage() {
           <AddressStep 
             form={form} 
             handleChange={handleChange} 
+            onReset={() => handleResetStep(3)}
+            errors={errors}
           />
         )}
 

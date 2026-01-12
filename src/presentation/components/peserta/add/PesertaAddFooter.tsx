@@ -25,7 +25,7 @@ export function PesertaAddFooter({
         type="button"
         onClick={onPrev}
         disabled={isLoading}
-        className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 bg-gray-50 rounded-xl transition-all disabled:opacity-50"
+        className="flex cursor-pointer items-center gap-2 px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 bg-gray-50 rounded-xl transition-all disabled:opacity-50"
       >
         <ArrowLeft className="w-4 h-4" />
         {currentStep === 1 ? "Batal" : "Kembali"}
@@ -35,7 +35,7 @@ export function PesertaAddFooter({
         <button
           type="button"
           onClick={onNext}
-          className="flex items-center gap-2 px-5 py-2 bg-linear-to-r from-slate-800 to-slate-900 hover:from-slate-700 hover:to-slate-800 text-white text-sm font-medium rounded-xl transition-colors"
+          className="flex cursor-pointer items-center gap-2 px-5 py-2 bg-linear-to-r from-slate-800 to-slate-900 hover:from-slate-700 hover:to-slate-800 text-white text-sm font-medium rounded-xl transition-colors"
         >
           Lanjut
           <ArrowRight className="w-4 h-4" />
@@ -45,7 +45,7 @@ export function PesertaAddFooter({
           type="button"
           onClick={onSubmit}
           disabled={isLoading}
-          className="flex items-center gap-2 px-5 py-2 bg-linear-to-r from-slate-800 to-slate-900 hover:from-slate-700 hover:to-slate-800 text-white text-sm font-medium rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex cursor-pointer items-center gap-2 px-5 py-2 bg-linear-to-r from-slate-800 to-slate-900 hover:from-slate-700 hover:to-slate-800 text-white text-sm font-medium rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isLoading ? (
             <>
