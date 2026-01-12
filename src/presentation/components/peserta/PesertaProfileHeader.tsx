@@ -45,15 +45,13 @@ export function PesertaProfileHeader({ peserta, config, age, onEdit, onDelete }:
                 <div className="flex items-center gap-2 shrink-0">
                     <button
                         onClick={onDelete}
-                        title="Hapus"
-                        className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center text-white bg-white/20 backdrop-blur-sm hover:bg-white/30 rounded-xl transition-colors shrink-0"
+                        className="w-10 h-10 cursor-pointer sm:w-12 sm:h-12 flex items-center justify-center text-white bg-white/20 backdrop-blur-sm hover:bg-white/30 rounded-xl transition-colors shrink-0"
                     >
                         <Trash2 className="w-5 h-5" />
                     </button>
                     <button
                         onClick={onEdit}
-                        title="Edit Data"
-                        className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center text-white bg-white/20 backdrop-blur-sm hover:bg-white/30 rounded-xl transition-colors shrink-0"
+                        className="w-10 h-10 cursor-pointer sm:w-12 sm:h-12 flex items-center justify-center text-white bg-white/20 backdrop-blur-sm hover:bg-white/30 rounded-xl transition-colors shrink-0"
                     >
                         <Edit2 className="w-5 h-5" />
                     </button>

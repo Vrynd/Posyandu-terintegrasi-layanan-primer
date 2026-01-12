@@ -5,6 +5,8 @@
 
 import { X, Edit2 } from 'lucide-react';
 import type { PesertaEditForm } from '../../../domain/entities/Peserta';
+import { FormInput, FormDatePicker } from '../common/form/FormInput';
+import { FormSelect } from '../common/form/FormSelect';
 
 interface Props {
     isOpen: boolean;
@@ -12,9 +14,10 @@ interface Props {
     onClose: () => void;
     onChange: (field: string, value: string | boolean) => void;
     onSave: () => void;
+    errors: Partial<Record<keyof PesertaEditForm, string>>;
 }
 
-export function PesertaEditModal({ isOpen, editForm, onClose, onChange, onSave }: Props) {
+export function PesertaEditModal({ isOpen, editForm, onClose, onChange, onSave, errors }: Props) {
     if (!isOpen) return null;
 
     return (
@@ -36,137 +39,149 @@ export function PesertaEditModal({ isOpen, editForm, onClose, onChange, onSave }
                 </div>
 
                 {/* Modal Content */}
-                <div className="px-6 py-5">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="px-6 py-5 max-h-[70vh] overflow-y-auto">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
                         {/* Nama */}
-                        <div>
-                            <label className="block text-xs text-gray-500 uppercase tracking-wide mb-1">Nama Lengkap</label>
-                            <input
-                                type="text"
-                                value={editForm.nama}
-                                onChange={(e) => onChange('nama', e.target.value)}
-                                className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:border-blue-400 focus:ring-2 focus:ring-blue-100 outline-none transition-all"
-                            />
-                        </div>
+                        <FormInput
+                            label="Nama Lengkap"
+                            value={editForm.nama}
+                            onChange={(val) => onChange('nama', val)}
+                            placeholder="Masukkan Nama Lengkap"
+                            required
+                            error={errors.nama}
+                        />
 
                         {/* NIK */}
-                        <div>
-                            <label className="block text-xs text-gray-500 uppercase tracking-wide mb-1">NIK</label>
-                            <input
-                                type="text"
+                        <div className="relative">
+                            <FormInput
+                                label="NIK"
                                 value={editForm.nik}
-                                onChange={(e) => onChange('nik', e.target.value)}
-                                className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:border-blue-400 focus:ring-2 focus:ring-blue-100 outline-none transition-all"
+                                onChange={(val) => onChange('nik', val)}
+                                placeholder="Masukkan 16 Digit Angka"
+                                required
+                                error={errors.nik}
+                                maxLength={16}
                             />
+                            <span className={`absolute right-4 top-[38px] text-xs font-medium pointer-events-none ${editForm.nik.length === 16 ? 'text-green-500' : 'text-gray-400'}`}>
+                                {editForm.nik.length}/16
+                            </span>
                         </div>
 
                         {/* Jenis Kelamin */}
-                        <div>
-                            <label className="block text-xs text-gray-500 uppercase tracking-wide mb-1">Jenis Kelamin</label>
-                            <select
-                                value={editForm.jenisKelamin}
-                                onChange={(e) => onChange('jenisKelamin', e.target.value)}
-                                className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:border-blue-400 focus:ring-2 focus:ring-blue-100 outline-none transition-all bg-white"
-                            >
-                                <option value="Laki-Laki">Laki-Laki</option>
-                                <option value="Perempuan">Perempuan</option>
-                            </select>
-                        </div>
+                        <FormSelect
+                            label="Jenis Kelamin"
+                            value={editForm.jenisKelamin}
+                            onChange={(val) => onChange('jenisKelamin', val)}
+                            options={[
+                                { value: 'Laki-Laki', label: 'Laki-Laki' },
+                                { value: 'Perempuan', label: 'Perempuan' }
+                            ]}
+                            required
+                            error={errors.jenisKelamin}
+                        />
 
                         {/* Tanggal Lahir */}
-                        <div>
-                            <label className="block text-xs text-gray-500 uppercase tracking-wide mb-1">Tanggal Lahir</label>
-                            <input
-                                type="date"
-                                value={editForm.tanggalLahir}
-                                onChange={(e) => onChange('tanggalLahir', e.target.value)}
-                                className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:border-blue-400 focus:ring-2 focus:ring-blue-100 outline-none transition-all"
-                            />
-                        </div>
+                        <FormDatePicker
+                            label="Tanggal Lahir"
+                            value={editForm.tanggalLahir}
+                            onChange={(val) => onChange('tanggalLahir', val)}
+                            placeholder="Pilih Tanggal Lahir"
+                            required
+                            error={errors.tanggalLahir}
+                        />
 
                         {/* Telepon */}
-                        <div>
-                            <label className="block text-xs text-gray-500 uppercase tracking-wide mb-1">Telepon</label>
-                            <input
-                                type="tel"
-                                value={editForm.telepon}
-                                onChange={(e) => onChange('telepon', e.target.value)}
-                                className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:border-blue-400 focus:ring-2 focus:ring-blue-100 outline-none transition-all"
-                            />
-                        </div>
+                        <FormInput
+                            label="Telepon"
+                            value={editForm.telepon}
+                            onChange={(val) => onChange('telepon', val)}
+                            placeholder="Contoh: 0812XXXXXXXX"
+                            required
+                            error={errors.telepon}
+                            maxLength={13}
+                        />
 
                         {/* Desa */}
-                        <div>
-                            <label className="block text-xs text-gray-500 uppercase tracking-wide mb-1">Desa / Kelurahan</label>
-                            <input
-                                type="text"
-                                value={editForm.desa}
-                                onChange={(e) => onChange('desa', e.target.value)}
-                                className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:border-blue-400 focus:ring-2 focus:ring-blue-100 outline-none transition-all"
-                            />
-                        </div>
+                        <FormInput
+                            label="Desa / Kelurahan"
+                            value={editForm.desa}
+                            onChange={(val) => onChange('desa', val)}
+                            placeholder="Contoh: Desa Tondomulyo"
+                            required
+                            error={errors.desa}
+                        />
 
                         {/* RT */}
-                        <div>
-                            <label className="block text-xs text-gray-500 uppercase tracking-wide mb-1">RT</label>
-                            <input
-                                type="text"
-                                value={editForm.rt}
-                                onChange={(e) => onChange('rt', e.target.value)}
-                                className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:border-blue-400 focus:ring-2 focus:ring-blue-100 outline-none transition-all"
-                            />
-                        </div>
+                        <FormInput
+                            label="RT"
+                            value={editForm.rt}
+                            onChange={(val) => onChange('rt', val)}
+                            placeholder="001"
+                            required
+                            error={errors.rt}
+                            maxLength={3}
+                        />
 
                         {/* RW */}
-                        <div>
-                            <label className="block text-xs text-gray-500 uppercase tracking-wide mb-1">RW</label>
-                            <input
-                                type="text"
-                                value={editForm.rw}
-                                onChange={(e) => onChange('rw', e.target.value)}
-                                className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:border-blue-400 focus:ring-2 focus:ring-blue-100 outline-none transition-all"
-                            />
-                        </div>
+                        <FormInput
+                            label="RW"
+                            value={editForm.rw}
+                            onChange={(val) => onChange('rw', val)}
+                            placeholder="001"
+                            required
+                            error={errors.rw}
+                            maxLength={3}
+                        />
 
                         {/* BPJS Status */}
-                        <div>
-                            <label className="block text-xs text-gray-500 uppercase tracking-wide mb-1">Status BPJS</label>
-                            <select
-                                value={editForm.kepesertaanBpjs ? 'ya' : 'tidak'}
-                                onChange={(e) => onChange('kepesertaanBpjs', e.target.value === 'ya')}
-                                className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:border-blue-400 focus:ring-2 focus:ring-blue-100 outline-none transition-all bg-white"
-                            >
-                                <option value="ya">Terdaftar</option>
-                                <option value="tidak">Belum Terdaftar</option>
-                            </select>
-                        </div>
+                        <FormSelect
+                            label="Status BPJS"
+                            value={editForm.kepesertaanBpjs ? 'ya' : 'tidak'}
+                            onChange={(val) => {
+                                const isYa = val === 'ya';
+                                onChange('kepesertaanBpjs', isYa);
+                                if (!isYa) onChange('nomorBpjs', '');
+                            }}
+                            options={[
+                                { value: 'ya', label: 'Terdaftar BPJS' },
+                                { value: 'tidak', label: 'Tidak Terdaftar' }
+                            ]}
+                            required
+                            error={errors.kepesertaanBpjs}
+                        />
 
                         {/* Nomor BPJS */}
-                        {editForm.kepesertaanBpjs && (
-                            <div>
-                                <label className="block text-xs text-gray-500 uppercase tracking-wide mb-1">Nomor BPJS</label>
-                                <input
-                                    type="text"
-                                    value={editForm.nomorBpjs}
-                                    onChange={(e) => onChange('nomorBpjs', e.target.value)}
-                                    className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:border-blue-400 focus:ring-2 focus:ring-blue-100 outline-none transition-all"
-                                />
-                            </div>
-                        )}
+                        <div className={`relative ${!editForm.kepesertaanBpjs ? 'opacity-50 grayscale pointer-events-none' : ''}`}>
+                            <FormInput
+                                label="Nomor BPJS"
+                                value={editForm.nomorBpjs}
+                                onChange={(val) => onChange('nomorBpjs', val)}
+                                placeholder="13 Digit Nomor BPJS"
+                                required={editForm.kepesertaanBpjs}
+                                error={errors.nomorBpjs}
+                                maxLength={13}
+                                disabled={!editForm.kepesertaanBpjs}
+                            />
+                            {editForm.kepesertaanBpjs && (
+                                <span className={`absolute right-4 top-[38px] text-xs font-medium pointer-events-none ${editForm.nomorBpjs.length === 13 ? 'text-green-500' : 'text-gray-400'}`}>
+                                    {editForm.nomorBpjs.length}/13
+                                </span>
+                            )}
+                        </div>
                     </div>
                 </div>
 
                 {/* Modal Footer */}
-                <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 flex gap-3 justify-end">
+                <div className="px-6 py-4 border-t border-gray-200 flex gap-3 justify-end">
                     <button
                         onClick={onClose}
-                        className="px-6 py-2.5 text-gray-700 bg-white border border-gray-200 rounded-xl font-medium hover:bg-gray-100 transition-colors"
+                        className="px-6 py-2 cursor-pointer text-gray-700 bg-white border border-gray-200 rounded-xl font-medium hover:bg-gray-100 transition-colors"
                     >
                         Batal
                     </button>
                     <button
                         onClick={onSave}
-                        className="px-6 py-2.5 text-white bg-linear-to-r from-slate-800 to-slate-900 hover:from-slate-700 hover:to-slate-800 rounded-xl font-medium transition-colors flex items-center gap-2"
+                        className="px-6 py-2 cursor-pointer text-white bg-linear-to-r from-slate-800 to-slate-900 hover:from-slate-700 hover:to-slate-800 rounded-xl font-medium transition-colors flex items-center gap-2"
                     >
                         <Edit2 className="w-4 h-4" />
                         Simpan Perubahan

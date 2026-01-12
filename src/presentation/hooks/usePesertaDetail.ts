@@ -81,6 +81,9 @@ export function usePesertaDetail(id: string | undefined) {
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
 
+    // Errors state
+    const [errors, setErrors] = useState<Partial<Record<keyof PesertaEditForm, string>>>({});
+
     // Edit form state
     const [editForm, setEditForm] = useState<PesertaEditForm>(createEmptyEditForm());
 
@@ -92,6 +95,7 @@ export function usePesertaDetail(id: string | undefined) {
         if (peserta) {
             setEditForm(pesertaDetailToEditForm(peserta));
         }
+        setErrors({});
         setShowEditModal(true);
     }, [peserta]);
 
@@ -100,14 +104,76 @@ export function usePesertaDetail(id: string | undefined) {
         setShowEditModal(false);
     }, []);
 
-    // Handle edit form field change
+    // Handle edit form field change with validation and restrictions
     const handleEditChange = useCallback((field: string, value: string | boolean) => {
-        setEditForm(prev => ({ ...prev, [field]: value }));
-    }, []);
+        let finalValue = value;
+
+        // Apply input restrictions for numeric fields
+        if (typeof value === 'string' && ['nik', 'telepon', 'rt', 'rw', 'nomorBpjs'].includes(field)) {
+            const numericValue = value.replace(/\D/g, "");
+            if (field === "nik") finalValue = numericValue.slice(0, 16);
+            else if (field === "nomorBpjs" || field === "telepon") finalValue = numericValue.slice(0, 13);
+            else if (["rt", "rw"].includes(field)) finalValue = numericValue.slice(0, 3);
+            else finalValue = numericValue;
+        }
+
+        setEditForm(prev => ({ ...prev, [field]: finalValue }));
+        
+        // Clear error when field is edited
+        if (errors[field as keyof PesertaEditForm]) {
+            setErrors(prev => {
+                const next = { ...prev };
+                delete next[field as keyof PesertaEditForm];
+                return next;
+            });
+        }
+    }, [errors]);
+
+    // Validate form before saving
+    const validateForm = (): boolean => {
+        const newErrors: Partial<Record<keyof PesertaEditForm, string>> = {};
+        
+        if (!editForm.nama.trim()) newErrors.nama = "Nama lengkap wajib diisi";
+        
+        if (!editForm.nik.trim()) {
+            newErrors.nik = "NIK wajib diisi";
+        } else if (editForm.nik.length !== 16) {
+            newErrors.nik = "NIK harus 16 digit";
+        }
+        
+        if (!editForm.tanggalLahir) newErrors.tanggalLahir = "Tanggal lahir wajib diisi";
+        if (!editForm.jenisKelamin) newErrors.jenisKelamin = "Jenis kelamin wajib diisi";
+        
+        if (!editForm.desa.trim()) newErrors.desa = "Alamat desa/kelurahan wajib diisi";
+        if (!editForm.rt.trim()) newErrors.rt = "RT wajib diisi";
+        if (!editForm.rw.trim()) newErrors.rw = "RW wajib diisi";
+        
+        if (!editForm.telepon.trim()) {
+            newErrors.telepon = "Nomor telepon wajib diisi";
+        } else if (editForm.telepon.length < 10) {
+            newErrors.telepon = "Nomor telepon tidak valid";
+        }
+        
+        if (editForm.kepesertaanBpjs) {
+            if (!editForm.nomorBpjs.trim()) {
+                newErrors.nomorBpjs = "Nomor BPJS wajib diisi";
+            } else if (editForm.nomorBpjs.length !== 13) {
+                newErrors.nomorBpjs = "Nomor BPJS harus 13 digit";
+            }
+        }
+        
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
 
     // Save edit via mutation
     const handleSaveEdit = useCallback(async () => {
         if (!numericId || !peserta) return;
+        
+        if (!validateForm()) {
+            toast.error('Mohon lengkapi data dengan benar');
+            return;
+        }
 
         try {
             const updateData = {
@@ -127,7 +193,7 @@ export function usePesertaDetail(id: string | undefined) {
             console.error('[PesertaDetail] Update error:', err);
             toast.error('Gagal memperbarui data peserta');
         }
-    }, [numericId, peserta, editForm, updateMutation]);
+    }, [numericId, peserta, editForm, updateMutation, validateForm]);
 
     // Open delete confirmation
     const openDeleteConfirm = useCallback(() => {
@@ -180,6 +246,7 @@ export function usePesertaDetail(id: string | undefined) {
         peserta: peserta || null,
         config,
         editForm,
+        errors,
         isLoading,
         error,
 
