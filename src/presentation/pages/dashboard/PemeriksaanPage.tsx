@@ -28,6 +28,8 @@ export function PemeriksaanPage() {
         handlePrevPage,
         handleNextPage,
         handleGoToPage,
+        recentPage,
+        handleRecentPageChange,
         kategoriConfig,
         isLoading,
     } = usePemeriksaan();
@@ -104,7 +106,10 @@ export function PemeriksaanPage() {
 
             {/* Recent Pemeriksaan - Show when no search is active */}
             {searchQuery.length === 0 && selectedFilters.length === 0 && (
-                <RecentPemeriksaan />
+                <RecentPemeriksaan 
+                    currentPage={recentPage}
+                    onPageChange={handleRecentPageChange}
+                />
             )}
         </div>
     );

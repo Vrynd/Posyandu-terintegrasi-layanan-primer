@@ -103,12 +103,25 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
                         className="flex-1 bg-transparent border-none text-white placeholder:text-slate-500 focus:outline-none focus:ring-0 text-base"
                     />
                     <div className="flex items-center gap-2">
+                        {query && (
+                            <button 
+                                onClick={() => {
+                                    setQuery('');
+                                    setSelectedIndex(0);
+                                    inputRef.current?.focus();
+                                }}
+                                className="p-1 hover:bg-white/5 rounded-md transition-colors text-slate-500 hover:text-slate-300"
+                            >
+                                <X className="w-4 h-4" />
+                            </button>
+                        )}
                         {isLoading && <Loader2 className="w-4 h-4 text-slate-500 animate-spin" />}
                         <button 
                             onClick={onClose}
-                            className="p-1 hover:bg-white/5 rounded-md transition-colors"
+                            className="p-1 hover:bg-white/5 rounded-md transition-colors border border-white/10 text-slate-500 hover:text-white"
+                            title="Tutup (Esc)"
                         >
-                            <X className="w-4 h-4 text-slate-500" />
+                            <span className="text-[10px] px-1 font-mono">ESC</span>
                         </button>
                     </div>
                 </div>

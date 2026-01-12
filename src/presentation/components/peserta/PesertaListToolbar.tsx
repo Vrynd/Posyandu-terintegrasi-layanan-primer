@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, Plus, Filter, ArrowUpDown, SlidersHorizontal, ChevronDown } from 'lucide-react';
+import { Search, Plus, Filter, ArrowUpDown, SlidersHorizontal, ChevronDown, X } from 'lucide-react';
 import type { KategoriKey } from '@/domain/entities/Peserta';
 import type { SortType, GenderFilter, AgeRange } from '@/presentation/hooks/usePesertaList';
 import { kategoriConfig } from '@/presentation/constants/kategoriConfig';
@@ -73,8 +73,16 @@ export function PesertaListToolbar({
                                 placeholder="Cari berdasarkan NIK atau nama peserta..."
                                 value={searchQuery}
                                 onChange={(e) => onSearchChange(e.target.value)}
-                                className="w-full pl-12 pr-4 py-2.5 border border-gray-200 rounded-xl focus:border-blue-400 focus:ring-2 focus:ring-blue-100 outline-none transition-all text-sm"
+                                className="w-full pl-12 pr-10 py-2.5 border border-gray-200 rounded-xl focus:border-blue-400 focus:ring-2 focus:ring-blue-100 outline-none transition-all text-sm"
                             />
+                            {searchQuery && (
+                                <button
+                                    onClick={() => onSearchChange('')}
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-100 rounded-full text-gray-400 hover:text-gray-600 transition-colors"
+                                >
+                                    <X className="w-4 h-4" />
+                                </button>
+                            )}
                         </div>
                         <button
                             onClick={onAddPeserta}

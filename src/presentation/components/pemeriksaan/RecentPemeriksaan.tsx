@@ -4,13 +4,18 @@
  * Uses React Query for optimal caching
  */
 
-import { useState, useMemo } from 'react';
+import { useMemo, useEffect } from 'react';
 import { Clock, ArrowRight, Calendar, ChevronLeft, ChevronRight, ClipboardList } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { BeatLoader } from 'react-spinners';
 import { kategoriConfig } from '../../constants/kategoriConfig';
 import { useKunjunganList, usePesertaList } from '@/data/queries';
 import type { KategoriKey } from '@/domain/entities/Peserta';
+
+interface RecentPemeriksaanProps {
+    currentPage: number;
+    onPageChange: (page: number) => void;
+}
 
 const ITEMS_PER_PAGE = 3;
 
@@ -37,9 +42,8 @@ function formatDate(dateString: string): string {
     }
 }
 
-export function RecentPemeriksaan() {
+export function RecentPemeriksaan({ currentPage, onPageChange }: RecentPemeriksaanProps) {
     const navigate = useNavigate();
-    const [currentPage, setCurrentPage] = useState(1);
 
     // Use React Query for caching - fetch both kunjungan and peserta
     const { data: kunjunganData, isLoading: isKunjunganLoading } = useKunjunganList({ limit: 15 });
@@ -77,8 +81,15 @@ export function RecentPemeriksaan() {
         return { paginatedItems, totalPages, totalItems };
     }, [kunjunganData, pesertaData, currentPage]);
 
-    const handlePrevPage = () => setCurrentPage(p => Math.max(1, p - 1));
-    const handleNextPage = () => setCurrentPage(p => Math.min(totalPages, p + 1));
+    // Clamp page if it's out of bounds (e.g., after data changes)
+    useEffect(() => {
+        if (!isLoading && totalPages > 0 && currentPage > totalPages) {
+            onPageChange(totalPages);
+        }
+    }, [totalPages, currentPage, isLoading, onPageChange]);
+
+    const handlePrevPage = () => onPageChange(Math.max(1, currentPage - 1));
+    const handleNextPage = () => onPageChange(Math.min(totalPages, currentPage + 1));
 
     // Loading state
     if (isLoading) {
@@ -117,7 +128,7 @@ export function RecentPemeriksaan() {
                     <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
                         <Clock className="w-4 h-4 text-blue-600" />
                     </div>
-                    <h3 className="text-sm font-semibold text-gray-900">Pemeriksaan Terakhir</h3>
+                    <h2 className="font-semibold text-gray-900">Pemeriksaan Terakhir</h2>
                 </div>
 
                 {/* Pagination Controls */}
@@ -173,7 +184,7 @@ export function RecentPemeriksaan() {
                                 </div>
 
                                 {/* Name */}
-                                <h4 className="text-sm font-semibold text-gray-900 truncate mb-2">
+                                <h4 className="text-md font-semibold text-gray-900 truncate mb-2">
                                     {item.peserta_nama}
                                 </h4>
 
