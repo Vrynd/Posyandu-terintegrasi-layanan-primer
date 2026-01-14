@@ -74,10 +74,10 @@ export function PesertaLastVisitCard({
                         </div>
                         <button
                             onClick={() => onNavigate(true)}
-                            className="w-full cursor-pointer md:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 sm:py-2 bg-linear-to-r from-slate-800 to-slate-900 text-white text-sm font-medium rounded-lg hover:from-slate-700 hover:to-slate-800 transition-all shrink-0"
+                            className="px-6 py-2.5 cursor-pointer bg-linear-to-r from-slate-800 to-slate-900 hover:from-slate-700 hover:to-slate-800 text-white text-sm font-medium rounded-xl flex items-center gap-2 transition-colors whitespace-nowrap"
                         >
                             <span>Lakukan Pemeriksaan</span>
-                            <ArrowRight className="w-4 h-4" />
+                            <ArrowRight className="w-5 h-5" />
                         </button>
                     </div>
                 ) : (
@@ -85,10 +85,10 @@ export function PesertaLastVisitCard({
                         <p className="text-sm text-gray-500">Belum ada data pemeriksaan untuk peserta ini.</p>
                         <button
                             onClick={() => onNavigate(false)}
-                            className="w-full cursor-pointer sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 sm:py-2 bg-linear-to-r from-slate-800 to-slate-900 text-white text-sm font-medium rounded-lg hover:from-slate-700 hover:to-slate-800 transition-all"
+                            className="px-6 py-2.5 cursor-pointer bg-linear-to-r from-slate-800 to-slate-900 hover:from-slate-700 hover:to-slate-800 text-white text-sm font-medium rounded-xl flex items-center gap-2 transition-colors whitespace-nowrap"
                         >
                             <span>Pemeriksaan Pertama</span>
-                            <ArrowRight className="w-4 h-4" />
+                            <ArrowRight className="w-5 h-5" />
                         </button>
                     </div>
                 )}
