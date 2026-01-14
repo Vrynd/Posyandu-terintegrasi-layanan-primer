@@ -31,7 +31,7 @@ export function LaporanTypeSelection({ reports, selectedReport, onToggle }: Lapo
                             <button
                                 key={report.id}
                                 onClick={() => onToggle(report.id)}
-                                className={`relative p-5 rounded-xl border-2 text-left transition-all ${isSelected
+                                className={`relative p-5 rounded-xl cursor-pointer border-2 text-left transition-all ${isSelected
                                     ? `${report.borderColor} ${report.bgColor}`
                                     : 'border-gray-100 bg-gray-50'
                                     }`}
@@ -44,8 +44,8 @@ export function LaporanTypeSelection({ reports, selectedReport, onToggle }: Lapo
                                 <div className={`w-12 h-12 rounded-xl ${report.bgColor} flex items-center justify-center mb-3`}>
                                     <IconComponent className={`w-6 h-6 ${report.color}`} />
                                 </div>
-                                <h3 className="font-bold text-gray-900 mb-1">{report.name}</h3>
-                                <p className="text-sm text-gray-500 mb-3">{report.description}</p>
+                                <h3 className="font-bold text-gray-900 mb-1 cursor-pointer">{report.name}</h3>
+                                <p className="text-sm text-gray-500 mb-3 cursor-pointer">{report.description}</p>
                                 <div className="flex flex-wrap gap-1.5">
                                     {report.details.map((detail, idx) => (
                                         <span key={idx} className="text-xs px-2 py-0.5 bg-white/80 text-gray-600 rounded-full border border-gray-100">

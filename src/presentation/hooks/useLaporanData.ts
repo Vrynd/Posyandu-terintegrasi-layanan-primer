@@ -4,11 +4,13 @@
  * Stub implementation - Supabase removed, ready for Laravel API integration
  */
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import * as XLSX from 'xlsx';
-import { useDataCache } from '../contexts/RealtimeDataContext';
+import { usePesertaList, usePemeriksaanList } from '../../data/queries';
+import type { PesertaListItem } from '../../data/models/PesertaApiTypes';
+import type { PemeriksaanListItem } from '../../data/models/PemeriksaanApiTypes';
 
-export type ReportType = 'kunjungan' | 'peserta' | 'kegiatan';
+export type ReportType = 'examinations' | 'participants' | 'activities';
 
 interface LaporanStats {
     kunjunganPerBulan: { bulan: string; posyandu: number; rumah: number }[];
@@ -24,10 +26,45 @@ export function useLaporanData() {
     const [stats, setStats] = useState<LaporanStats | null>(null);
     const [error, setError] = useState<string | null>(null);
 
-    // Get cached data from DataCacheContext
-    const { pesertaList, kunjunganList, isSyncing, lastSyncTime } = useDataCache();
+    // Get data using React Query hooks
+    const { 
+        data: pesertaDataResponse, 
+        isLoading: isPesertaLoading 
+    } = usePesertaList({ limit: 200 });
+    
+    const { 
+        data: pemeriksaanDataResponse, 
+        isLoading: isPemeriksaanLoading 
+    } = usePemeriksaanList({ limit: 200 });
 
-    // Fetch stats for visualizations - uses cached data only
+    const pesertaList = useMemo(() => {
+        // usePesertaList returns ApiResponse<PesertaListResponse>
+        const apiData = (pesertaDataResponse as any)?.data;
+        if (!apiData) return [];
+        
+        // If data is directly the array
+        if (Array.isArray(apiData)) return apiData;
+        
+        // If data is PesertaListResponse which has its own data property
+        return apiData.data || [];
+    }, [pesertaDataResponse]);
+
+    const kunjunganList = useMemo(() => {
+        // usePemeriksaanList returns ApiResponse<PemeriksaanListResponse>
+        const apiData = (pemeriksaanDataResponse as any)?.data;
+        if (!apiData) return [];
+        
+        // If data is directly the array
+        if (Array.isArray(apiData)) return apiData;
+        
+        // If data is PemeriksaanListResponse which has its own data property
+        return apiData.data || [];
+    }, [pemeriksaanDataResponse]);
+
+    // Combined loading state
+    const isDataLoading = isPesertaLoading || isPemeriksaanLoading;
+
+    // Fetch stats for visualizations - uses query data
     const fetchStats = useCallback(async (_month: number, _year: number) => {
         setIsLoading(true);
         setError(null);
@@ -42,7 +79,7 @@ export function useLaporanData() {
 
             // Process peserta per kategori
             const kategoriCounts: Record<string, number> = {};
-            pesertaData.forEach((p: any) => {
+            pesertaData.forEach((p: PesertaListItem) => {
                 kategoriCounts[p.kategori] = (kategoriCounts[p.kategori] || 0) + 1;
             });
 
@@ -52,8 +89,8 @@ export function useLaporanData() {
             }));
 
             // Process kunjungan per lokasi
-            const posyanduCount = kunjunganData.filter((k: any) => k.lokasi_pemeriksaan === 'posyandu' || k.lokasi === 'posyandu').length;
-            const rumahCount = kunjunganData.filter((k: any) => k.lokasi_pemeriksaan === 'rumah' || k.lokasi === 'rumah').length;
+            const posyanduCount = kunjunganData.filter((k: PemeriksaanListItem) => k.lokasi === 'posyandu').length;
+            const rumahCount = kunjunganData.filter((k: PemeriksaanListItem) => k.lokasi === 'kunjungan_rumah' || k.lokasi === 'rumah').length;
 
             const newStats = {
                 kunjunganPerBulan: [{
@@ -90,19 +127,19 @@ export function useLaporanData() {
             let workbook: XLSX.WorkBook;
             let filename: string;
 
-            if (type === 'kunjungan') {
+            if (type === 'examinations') {
                 const data = kunjunganList;
 
-                const rows = data.map((k: any, index: number) => {
+                const rows = data.map((k: PemeriksaanListItem, index: number) => {
                     // Lookup peserta from cache if fields are missing
-                    const pesertaInfo = pesertaList.find(p => p.id === k.peserta_id);
+                    const pesertaInfo = pesertaList.find((p: PesertaListItem) => p.id === k.peserta_id);
                     
                     return {
                         'No': index + 1,
                         'Tanggal': k.tanggal_kunjungan ? new Date(k.tanggal_kunjungan).toLocaleDateString('id-ID') : '-',
-                        'Nama Peserta': k.peserta_nama || k.peserta?.nama || pesertaInfo?.nama || '-',
-                        'NIK': k.peserta_nik || k.peserta?.nik || pesertaInfo?.nik || '-',
-                        'Kategori': getKategoriLabel(k.peserta_kategori || k.peserta?.kategori || pesertaInfo?.kategori || ''),
+                        'Nama Peserta': k.peserta_nama || (k as any).peserta?.nama || pesertaInfo?.nama || '-',
+                        'NIK': (k as any).peserta_nik || (k as any).peserta?.nik || pesertaInfo?.nik || '-',
+                        'Kategori': getKategoriLabel(k.peserta_kategori || (k as any).peserta?.kategori || pesertaInfo?.kategori || ''),
                         'Lokasi': k.lokasi === 'posyandu' ? 'Posyandu' : 'Kunjungan Rumah',
                         'Rujuk': k.rujuk ? 'Ya' : 'Tidak'
                     };
@@ -116,24 +153,24 @@ export function useLaporanData() {
                     { width: 15 }, { width: 18 }, { width: 30 }
                 ];
 
-                XLSX.utils.book_append_sheet(workbook, worksheet, 'Kunjungan');
-                filename = `Laporan_Kunjungan_${monthNames[month - 1]}_${year}.xlsx`;
+                XLSX.utils.book_append_sheet(workbook, worksheet, 'Pemeriksaan');
+                filename = `Laporan_Pemeriksaan_${monthNames[month - 1]}_${year}.xlsx`;
 
-            } else if (type === 'peserta') {
+            } else if (type === 'participants') {
                 const data = pesertaList;
 
-                const rows = data.map((p: any, index: number) => ({
+                const rows = data.map((p: PesertaListItem, index: number) => ({
                     'No': index + 1,
                     'Nama': p.nama,
                     'NIK': p.nik,
                     'Kategori': getKategoriLabel(p.kategori),
-                    'Jenis Kelamin': p.jenis_kelamin || p.jenisKelamin,
+                    'Jenis Kelamin': p.jenis_kelamin,
                     'Tanggal Lahir': p.tanggal_lahir ? new Date(p.tanggal_lahir).toLocaleDateString('id-ID') : '-',
-                    'Telepon': p.telepon || '-',
-                    'Alamat': p.alamat || '-',
+                    'Telepon': (p as any).telepon || '-',
+                    'Alamat': (p as any).alamat || '-',
                     'RT/RW': `${p.rt || '-'}/${p.rw || '-'}`,
-                    'BPJS': (p.kepesertaan_bpjs ?? p.kepesertaanBpjs) ? 'Ya' : 'Tidak',
-                    'No. BPJS': p.nomor_bpjs || p.nomorBpjs || '-'
+                    'BPJS': ((p as any).kepesertaan_bpjs ?? (p as any).kepesertaanBpjs) ? 'Ya' : 'Tidak',
+                    'No. BPJS': (p as any).nomor_bpjs || (p as any).nomorBpjs || '-'
                 }));
 
                 workbook = XLSX.utils.book_new();
@@ -149,8 +186,8 @@ export function useLaporanData() {
                 filename = `Laporan_Peserta_${monthNames[month - 1]}_${year}.xlsx`;
 
             } else {
-                // Kegiatan - no data without backend
-                console.warn('[Laporan] Kegiatan report requires backend');
+                // Activities - no data without backend
+                console.warn('[Laporan] Activities report requires backend');
                 setError('Laporan kegiatan tidak tersedia tanpa backend');
                 return { success: false, error: 'Backend tidak terhubung' };
             }
@@ -172,54 +209,54 @@ export function useLaporanData() {
     // Get preview data for display - uses cache only
     const getPreviewData = useCallback(async (type: ReportType) => {
         try {
-            if (type === 'kunjungan') {
+            if (type === 'examinations') {
                 const data = kunjunganList;
-                if (data.length === 0 && !isSyncing && lastSyncTime) {
-                    console.log('[Laporan] Cache is empty and sync is done. Returning empty.');
+                if (data.length === 0) {
+                    console.log('[Laporan] Kunjungan cache is empty.');
                     return [];
                 }
 
-                return data.map((k: any, index: number) => {
+                return data.map((k: PemeriksaanListItem, index: number) => {
                     // Lookup peserta from cache if fields are missing
-                    const pesertaInfo = pesertaList.find(p => p.id === k.peserta_id);
+                    const pesertaInfo = pesertaList.find((p: PesertaListItem) => p.id === k.peserta_id);
 
                     return {
                         'No': index + 1,
                         'Tanggal': k.tanggal_kunjungan ? new Date(k.tanggal_kunjungan).toLocaleDateString('id-ID') : '-',
-                        'Nama Peserta': k.peserta_nama || k.peserta?.nama || pesertaInfo?.nama || '-',
-                        'NIK': k.peserta_nik || k.peserta?.nik || pesertaInfo?.nik || '-',
-                        'Kategori': getKategoriLabel(k.peserta_kategori || k.peserta?.kategori || pesertaInfo?.kategori || ''),
+                        'Nama Peserta': k.peserta_nama || (k as any).peserta?.nama || pesertaInfo?.nama || '-',
+                        'NIK': (k as any).peserta_nik || (k as any).peserta?.nik || pesertaInfo?.nik || '-',
+                        'Kategori': getKategoriLabel(k.peserta_kategori || (k as any).peserta?.kategori || pesertaInfo?.kategori || ''),
                         'Lokasi': k.lokasi === 'posyandu' ? 'Posyandu' : 'Kunjungan Rumah',
                     };
                 });
-            } else if (type === 'peserta') {
+            } else if (type === 'participants') {
                 const data = pesertaList;
-                if (data.length === 0 && !isSyncing && lastSyncTime) {
-                    console.log('[Laporan] Cache is empty and sync is done. Returning empty.');
+                if (data.length === 0) {
+                    console.log('[Laporan] Peserta cache is empty.');
                     return [];
                 }
 
-                return data.map((p: any, index: number) => ({
+                return data.map((p: PesertaListItem, index: number) => ({
                     'No': index + 1,
                     'Nama': p.nama,
                     'NIK': p.nik,
                     'Kategori': getKategoriLabel(p.kategori),
-                    'Jenis Kelamin': p.jenis_kelamin || p.jenisKelamin || '-',
-                    'Telepon': p.telepon || '-',
+                    'Jenis Kelamin': p.jenis_kelamin || '-',
+                    'Telepon': (p as any).telepon || '-',
                 }));
             } else {
                 // Activity log - not available without backend
-                console.warn('[Laporan] Kegiatan preview requires backend');
+                console.warn('[Laporan] Activities preview requires backend');
                 return [];
             }
         } catch (err) {
             console.error('Error getting preview data:', err);
             throw err;
         }
-    }, [pesertaList, kunjunganList, isSyncing, lastSyncTime]);
+    }, [pesertaList, kunjunganList]);
 
     return {
-        isLoading,
+        isLoading: isLoading || isDataLoading,
         stats,
         error,
         fetchStats,

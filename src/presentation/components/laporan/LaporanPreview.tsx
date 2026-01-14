@@ -52,7 +52,7 @@ export function LaporanPreview({
                     <div className="py-12 text-center">
                         <FileText className="w-12 h-12 text-gray-300 mx-auto mb-2" />
                         <p className="text-gray-500">Belum ada data untuk laporan ini</p>
-                        <p className="text-gray-400 text-sm mt-2">Silakan input data peserta atau kunjungan terlebih dahulu</p>
+                        <p className="text-gray-400 text-sm mt-2">Silakan input data peserta atau pemeriksaan terlebih dahulu</p>
                     </div>
                 ) : (
                     <div className="overflow-x-auto rounded-xl border border-gray-100">

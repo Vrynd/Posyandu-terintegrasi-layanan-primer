@@ -61,7 +61,7 @@ export function LaporanPeriodSelection({
                 <button
                     onClick={onGenerate}
                     disabled={!selectedReport || isLoading}
-                    className={`px-6 py-2.5 rounded-xl font-semibold flex items-center justify-center gap-2 ${selectedReport && !isLoading
+                    className={`px-6 py-2 rounded-xl cursor-pointer font-semibold flex items-center justify-center gap-2 ${selectedReport && !isLoading
                         ? 'bg-slate-800 text-white'
                         : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                         }`}
@@ -69,7 +69,7 @@ export function LaporanPeriodSelection({
                     {isLoading ? (
                         <><Loader2 className="w-5 h-5 animate-spin" /> Membuat Laporan...</>
                     ) : (
-                        <><Download className="w-5 h-5" /> Unduh Laporan Excel</>
+                        <><Download className="w-5 h-5" /> Unduh Laporan</>
                     )}
                 </button>
             </div>

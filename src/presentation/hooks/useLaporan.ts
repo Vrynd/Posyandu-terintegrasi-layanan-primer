@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useLaporanData, type ReportType } from './useLaporanData';
 import toast from 'react-hot-toast';
 import { FileText, Calendar, Users } from 'lucide-react';
@@ -16,8 +17,8 @@ export interface ReportConfig {
 
 export const reports: ReportConfig[] = [
     {
-        id: 'kunjungan',
-        name: 'Laporan Kunjungan',
+        id: 'examinations',
+        name: 'Laporan Pemeriksaan',
         description: 'Rekap data kunjungan peserta',
         details: ['Tanggal kunjungan', 'Data peserta', 'Lokasi pemeriksaan', 'Status rujukan'],
         icon: Calendar,
@@ -26,7 +27,7 @@ export const reports: ReportConfig[] = [
         borderColor: 'border-blue-500',
     },
     {
-        id: 'peserta',
+        id: 'participants',
         name: 'Laporan Peserta',
         description: 'Data lengkap semua peserta',
         details: ['Data pribadi', 'Kategori peserta', 'Kontak & alamat', 'Status BPJS'],
@@ -47,14 +48,35 @@ export const months = [
 ];
 
 export function useLaporan() {
-    const [selectedReport, setSelectedReport] = useState<ReportType | null>(null);
-    const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
+    const [searchParams, setSearchParams] = useSearchParams();
+
+    // Initialize from URL or defaults
+    const reportFromUrl = searchParams.get('type') as ReportType | null;
+    const monthFromUrl = searchParams.get('month') ? parseInt(searchParams.get('month')!, 10) : null;
+
+    const [selectedReport, setSelectedReport] = useState<ReportType | null>(reportFromUrl);
+    const [selectedMonth, setSelectedMonth] = useState(monthFromUrl || new Date().getMonth() + 1);
     const [previewData, setPreviewData] = useState<any[]>([]);
     const [isLoadingPreview, setIsLoadingPreview] = useState(false);
     const [previewError, setPreviewError] = useState<string | null>(null);
 
     const { isLoading, generateReport, getPreviewData } = useLaporanData();
     const currentYear = new Date().getFullYear();
+
+    // Sync state to URL
+    useEffect(() => {
+        const params = new URLSearchParams(searchParams);
+        if (selectedReport) {
+            params.set('type', selectedReport);
+        } else {
+            params.delete('type');
+        }
+        params.set('month', selectedMonth.toString());
+
+        if (params.toString() !== searchParams.toString()) {
+            setSearchParams(params, { replace: true });
+        }
+    }, [selectedReport, selectedMonth, setSearchParams, searchParams]);
 
     useEffect(() => {
         const loadPreview = async () => {
