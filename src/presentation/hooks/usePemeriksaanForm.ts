@@ -259,7 +259,7 @@ export interface UsePemeriksaanFormReturn {
 
 export function usePemeriksaanForm(id: string | undefined): UsePemeriksaanFormReturn {
     const navigate = useNavigate();
-    const [searchParams] = useSearchParams();
+    const [searchParams, setSearchParams] = useSearchParams();
     const numericId = id && id !== 'baru' ? parseInt(id, 10) : 0;
     
     // Read initial step from query param (for skip to step 2 feature)
@@ -279,6 +279,20 @@ export function usePemeriksaanForm(id: string | undefined): UsePemeriksaanFormRe
     const [isPreFilled, setIsPreFilled] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [hasProcessedData, setHasProcessedData] = useState(false);
+    
+    // Sync currentStep to URL search params
+    useEffect(() => {
+        const stepInUrl = searchParams.get('step');
+        if (stepInUrl !== currentStep.toString()) {
+            setSearchParams(
+                (prev: URLSearchParams) => {
+                    prev.set('step', currentStep.toString());
+                    return prev;
+                },
+                { replace: true }
+            );
+        }
+    }, [currentStep, searchParams, setSearchParams]);
     
     // Derive loading state from React Query
     const isLoading = (isPesertaLoading || isVisitLoading) && numericId > 0;
@@ -318,7 +332,7 @@ export function usePemeriksaanForm(id: string | undefined): UsePemeriksaanFormRe
         const currentPath = window.location.pathname;
         const slug = kategoriConfig[mapped.kategori].urlSlug;
         if (!currentPath.includes(`/${slug}/`)) {
-            navigate(`/dashboard/examinations/${slug}/${id}`, { replace: true });
+            navigate(`/dashboard/examinations/${slug}/${id}?${searchParams.toString()}`, { replace: true });
         }
 
         // Pre-populate formData with identity
@@ -750,7 +764,11 @@ export function usePemeriksaanForm(id: string | undefined): UsePemeriksaanFormRe
         }
     };
 
-    const handleBack = () => navigate('/dashboard/examinations');
+    const handleBack = () => {
+        // Use navigate(-1) to go back without adding the wizard back to history stack
+        // This prevents the "loop" when clicking browser's back button
+        navigate(-1);
+    };
 
     const handleReset = () => {
         // If we have saved pre-filled data, restore it and exit edit mode

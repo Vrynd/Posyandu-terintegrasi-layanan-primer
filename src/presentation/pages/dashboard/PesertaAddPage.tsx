@@ -43,7 +43,10 @@ export function PesertaAddPage() {
     errors,
   } = usePesertaAdd();
 
-  const handleBatal = () => navigate("/dashboard/participants");
+  const handleBatal = () => {
+    // Use navigate(-1) to pop this page from history stack on cancel
+    navigate(-1);
+  };
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
