@@ -128,7 +128,11 @@ export function useLaporanData() {
             let filename: string;
 
             if (type === 'examinations') {
-                const data = kunjunganList;
+                const data = kunjunganList.filter((k: PemeriksaanListItem) => {
+                    if (!k.tanggal_kunjungan) return false;
+                    const d = new Date(k.tanggal_kunjungan);
+                    return d.getMonth() + 1 === month && d.getFullYear() === year;
+                });
 
                 const rows = data.map((k: PemeriksaanListItem, index: number) => {
                     // Lookup peserta from cache if fields are missing
@@ -157,7 +161,16 @@ export function useLaporanData() {
                 filename = `Laporan_Pemeriksaan_${monthNames[month - 1]}_${year}.xlsx`;
 
             } else if (type === 'participants') {
-                const data = pesertaList;
+                // For participants, we might filter by registration date if available, 
+                // but since PesertaListItem doesn't have it, we show all active participants 
+                // who were either registered or had activity in that month (or just show all)
+                // However, per user request to show empty if no data, we'll try to filter by last_kunjungan_date
+                // as a proxy for "active participants in this month"
+                const data = pesertaList.filter((p: PesertaListItem) => {
+                    if (!p.last_kunjungan_date) return false;
+                    const d = new Date(p.last_kunjungan_date);
+                    return d.getMonth() + 1 === month && d.getFullYear() === year;
+                });
 
                 const rows = data.map((p: PesertaListItem, index: number) => ({
                     'No': index + 1,
@@ -207,12 +220,17 @@ export function useLaporanData() {
     }, [pesertaList, kunjunganList]);
 
     // Get preview data for display - uses cache only
-    const getPreviewData = useCallback(async (type: ReportType) => {
+    const getPreviewData = useCallback(async (type: ReportType, month: number, year: number) => {
         try {
             if (type === 'examinations') {
-                const data = kunjunganList;
+                const data = kunjunganList.filter((k: PemeriksaanListItem) => {
+                    if (!k.tanggal_kunjungan) return false;
+                    const d = new Date(k.tanggal_kunjungan);
+                    return d.getMonth() + 1 === month && d.getFullYear() === year;
+                });
+
                 if (data.length === 0) {
-                    console.log('[Laporan] Kunjungan cache is empty.');
+                    console.log(`[Laporan] No examinations found for ${month}/${year}.`);
                     return [];
                 }
 
@@ -230,9 +248,14 @@ export function useLaporanData() {
                     };
                 });
             } else if (type === 'participants') {
-                const data = pesertaList;
+                const data = pesertaList.filter((p: PesertaListItem) => {
+                    if (!p.last_kunjungan_date) return false;
+                    const d = new Date(p.last_kunjungan_date);
+                    return d.getMonth() + 1 === month && d.getFullYear() === year;
+                });
+
                 if (data.length === 0) {
-                    console.log('[Laporan] Peserta cache is empty.');
+                    console.log(`[Laporan] No active participants found for ${month}/${year}.`);
                     return [];
                 }
 

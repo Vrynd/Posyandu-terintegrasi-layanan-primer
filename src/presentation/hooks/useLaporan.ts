@@ -88,7 +88,7 @@ export function useLaporan() {
             setIsLoadingPreview(true);
             setPreviewError(null);
             try {
-                const data = await getPreviewData(selectedReport);
+                const data = await getPreviewData(selectedReport, selectedMonth, currentYear);
                 setPreviewData(data.slice(0, 10));
             } catch (err) {
                 console.error('Preview error:', err);
@@ -99,7 +99,7 @@ export function useLaporan() {
             }
         };
         loadPreview();
-    }, [selectedReport, getPreviewData]);
+    }, [selectedReport, selectedMonth, currentYear, getPreviewData]);
 
     const handleReportToggle = useCallback((id: ReportType) => {
         setSelectedReport(prev => prev === id ? null : id);

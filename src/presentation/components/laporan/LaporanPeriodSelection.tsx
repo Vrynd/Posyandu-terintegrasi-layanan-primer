@@ -1,5 +1,7 @@
 import { Download, Loader2 } from 'lucide-react';
 import type { ReportType } from '@/presentation/hooks/useLaporanData';
+import { FormSelect } from '../common/form/FormSelect';
+import { FormInput } from '../common/form/FormInput';
 
 interface LaporanPeriodSelectionProps {
     selectedReport: ReportType | null;
@@ -34,25 +36,19 @@ export function LaporanPeriodSelection({
 
             <div className="p-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label className="block text-xs text-gray-500 uppercase tracking-wide mb-2 font-bold">Bulan</label>
-                        <select
-                            value={selectedMonth}
-                            onChange={(e) => onMonthChange(Number(e.target.value))}
-                            disabled={!selectedReport}
-                            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-blue-400 focus:ring-2 focus:ring-blue-100 outline-none transition-all bg-white disabled:bg-gray-50 disabled:cursor-not-allowed"
-                        >
-                            {months.map((month) => (
-                                <option key={month.value} value={month.value}>{month.label}</option>
-                            ))}
-                        </select>
-                    </div>
-                    <div>
-                        <label className="block text-xs text-gray-500 uppercase tracking-wide mb-2 font-bold">Tahun</label>
-                        <div className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-gray-50 text-gray-700">
-                            {currentYear}
-                        </div>
-                    </div>
+                    <FormSelect
+                        label="Bulan"
+                        value={selectedMonth.toString()}
+                        onChange={(val) => onMonthChange(Number(val))}
+                        disabled={!selectedReport}
+                        options={months.map(m => ({ value: m.value.toString(), label: m.label }))}
+                    />
+                    <FormInput
+                        label="Tahun"
+                        value={currentYear.toString()}
+                        onChange={() => {}}
+                        disabled={true}
+                    />
                 </div>
             </div>
 
