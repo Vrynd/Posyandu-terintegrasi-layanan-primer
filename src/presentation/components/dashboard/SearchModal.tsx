@@ -20,7 +20,7 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
     const modalRef = useRef<HTMLDivElement>(null);
 
     // Reuse usePesertaList for filtering
-    const { filteredPeserta, isLoading } = usePesertaList();
+    const { filteredPeserta, isLoading, handleHoverPeserta } = usePesertaList();
 
     // Filter suggestions based on local state query
     const suggestions = query.trim() === '' 
@@ -53,10 +53,10 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
             } else if (e.key === 'Enter') {
                 e.preventDefault();
                 if (suggestions[selectedIndex]) {
-                    handleSelect(suggestions[selectedIndex].id);
+                    handleSelect(suggestions[selectedIndex]);
                 } else if (query.trim()) {
                     // Fallback to search result page
-                    navigate(`/dashboard/participants?search=${encodeURIComponent(query)}`);
+                    navigate(`/dashboard/participants?q=${encodeURIComponent(query)}`);
                     onClose();
                 }
             } else if (e.key === 'Escape') {
@@ -68,8 +68,9 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, [isOpen, suggestions, selectedIndex, query, navigate, onClose]);
 
-    const handleSelect = (id: number | string) => {
-        navigate(`/dashboard/participants/${id}`);
+    const handleSelect = (peserta: any) => {
+        const slug = kategoriConfig[peserta.kategori as keyof typeof kategoriConfig]?.urlSlug || 'all';
+        navigate(`/dashboard/participants/${slug}/${peserta.id}`);
         onClose();
     };
 
@@ -148,8 +149,11 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
                                 return (
                                     <button
                                         key={peserta.id}
-                                        onClick={() => handleSelect(peserta.id)}
-                                        onMouseEnter={() => setSelectedIndex(index)}
+                                        onClick={() => handleSelect(peserta)}
+                                        onMouseEnter={() => {
+                                            setSelectedIndex(index);
+                                            handleHoverPeserta(peserta.id);
+                                        }}
                                         className={`w-full flex items-center gap-4 px-4 py-3 transition-colors text-left ${
                                             isSelected ? 'bg-blue-600/10' : 'hover:bg-white/5'
                                         }`}
@@ -177,7 +181,7 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
                             
                             <button 
                                 onClick={() => {
-                                    navigate(`/dashboard/participants?search=${encodeURIComponent(query)}`);
+                                    navigate(`/dashboard/participants?q=${encodeURIComponent(query)}`);
                                     onClose();
                                 }}
                                 className="w-full flex items-center justify-between px-4 py-3 mt-2 border-t border-white/5 text-slate-400 hover:text-white transition-colors text-sm"

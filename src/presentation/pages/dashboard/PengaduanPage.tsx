@@ -55,7 +55,7 @@ export function PengaduanPage() {
     }, [fetchStats]);
 
     const handleCreateNew = () => {
-        navigate('/dashboard/pengaduan/baru');
+        navigate('/dashboard/complaints/new');
     };
 
     const setCurrentPage = (page: number) => {
@@ -100,7 +100,7 @@ export function PengaduanPage() {
                     <PengaduanCardGrid
                         pengaduanList={pengaduanList}
                         isLoading={isLoading}
-                        onNavigate={(id) => navigate(`/dashboard/pengaduan/${id}`)}
+                        onNavigate={(id) => navigate(`/dashboard/complaints/${id}`)}
                     />
 
                     <Pagination

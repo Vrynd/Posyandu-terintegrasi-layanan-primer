@@ -16,8 +16,8 @@
  * - /dashboard/examinations → Search & start health examination
  * - /dashboard/examinations/:category/:id → Record health data (wizard)
  * - /dashboard/reports → View & download Excel reports
- * - /dashboard/pengaduan → Submit bug reports
- * - /dashboard/pengaturan → Account profile & security settings
+ * - /dashboard/complaints → Submit bug reports/complaints
+ * - /dashboard/settings → Account profile & security settings
  */
 
 import { createBrowserRouter, Navigate, Outlet } from 'react-router-dom';
@@ -160,17 +160,17 @@ export const router = createBrowserRouter([
                         element: <LaporanPage />,
                     },
 
-                    // Pengaduan (Quick Action)
+                    // Complaints (formerly Pengaduan)
                     {
-                        path: '/dashboard/pengaduan',
+                        path: '/dashboard/complaints',
                         element: <PengaduanPage />,
                     },
                     {
-                        path: '/dashboard/pengaduan/baru',
+                        path: '/dashboard/complaints/new',
                         element: <PengaduanAddPage />,
                     },
                     {
-                        path: '/dashboard/pengaduan/:id',
+                        path: '/dashboard/complaints/:id',
                         element: <PengaduanDetailPage />,
                     },
 
@@ -226,28 +226,42 @@ export const router = createBrowserRouter([
                     // TOP-LEVEL PAGES (Navbar items)
                     // ========================================
 
-
-                    // Pengaturan Akun (Single page with all sections like Laporan)
-                    {
-                        path: '/dashboard/pengaturan',
-                        element: <AccountSettingsPage />,
-                    },
-                    // Legacy routes → redirect to pengaturan
+                    // Settings (formerly Pengaturan Akun)
                     {
                         path: '/dashboard/settings',
-                        element: <Navigate to="/dashboard/pengaturan" replace />,
+                        element: <AccountSettingsPage />,
+                    },
+
+                    // ========================================
+                    // LEGACY REDIRECTS (Indonesian paths)
+                    // ========================================
+                    {
+                        path: '/dashboard/pengaduan',
+                        element: <Navigate to="/dashboard/complaints" replace />,
+                    },
+                    {
+                        path: '/dashboard/pengaduan/baru',
+                        element: <Navigate to="/dashboard/complaints/new" replace />,
+                    },
+                    {
+                        path: '/dashboard/pengaduan/:id',
+                        element: <Navigate to="/dashboard/complaints" replace />,
+                    },
+                    {
+                        path: '/dashboard/pengaturan',
+                        element: <Navigate to="/dashboard/settings" replace />,
                     },
                     {
                         path: '/dashboard/profile',
-                        element: <Navigate to="/dashboard/pengaturan" replace />,
+                        element: <Navigate to="/dashboard/settings" replace />,
                     },
                     {
                         path: '/dashboard/password',
-                        element: <Navigate to="/dashboard/pengaturan" replace />,
+                        element: <Navigate to="/dashboard/settings" replace />,
                     },
                     {
                         path: '/dashboard/hapus-akun',
-                        element: <Navigate to="/dashboard/pengaturan" replace />,
+                        element: <Navigate to="/dashboard/settings" replace />,
                     },
                 ],
             },

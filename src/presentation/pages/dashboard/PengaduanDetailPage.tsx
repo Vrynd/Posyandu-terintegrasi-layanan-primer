@@ -2,7 +2,7 @@
  * PengaduanDetailPage - Admin detail view for complaint
  * Refactored to use smaller components and UseCases via hook
  * 
- * Route: /dashboard/pengaduan/:id
+ * Route: /dashboard/complaints/:id
  */
 
 import { useEffect, useState } from 'react';
@@ -73,7 +73,7 @@ export function PengaduanDetailPage() {
     };
 
     const handleBack = () => {
-        navigate('/dashboard/pengaduan');
+        navigate('/dashboard/complaints');
     };
 
     // Loading state
@@ -109,7 +109,7 @@ export function PengaduanDetailPage() {
                     title="Detail Pengaduan" 
                     description="Tinjau dan tanggapi pengaduan"
                     breadcrumbs={[
-                        { label: 'Pengaduan', path: '/dashboard/pengaduan' },
+                        { label: 'Complaints', path: '/dashboard/complaints' },
                         { label: selectedPengaduan.judul, isCurrent: true }
                     ]}
                 />

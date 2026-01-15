@@ -1,6 +1,6 @@
 /**
  * PengaduanAddPage - Step Wizard Form for Creating Complaint
- * Route: /dashboard/pengaduan/baru
+ * Route: /dashboard/complaints/new
  */
 
 import { useState } from 'react';
@@ -85,7 +85,7 @@ export function PengaduanAddPage() {
 
     const handlePrev = () => {
         if (currentStep === 1) {
-            navigate('/dashboard/pengaduan');
+            navigate('/dashboard/complaints');
         } else {
             setCurrentStep(prev => prev - 1);
         }
@@ -106,7 +106,7 @@ export function PengaduanAddPage() {
 
         if (success) {
             toast.success('Pengaduan berhasil dikirim!');
-            navigate('/dashboard/pengaduan');
+            navigate('/dashboard/complaints');
         }
     };
 
@@ -120,8 +120,8 @@ export function PengaduanAddPage() {
                 title="Buat Pengaduan" 
                 description="Laporkan bug atau masalah sistem"
                 breadcrumbs={[
-                    { label: 'Pengaduan', path: '/dashboard/pengaduan' },
-                    { label: 'Buat', isCurrent: true }
+                    { label: 'Complaints', path: '/dashboard/complaints' },
+                    { label: 'New', isCurrent: true }
                 ]}
             />
 

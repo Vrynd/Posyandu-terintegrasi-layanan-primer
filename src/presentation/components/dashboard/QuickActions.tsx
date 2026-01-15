@@ -56,7 +56,7 @@ export function QuickActions() {
             description: 'Laporkan bug atau masalah sistem',
             icon: Bug,
             bgGradient: 'from-amber-500 to-orange-600',
-            route: '/dashboard/pengaduan',
+            route: '/dashboard/complaints',
             comingSoon: true,
         },
     ];

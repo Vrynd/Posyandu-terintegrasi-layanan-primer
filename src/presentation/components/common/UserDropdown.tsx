@@ -29,7 +29,7 @@ export function UserDropdown({ userName, userEmail, userRole, onLogout }: UserDr
     }, []);
 
     const menuItems = [
-        { id: 'settings', label: 'Pengaturan', icon: Settings, onClick: () => navigate('/dashboard/pengaturan') },
+        { id: 'settings', label: 'Pengaturan', icon: Settings, onClick: () => navigate('/dashboard/settings') },
     ];
 
     const getInitial = (name: string) => {
