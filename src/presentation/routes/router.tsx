@@ -77,6 +77,19 @@ function SuspenseWrapper({ children }: { children: React.ReactNode }) {
 }
 
 /**
+ * LoginSuspenseWrapper - Minimal suspense wrapper for login/register pages
+ * Uses null fallback to prevent "Memuat..." overlay after logout redirect
+ * Login pages are typically already prefetched, so fallback rarely shows
+ */
+function LoginSuspenseWrapper({ children }: { children: React.ReactNode }) {
+    return (
+        <Suspense fallback={null}>
+            {children}
+        </Suspense>
+    );
+}
+
+/**
  * ProtectedRoute - Guards routes that require authentication
  */
 function ProtectedRoute() {
@@ -126,11 +139,11 @@ export const router = createBrowserRouter([
         children: [
             {
                 path: '/login',
-                element: <SuspenseWrapper><LoginPage /></SuspenseWrapper>,
+                element: <LoginSuspenseWrapper><LoginPage /></LoginSuspenseWrapper>,
             },
             {
                 path: '/register',
-                element: <SuspenseWrapper><RegisterPage /></SuspenseWrapper>,
+                element: <LoginSuspenseWrapper><RegisterPage /></LoginSuspenseWrapper>,
             },
         ],
     },

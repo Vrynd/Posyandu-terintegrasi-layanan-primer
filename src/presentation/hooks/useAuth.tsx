@@ -3,7 +3,7 @@
  * Manages authentication state using Laravel API integration
  */
 
-import { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
 import type { ReactNode } from 'react';
 import { loginUseCase } from '../../domain/usecases/auth/LoginUseCase';
 import { registerUseCase } from '../../domain/usecases/auth/RegisterUseCase';
@@ -82,9 +82,16 @@ interface AuthProviderProps {
 export function AuthProvider({ children }: AuthProviderProps) {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true); // Start true for initial auth check
+    
+    // Track if auth initialization has already been triggered (prevents StrictMode double calls)
+    const initStartedRef = useRef(false);
 
     // Check for existing token on mount
     useEffect(() => {
+        // Prevent duplicate initialization in React StrictMode
+        if (initStartedRef.current) return;
+        initStartedRef.current = true;
+        
         const initAuth = async () => {
             const token = localStorage.getItem(TOKEN_KEY);
             if (token) {

@@ -49,47 +49,47 @@ export function NewParticipantChart() {
                     ) : (
                         <ResponsiveContainer width="100%" height="100%">
                             <BarChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
-                            <XAxis
-                                dataKey="label"
-                                axisLine={false}
-                                tickLine={false}
-                                tick={{ fontSize: 10, fill: '#64748b', fontWeight: 500 }}
-                                dy={10}
-                            />
-                            <YAxis
-                                axisLine={false}
-                                tickLine={false}
-                                tick={{ fontSize: 10, fill: '#64748b', fontWeight: 500 }}
-                                allowDecimals={false}
-                            />
-                            <Tooltip
-                                cursor={{ fill: '#f8fafc', radius: 8 }}
-                                contentStyle={{
-                                    backgroundColor: 'white',
-                                    border: '1px solid #f1f5f9',
-                                    borderRadius: '12px',
-                                    boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)',
-                                    padding: '12px'
-                                }}
-                                itemStyle={{ fontSize: '11px', padding: '1px 0' }}
-                                labelStyle={{ fontWeight: 700, marginBottom: 8, color: '#1e293b' }}
-                                formatter={(value: any) => [`${value ?? 0} peserta`, 'Terdaftar']}
-                            />
-                            <Bar
-                                dataKey="total"
-                                radius={[6, 6, 0, 0]}
-                                barSize={24}
-                            >
-                                {data.map((entry, index) => (
-                                    <Cell 
-                                        key={`cell-${index}`} 
-                                        fill={entry.total > 0 ? '#10b981' : '#e2e8f0'} 
-                                    />
-                                ))}
-                            </Bar>
-                        </BarChart>
-                    </ResponsiveContainer>
+                                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+                                <XAxis
+                                    dataKey="label"
+                                    axisLine={false}
+                                    tickLine={false}
+                                    tick={{ fontSize: 10, fill: '#64748b', fontWeight: 500 }}
+                                    dy={10}
+                                />
+                                <YAxis
+                                    axisLine={false}
+                                    tickLine={false}
+                                    tick={{ fontSize: 10, fill: '#64748b', fontWeight: 500 }}
+                                    allowDecimals={false}
+                                />
+                                <Tooltip
+                                    cursor={{ fill: '#f8fafc', radius: 8 }}
+                                    contentStyle={{
+                                        backgroundColor: 'white',
+                                        border: '1px solid #f1f5f9',
+                                        borderRadius: '12px',
+                                        boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)',
+                                        padding: '12px'
+                                    }}
+                                    itemStyle={{ fontSize: '11px', padding: '1px 0' }}
+                                    labelStyle={{ fontWeight: 700, marginBottom: 8, color: '#1e293b' }}
+                                    formatter={(value: any) => [`${value ?? 0} peserta`, 'Terdaftar']}
+                                />
+                                <Bar
+                                    dataKey="total"
+                                    radius={[6, 6, 0, 0]}
+                                    barSize={24}
+                                >
+                                    {data.map((entry, index) => (
+                                        <Cell 
+                                            key={`cell-${index}`} 
+                                            fill={entry.total > 0 ? '#10b981' : '#e2e8f0'} 
+                                        />
+                                    ))}
+                                </Bar>
+                            </BarChart>
+                        </ResponsiveContainer>
                     )}
                 </div>
             </div>
