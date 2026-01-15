@@ -138,5 +138,44 @@ export interface GetPesertaParams {
     rw?: string;
     limit?: number;
     page?: number;
+    fields?: string; // Dynamic field selection: "id,nama,nik,kategori"
 }
 
+// ============================================
+// Lightweight Summary Types (70% smaller payload)
+// ============================================
+
+export interface PesertaSummaryItem {
+    id: number;
+    nama: string;
+    nik: string;
+    kategori: KategoriKey;
+    jenis_kelamin: string;
+}
+
+export interface PesertaSummaryResponse {
+    data: PesertaSummaryItem[];
+    current_page: number;
+    last_page: number;
+    per_page: number;
+    total: number;
+}
+
+export interface GetPesertaSummaryParams {
+    search?: string;
+    kategori?: KategoriKey;
+    limit?: number;
+}
+
+// ============================================
+// Bulk Operations Types
+// ============================================
+
+export interface BulkDeleteRequest {
+    ids: number[];
+}
+
+export interface BulkDeleteResponse {
+    success: boolean;
+    message: string;
+}

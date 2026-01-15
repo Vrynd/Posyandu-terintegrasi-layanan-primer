@@ -12,13 +12,16 @@ export { useDashboardStats, useDashboardChart, useDashboardRegistrations } from 
 export {
     usePesertaList,
     usePesertaInfinite,
+    usePesertaSummary,
     usePesertaDetail,
     useCreatePeserta,
     useUpdatePeserta,
     useDeletePeserta,
+    useBulkDeletePeserta,
     usePrefetchPeserta,
     useLatestVisit,
 } from './usePesertaQuery';
+
 
 // Pemeriksaan/Kunjungan Queries
 export {

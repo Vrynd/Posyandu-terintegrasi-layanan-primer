@@ -38,8 +38,8 @@ export function usePemeriksaanDetail(id: number | string) {
 
 /**
  * Hook untuk create pemeriksaan baru
- * - Auto-invalidates list cache on success
- * - Also invalidates dashboard stats for updated counts
+ * - Targeted invalidation: Sets created data directly in cache
+ * - Invalidates related caches on success
  */
 export function useCreatePemeriksaan() {
     const queryClient = useQueryClient();
@@ -47,7 +47,14 @@ export function useCreatePemeriksaan() {
     return useMutation({
         mutationFn: (data: CreatePemeriksaanRequest) =>
             pemeriksaanApiDataSource.createPemeriksaan(data),
-        onSuccess: (_, variables) => {
+        onSuccess: (response, variables) => {
+            // If the API returns the created data, pre-populate detail cache
+            if (response.data) {
+                queryClient.setQueryData(
+                    queryKeys.pemeriksaan.detail(response.data.id),
+                    response.data
+                );
+            }
             // Invalidate pemeriksaan lists
             queryClient.invalidateQueries({ queryKey: queryKeys.pemeriksaan.lists() });
             // Invalidate peserta's latest visit
@@ -62,25 +69,62 @@ export function useCreatePemeriksaan() {
     });
 }
 
+
 /**
  * Hook untuk delete pemeriksaan
- * - Auto-invalidates list and removes from cache
+ * - Optimistic update: UI updates instantly
+ * - Auto-rollback on error
+ * - Auto-invalidates after settled
  */
 export function useDeletePemeriksaan() {
     const queryClient = useQueryClient();
 
     return useMutation({
         mutationFn: (id: number | string) => pemeriksaanApiDataSource.deletePemeriksaan(id),
-        onSuccess: (_, id) => {
-            // Remove from cache
-            queryClient.removeQueries({ queryKey: queryKeys.pemeriksaan.detail(id) });
-            // Invalidate lists
+        
+        // OPTIMISTIC: Update UI before server response
+        onMutate: async (id) => {
+            // Cancel ongoing refetches to avoid race conditions
+            await queryClient.cancelQueries({ queryKey: queryKeys.pemeriksaan.lists() });
+
+            // Snapshot ALL current pemeriksaan list queries for rollback
+            const previousQueries = queryClient.getQueriesData({ queryKey: queryKeys.pemeriksaan.lists() });
+
+            // Optimistically remove from ALL list caches
+            queryClient.setQueriesData(
+                { queryKey: queryKeys.pemeriksaan.lists() },
+                (old: any) => {
+                    if (!old) return old;
+                    return {
+                        ...old,
+                        data: old.data.filter((p: any) => p.id !== id),
+                        total: old.total - 1,
+                    };
+                }
+            );
+
+            // Return context for rollback
+            return { previousQueries };
+        },
+
+        // Rollback on error
+        onError: (_err, _id, context) => {
+            // Restore all cached queries to their previous state
+            context?.previousQueries.forEach(([queryKey, data]) => {
+                queryClient.setQueryData(queryKey, data);
+            });
+        },
+
+        // Always refetch after settled (success or error)
+        onSettled: () => {
+            // Invalidate pemeriksaan lists for fresh data
             queryClient.invalidateQueries({ queryKey: queryKeys.pemeriksaan.lists() });
             // Invalidate dashboard
             queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all });
         },
     });
 }
+
 
 // Alias for backward compatibility
 export const useKunjunganList = usePemeriksaanList;
