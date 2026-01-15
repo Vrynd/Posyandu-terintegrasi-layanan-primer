@@ -1,6 +1,7 @@
 /**
  * Application Router Configuration
  * Uses AppLayout as shared layout for all authenticated pages
+ * Implements code splitting with React.lazy for better initial load performance
  * 
  * Route structure:
  * - / → Redirect to login
@@ -20,26 +21,60 @@
  * - /dashboard/settings → Account profile & security settings
  */
 
+import { lazy, Suspense } from 'react';
 import { createBrowserRouter, Navigate, Outlet } from 'react-router-dom';
-import { LoginPage } from '../pages/auth/LoginPage';
-import { RegisterPage } from '../pages/auth/RegisterPage';
-import { AuthCallbackPage } from '../pages/auth/AuthCallbackPage';
-
-import { AppLayout } from '../components/layouts/AppLayout';
-import { DashboardPage } from '../pages/dashboard/DashboardPage';
-import { LaporanPage } from '../pages/dashboard/LaporanPage';
-import { PengaduanPage } from '../pages/dashboard/PengaduanPage';
-import { PengaduanAddPage } from '../pages/dashboard/PengaduanAddPage';
-import { PengaduanDetailPage } from '../pages/dashboard/PengaduanDetailPage';
-import { PesertaPage } from '../pages/dashboard/PesertaPage';
-import { PesertaDetailPage } from '../pages/dashboard/PesertaDetailPage';
-import { PemeriksaanPage } from '../pages/dashboard/PemeriksaanPage';
-import { PemeriksaanAddPage } from '../pages/dashboard/PemeriksaanAddPage';
-import { PesertaAddPage } from '../pages/dashboard/PesertaAddPage';
-
-import { AccountSettingsPage } from '../pages/dashboard/AccountSettingsPage';
 import { useAuth } from '../hooks/useAuth';
 import { ClipLoader } from 'react-spinners';
+
+// ============================================
+// EAGER LOADED (Critical for initial render)
+// ============================================
+import { AppLayout } from '../components/layouts/AppLayout';
+
+// ============================================
+// LAZY LOADED - Auth Pages
+// ============================================
+const LoginPage = lazy(() => import('../pages/auth/LoginPage').then(m => ({ default: m.LoginPage })));
+const RegisterPage = lazy(() => import('../pages/auth/RegisterPage').then(m => ({ default: m.RegisterPage })));
+const AuthCallbackPage = lazy(() => import('../pages/auth/AuthCallbackPage').then(m => ({ default: m.AuthCallbackPage })));
+
+// ============================================
+// LAZY LOADED - Dashboard Pages
+// ============================================
+const DashboardPage = lazy(() => import('../pages/dashboard/DashboardPage').then(m => ({ default: m.DashboardPage })));
+const PesertaPage = lazy(() => import('../pages/dashboard/PesertaPage').then(m => ({ default: m.PesertaPage })));
+const PesertaAddPage = lazy(() => import('../pages/dashboard/PesertaAddPage').then(m => ({ default: m.PesertaAddPage })));
+const PesertaDetailPage = lazy(() => import('../pages/dashboard/PesertaDetailPage').then(m => ({ default: m.PesertaDetailPage })));
+const PemeriksaanPage = lazy(() => import('../pages/dashboard/PemeriksaanPage').then(m => ({ default: m.PemeriksaanPage })));
+const PemeriksaanAddPage = lazy(() => import('../pages/dashboard/PemeriksaanAddPage').then(m => ({ default: m.PemeriksaanAddPage })));
+const LaporanPage = lazy(() => import('../pages/dashboard/LaporanPage').then(m => ({ default: m.LaporanPage })));
+const PengaduanPage = lazy(() => import('../pages/dashboard/PengaduanPage').then(m => ({ default: m.PengaduanPage })));
+const PengaduanAddPage = lazy(() => import('../pages/dashboard/PengaduanAddPage').then(m => ({ default: m.PengaduanAddPage })));
+const PengaduanDetailPage = lazy(() => import('../pages/dashboard/PengaduanDetailPage').then(m => ({ default: m.PengaduanDetailPage })));
+const AccountSettingsPage = lazy(() => import('../pages/dashboard/AccountSettingsPage').then(m => ({ default: m.AccountSettingsPage })));
+
+/**
+ * AuthLoader - Full screen loader for auth checks
+ */
+function AuthLoader() {
+    return (
+        <div className="min-h-screen flex flex-col items-center justify-center bg-slate-900">
+            <ClipLoader color="#ffffff" size={50} speedMultiplier={0.8} />
+            <p className="mt-4 text-white font-medium">Memuat...</p>
+        </div>
+    );
+}
+
+/**
+ * SuspenseWrapper - Wraps lazy components with Suspense (for routes without AppLayout)
+ */
+function SuspenseWrapper({ children }: { children: React.ReactNode }) {
+    return (
+        <Suspense fallback={<AuthLoader />}>
+            {children}
+        </Suspense>
+    );
+}
 
 /**
  * ProtectedRoute - Guards routes that require authentication
@@ -48,12 +83,7 @@ function ProtectedRoute() {
     const { user, loading } = useAuth();
 
     if (loading) {
-        return (
-            <div className="min-h-screen flex flex-col items-center justify-center bg-slate-900">
-                <ClipLoader color="#ffffff" size={50} speedMultiplier={0.8} />
-                <p className="mt-4 text-white font-medium">Memuat...</p>
-            </div>
-        );
+        return <AuthLoader />;
     }
 
     if (!user) {
@@ -70,12 +100,7 @@ function PublicRoute() {
     const { user, loading } = useAuth();
 
     if (loading) {
-        return (
-            <div className="min-h-screen flex flex-col items-center justify-center bg-slate-900">
-                <ClipLoader color="#ffffff" size={50} speedMultiplier={0.8} />
-                <p className="mt-4 text-white font-medium">Memuat...</p>
-            </div>
-        );
+        return <AuthLoader />;
     }
 
     if (user) {
@@ -101,11 +126,11 @@ export const router = createBrowserRouter([
         children: [
             {
                 path: '/login',
-                element: <LoginPage />,
+                element: <SuspenseWrapper><LoginPage /></SuspenseWrapper>,
             },
             {
                 path: '/register',
-                element: <RegisterPage />,
+                element: <SuspenseWrapper><RegisterPage /></SuspenseWrapper>,
             },
         ],
     },
@@ -113,7 +138,7 @@ export const router = createBrowserRouter([
     // OAuth callback (no auth check needed)
     {
         path: '/auth/callback',
-        element: <AuthCallbackPage />,
+        element: <SuspenseWrapper><AuthCallbackPage /></SuspenseWrapper>,
     },
     // Protected routes (require authentication)
     {
@@ -268,4 +293,3 @@ export const router = createBrowserRouter([
         ],
     },
 ]);
-

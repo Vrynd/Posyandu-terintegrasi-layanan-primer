@@ -56,52 +56,110 @@ export function HeroOverview() {
         return currentTime.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }).replace('.', ':');
     };
 
-    // Fetch weather for Pati, Jawa Tengah
+    // Fetch weather based on user's realtime location (with localStorage cache)
     useEffect(() => {
-        const fetchWeather = async () => {
+        const CACHE_KEY = 'posyandu_weather_cache';
+        const CACHE_DURATION_MS = 30 * 60 * 1000; // 30 minutes
+
+        // Weather code descriptions
+        const weatherCodes: Record<number, string> = {
+            0: 'Cerah',
+            1: 'Cerah Berawan',
+            2: 'Berawan Sebagian',
+            3: 'Berawan',
+            45: 'Berkabut',
+            48: 'Berkabut Tebal',
+            51: 'Gerimis Ringan',
+            53: 'Gerimis',
+            55: 'Gerimis Lebat',
+            61: 'Hujan Ringan',
+            63: 'Hujan',
+            65: 'Hujan Lebat',
+            71: 'Hujan Salju Ringan',
+            73: 'Hujan Salju',
+            75: 'Hujan Salju Lebat',
+            80: 'Hujan Lokal',
+            81: 'Hujan Lokal Sedang',
+            82: 'Hujan Lokal Lebat',
+            95: 'Badai Petir',
+            96: 'Badai Petir + Hujan Es',
+            99: 'Badai Petir Hebat',
+        };
+
+        const fetchWeatherForLocation = async (latitude: number, longitude: number) => {
+            // Create location-specific cache key
+            const locationKey = `${CACHE_KEY}_${latitude.toFixed(2)}_${longitude.toFixed(2)}`;
+
+            // Check cache first
+            try {
+                const cached = localStorage.getItem(locationKey);
+                if (cached) {
+                    const { data, timestamp } = JSON.parse(cached);
+                    if (Date.now() - timestamp < CACHE_DURATION_MS) {
+                        setWeather(data);
+                        console.log('[Weather] Using cached data for location');
+                        return;
+                    }
+                }
+            } catch {
+                // Cache read failed, continue to fetch
+            }
+
             try {
                 // Using Open-Meteo API (free, no API key needed)
-                // Pati coordinates: -6.75, 111.04
                 const res = await fetch(
-                    'https://api.open-meteo.com/v1/forecast?latitude=-6.75&longitude=111.04&current=temperature_2m,weather_code&timezone=Asia/Jakarta'
+                    `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,weather_code&timezone=Asia/Jakarta`
                 );
                 const data = await res.json();
-                
-                // Weather code descriptions
-                const weatherCodes: Record<number, string> = {
-                    0: 'Cerah',
-                    1: 'Cerah Berawan',
-                    2: 'Berawan Sebagian',
-                    3: 'Berawan',
-                    45: 'Berkabut',
-                    48: 'Berkabut Tebal',
-                    51: 'Gerimis Ringan',
-                    53: 'Gerimis',
-                    55: 'Gerimis Lebat',
-                    61: 'Hujan Ringan',
-                    63: 'Hujan',
-                    65: 'Hujan Lebat',
-                    71: 'Hujan Salju Ringan',
-                    73: 'Hujan Salju',
-                    75: 'Hujan Salju Lebat',
-                    80: 'Hujan Lokal',
-                    81: 'Hujan Lokal Sedang',
-                    82: 'Hujan Lokal Lebat',
-                    95: 'Badai Petir',
-                    96: 'Badai Petir + Hujan Es',
-                    99: 'Badai Petir Hebat',
-                };
 
-                setWeather({
+                const weatherData = {
                     temp: Math.round(data.current.temperature_2m),
                     desc: weatherCodes[data.current.weather_code] || 'Tidak Diketahui'
-                });
+                };
+
+                setWeather(weatherData);
+
+                // Save to cache with location key
+                try {
+                    localStorage.setItem(locationKey, JSON.stringify({
+                        data: weatherData,
+                        timestamp: Date.now()
+                    }));
+                    console.log('[Weather] Data cached for location:', latitude.toFixed(2), longitude.toFixed(2));
+                } catch {
+                    // Cache write failed, ignore
+                }
             } catch (error) {
                 console.warn('[Weather] Failed to fetch:', error);
             }
         };
 
-        fetchWeather();
+        // Try to get user's current location
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    // Success - use real location
+                    const { latitude, longitude } = position.coords;
+                    console.log('[Weather] Using realtime location:', latitude, longitude);
+                    fetchWeatherForLocation(latitude, longitude);
+                },
+                (error) => {
+                    // Geolocation failed - fallback to Yogyakarta (default)
+                    console.log('[Weather] Geolocation denied, using default (Yogyakarta):', error.message);
+                    // Yogyakarta coordinates: -7.7956, 110.3695
+                    fetchWeatherForLocation(-7.7956, 110.3695);
+                },
+                {
+                    enableHighAccuracy: false,
+                    timeout: 5000,
+                    maximumAge: 10 * 60 * 1000 // Cache position for 10 minutes
+                }
+            );
+        } else {
+            // Browser doesn't support geolocation - fallback to Yogyakarta
+            console.log('[Weather] Geolocation not supported, using default (Yogyakarta)');
+            fetchWeatherForLocation(-7.7956, 110.3695);
+        }
     }, []);
 
     // Global Keyboard Shortcut (Cmd+K / Ctrl+K)

@@ -3,25 +3,42 @@
  * React Query hooks for peserta data fetching with optimized caching
  */
 
-import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, useInfiniteQuery, type UseQueryOptions } from '@tanstack/react-query';
 import { pesertaApiDataSource } from '../datasources/PesertaApiDataSource';
 import { queryKeys } from '../core/queryClient';
-import type { GetPesertaParams, CreatePesertaRequest } from '../models/PesertaApiTypes';
+import type { GetPesertaParams, CreatePesertaRequest, PesertaListResponse } from '../models/PesertaApiTypes';
 
 /**
  * Hook untuk fetch list peserta dengan pagination
  * - Supports filtering by kategori, search, etc.
  * - Cached per unique params combination
  */
-export function usePesertaList(params?: GetPesertaParams) {
+export function usePesertaList(
+    params?: GetPesertaParams, 
+    options?: Omit<UseQueryOptions<PesertaListResponse, Error>, 'queryKey' | 'queryFn'>
+) {
     return useQuery({
+        ...options,
         queryKey: queryKeys.peserta.list(params),
         queryFn: async () => {
             const response = await pesertaApiDataSource.getPeserta(params);
+            if (!response.data) {
+                // If API succeeds but data is missing (e.g. empty results in some backend versions)
+                // we should provide a fallback structure to satisfy TypeScript
+                return {
+                    data: [],
+                    current_page: 1,
+                    last_page: 1,
+                    per_page: params?.limit || 20,
+                    total: 0
+                };
+            }
             return response.data;
         },
     });
 }
+
+
 
 /**
  * Hook untuk infinite scroll list peserta

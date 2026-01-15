@@ -1,12 +1,13 @@
 /**
  * AppLayout - Shared layout for all authenticated pages
  * Structure: Navbar + Main Content (via Outlet)
+ * Uses Suspense with skeleton for lazy-loaded pages
  */
 
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import { Stethoscope } from 'lucide-react';
-import { UserDropdown, LogoutConfirmModal, FullPageLoading } from '../common';
+import { UserDropdown, LogoutConfirmModal, FullPageLoading, PageSkeleton } from '../common';
 import { useAuth } from '../../hooks/useAuth';
 
 export function AppLayout() {
@@ -78,11 +79,16 @@ export function AppLayout() {
                 </div>
             </header>
 
-            {/* Main Content */}
+            {/* Main Content - Skeleton shown while lazy chunks load */}
             <main>
-                <Outlet />
+                <Suspense fallback={<PageSkeleton />}>
+                    <Outlet />
+                </Suspense>
             </main>
         </div>
     );
 }
+
+
+
 

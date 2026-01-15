@@ -2,10 +2,11 @@
  * useLaporanData Hook
  * Fetches data for reports and generates Excel files
  * Stub implementation - Supabase removed, ready for Laravel API integration
+ * 
+ * Note: xlsx is dynamically imported to reduce initial bundle size
  */
 
 import { useState, useCallback, useMemo } from 'react';
-import * as XLSX from 'xlsx';
 import { usePesertaList, usePemeriksaanList } from '../../data/queries';
 import type { PesertaListItem } from '../../data/models/PesertaApiTypes';
 import type { PemeriksaanListItem } from '../../data/models/PemeriksaanApiTypes';
@@ -116,15 +117,19 @@ export function useLaporanData() {
     }, [pesertaList, kunjunganList]);
 
     // Generate and download Excel report - uses cache only
+    // xlsx is dynamically imported to reduce initial bundle size
     const generateReport = useCallback(async (type: ReportType, month: number, year: number) => {
         setIsLoading(true);
         setError(null);
 
         try {
+            // Dynamic import - xlsx (~500KB) only loads when user generates report
+            const XLSX = await import('xlsx');
+            
             const monthNames = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
                 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
 
-            let workbook: XLSX.WorkBook;
+            let workbook: ReturnType<typeof XLSX.utils.book_new>;
             let filename: string;
 
             if (type === 'examinations') {

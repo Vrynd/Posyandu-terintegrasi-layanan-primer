@@ -46,6 +46,7 @@ export function RecentPemeriksaan({ currentPage, onPageChange }: RecentPemeriksa
     const navigate = useNavigate();
 
     // Use React Query for caching - fetch both kunjungan and peserta
+    // We fetch 15 latest kunjungan and 100 peserta to find matches
     const { data: kunjunganData, isLoading: isKunjunganLoading } = useKunjunganList({ limit: 15 });
     const { data: pesertaData, isLoading: isPesertaLoading } = usePesertaList({ limit: 100 });
 
@@ -74,12 +75,15 @@ export function RecentPemeriksaan({ currentPage, onPageChange }: RecentPemeriksa
             });
 
         const totalItems = merged.length;
+        // Local pagination for the 15 recently fetched items
         const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
         const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
         const paginatedItems = merged.slice(startIndex, startIndex + ITEMS_PER_PAGE);
 
         return { paginatedItems, totalPages, totalItems };
     }, [kunjunganData, pesertaData, currentPage]);
+
+
 
     // Clamp page if it's out of bounds (e.g., after data changes)
     useEffect(() => {

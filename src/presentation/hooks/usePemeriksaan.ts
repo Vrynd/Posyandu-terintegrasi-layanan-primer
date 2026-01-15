@@ -31,7 +31,6 @@ export function usePemeriksaan() {
   const initialPage = parseInt(searchParams.get("page") || "1", 10);
 
   // State
-  const [pesertaList, setPesertaList] = useState<PesertaListItem[]>([]);
   const [searchQuery, setSearchQuery] = useState(initialQuery);
   const [selectedFilters, setSelectedFilters] =
     useState<KategoriKey[]>(initialFilters);
@@ -42,19 +41,25 @@ export function usePemeriksaan() {
   const initialRecentPage = parseInt(searchParams.get("recent") || "1", 10);
   const [recentPage, setRecentPage] = useState(initialRecentPage);
 
-  // Debounced search query for URL sync
-  const debouncedSearchQuery = useDebounce(searchQuery, 500);
+  // Debounced search query for API calls
+  const debouncedSearchQuery = useDebounce(searchQuery, 400);
 
-  // Use React Query for fetching peserta list
+  // Determine if we should perform a search
+  const isSearchActive = debouncedSearchQuery.length >= 1 || selectedFilters.length > 0;
+
+  // Use React Query for fetching peserta list from server
   const { data: apiData, isLoading: isQueryLoading } = usePesertaListQuery({
-    limit: 100,
+    search: debouncedSearchQuery || undefined,
+    // If backend supports multiple, we'd pass join. For now, backend docs show singular.
+    // We'll pass the first one, or undefined if none.
+    kategori: selectedFilters.length > 0 ? selectedFilters[0] : undefined,
+    page: currentPage,
+    limit: ITEMS_PER_PAGE,
+    sort_by: selectedSort.startsWith('nama') ? 'nama' : undefined,
+    sort_order: selectedSort.endsWith('asc') ? 'asc' : 'desc',
+  }, { 
+    enabled: isSearchActive // Only fetch when there's a search context
   });
-
-  // Extract cached peserta from query data
-  const cachedPeserta: PesertaListItem[] = useMemo(() => {
-    if (!apiData) return [];
-    return apiData.data || [];
-  }, [apiData]);
 
   // Sync states to URL
   useEffect(() => {
@@ -77,30 +82,19 @@ export function usePemeriksaan() {
     setSearchParams,
   ]);
 
-  // Filter peserta based on search query and filters
-  useEffect(() => {
-    const shouldSearch = searchQuery.length >= 1 || selectedFilters.length > 0;
-
-    if (!shouldSearch) {
-      setPesertaList([]);
-      return;
+  // Extract results and pagination from API response
+  const { searchResults, totalResults, totalPages } = useMemo(() => {
+    if (!isSearchActive || !apiData) {
+      return { searchResults: [], totalResults: 0, totalPages: 1 };
     }
 
-    // Filter from cached data
-    const filtered = cachedPeserta.filter((p) => {
-      const matchSearch =
-        searchQuery.length < 1 ||
-        p.nama.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        p.nik.includes(searchQuery);
-
-      const matchKategori =
-        selectedFilters.length === 0 || selectedFilters.includes(p.kategori);
-
-      return matchSearch && matchKategori;
-    });
-
-    setPesertaList(filtered);
-  }, [searchQuery, selectedFilters, cachedPeserta]);
+    const responseData = (apiData as any);
+    return {
+        searchResults: (responseData?.data || []) as PesertaListItem[],
+        totalResults: responseData?.total || 0,
+        totalPages: responseData?.last_page || 1
+    };
+  }, [apiData, isSearchActive]);
 
   // Refresh function with React Query invalidation
   const refresh = useCallback(async () => {
@@ -108,49 +102,6 @@ export function usePemeriksaan() {
       queryKey: queryKeys.peserta.lists(),
     });
   }, []);
-
-  const { paginatedResults, totalResults, totalPages } = useMemo(() => {
-    let results = [...pesertaList];
-
-    // Client-side filtering for multiple category selection
-    if (selectedFilters.length > 1) {
-      results = results.filter((p) => selectedFilters.includes(p.kategori));
-    }
-
-    // Sort results
-    results.sort((a, b) => {
-      switch (selectedSort) {
-        case "nama-asc":
-          return a.nama.localeCompare(b.nama, "id");
-        case "nama-desc":
-          return b.nama.localeCompare(a.nama, "id");
-        case "kunjungan-desc":
-        case "kunjungan-asc":
-          // Sort by tanggal_lahir as fallback since we don't have kunjunganTerakhir
-          return a.nama.localeCompare(b.nama, "id");
-        default:
-          return 0;
-      }
-    });
-
-    const totalResults = results.length;
-    const totalPages = Math.ceil(totalResults / ITEMS_PER_PAGE);
-
-    // Paginate results
-    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-    const paginatedResults = results.slice(
-      startIndex,
-      startIndex + ITEMS_PER_PAGE
-    );
-
-    return { paginatedResults, totalResults, totalPages };
-  }, [
-    pesertaList,
-    debouncedSearchQuery,
-    selectedFilters,
-    selectedSort,
-    currentPage,
-  ]);
 
   // Reset page when filters change
   const handleSearchChange = useCallback((query: string) => {
@@ -194,11 +145,6 @@ export function usePemeriksaan() {
     [navigate]
   );
 
-  // Determine loading state (only loading when query active)
-  const isLoading =
-    isQueryLoading &&
-    (debouncedSearchQuery.length >= 1 || selectedFilters.length > 0);
-
   return {
     // State
     searchQuery,
@@ -207,8 +153,8 @@ export function usePemeriksaan() {
     currentPage,
     totalPages,
     totalResults,
-    searchResults: paginatedResults,
-    isLoading,
+    searchResults,
+    isLoading: isQueryLoading && isSearchActive,
 
     // Actions
     handleSearchChange,
@@ -229,5 +175,6 @@ export function usePemeriksaan() {
     refresh,
   };
 }
+
 
 export type { KategoriKey };

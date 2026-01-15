@@ -129,8 +129,14 @@ export interface GetPesertaParams {
     search?: string;
     nik?: string;
     kategori?: KategoriKey;
+    gender?: 'L' | 'P';
+    min_age?: number;
+    max_age?: number;
+    sort_by?: 'nama' | 'tanggal_lahir' | 'created_at';
+    sort_order?: 'asc' | 'desc';
     rt?: string;
     rw?: string;
     limit?: number;
     page?: number;
 }
+

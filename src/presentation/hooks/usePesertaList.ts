@@ -1,18 +1,13 @@
-/**
- * usePesertaList Hook
- * State and logic for PesertaPage - search, filter, pagination
- * Uses React Query for optimal caching
- */
-
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { calculateAge, type KategoriKey } from '../../domain/entities/Peserta';
 import { kategoriConfig } from '../constants/kategoriConfig';
-import type { PesertaListItem } from '../../data/models/PesertaApiTypes';
+import type { PesertaListItem, GetPesertaParams } from '../../data/models/PesertaApiTypes';
 import { usePesertaList as usePesertaListQuery, usePrefetchPeserta, queryClient, queryKeys } from '../../data/queries';
+import { useDashboardStats } from '../../data/queries/useDashboardQuery'; // Import dashboard stats for accurate counts
 import { useDebounce } from './useDebounce';
 
-const ITEMS_PER_PAGE = 5;
+const ITEMS_PER_PAGE = 8;
 
 export type SortType = 'nama-asc' | 'nama-desc' | 'umur-asc' | 'umur-desc' | 'terbaru';
 export type GenderFilter = 'all' | 'L' | 'P';
@@ -55,16 +50,63 @@ export function usePesertaList() {
     const [currentPage, setCurrentPage] = useState(parseInt(searchParams.get('page') || '1'));
     const [successData, setSuccessData] = useState<{ nama: string; nik: string } | null>(null);
 
-    // Debounce search query for URL synchronization
-    const debouncedSearchQuery = useDebounce(searchQuery, 500);
+    // Debounce search query for API calls
+    const debouncedSearchQuery = useDebounce(searchQuery, 400);
 
-    // Use React Query for fetching peserta list
-    const { data: apiData, isLoading, error: queryError } = usePesertaListQuery({ limit: 100 });
+    // Prepare API Params
+    const apiParams: GetPesertaParams = useMemo(() => {
+        const params: GetPesertaParams = {
+            page: currentPage,
+            limit: ITEMS_PER_PAGE,
+            search: debouncedSearchQuery || undefined,
+            kategori: selectedKategori || undefined,
+            gender: selectedGender !== 'all' ? selectedGender : undefined,
+            min_age: selectedAgeRange.min !== null ? selectedAgeRange.min : undefined,
+            max_age: (selectedAgeRange.max !== null && selectedAgeRange.max !== 999) ? selectedAgeRange.max : undefined,
+        };
+
+        // Map sorting
+        switch (selectedSort) {
+            case 'nama-asc':
+                params.sort_by = 'nama';
+                params.sort_order = 'asc';
+                break;
+            case 'nama-desc':
+                params.sort_by = 'nama';
+                params.sort_order = 'desc';
+                break;
+            case 'umur-asc':
+                params.sort_by = 'tanggal_lahir';
+                params.sort_order = 'desc'; // Oldest birth date = oldest age, so ascending age = descending birth date? 
+                                            // Wait, Ascending age = 1, 2, 3 -> Birth dates: 2023, 2022, 2021. So descending.
+                break;
+            case 'umur-desc':
+                params.sort_by = 'tanggal_lahir';
+                params.sort_order = 'asc';
+                break;
+            case 'terbaru':
+                params.sort_by = 'created_at';
+                params.sort_order = 'desc';
+                break;
+        }
+
+        return params;
+    }, [currentPage, debouncedSearchQuery, selectedKategori, selectedGender, selectedAgeRange, selectedSort]);
+
+    // Use React Query for fetching peserta list from server
+    const { data: apiData, isLoading, error: queryError } = usePesertaListQuery(apiParams);
+
+    // Fetch dashboard stats for accurate category counts
+    const { data: dashboardStats } = useDashboardStats();
     
-    // Extract list from API response
-    const pesertaList: PesertaDisplay[] = useMemo(() => {
-        if (!apiData) return [];
-        return (apiData.data || []) as PesertaDisplay[];
+    // Extract list and pagination from API response
+    const { pesertaList, totalDataCount, totalPages } = useMemo(() => {
+        const responseData = (apiData as any);
+        return {
+            pesertaList: (responseData?.data || []) as PesertaDisplay[],
+            totalDataCount: responseData?.total || 0,
+            totalPages: responseData?.last_page || 1
+        };
     }, [apiData]);
 
     // Sync states to URL
@@ -79,7 +121,7 @@ export function usePesertaList() {
         if (selectedAgeRange.max !== null) params.set('maxAge', selectedAgeRange.max.toString());
         if (currentPage > 1) params.set('page', currentPage.toString());
 
-        // Preserve success data if any (usually from redirect)
+        // Preserve success data if any
         const success = searchParams.get('success');
         const nama = searchParams.get('nama');
         const nik = searchParams.get('nik');
@@ -90,7 +132,7 @@ export function usePesertaList() {
         setSearchParams(params, { replace: true });
     }, [debouncedSearchQuery, selectedKategori, selectedSort, selectedGender, selectedAgeRange, currentPage, setSearchParams]);
 
-    // Banner logic (one-time read and clear)
+    // Banner logic
     useEffect(() => {
         const success = searchParams.get('success');
         const nama = searchParams.get('nama');
@@ -98,75 +140,21 @@ export function usePesertaList() {
         
         if (success === '1' && nama && nik) {
             setSuccessData({ nama, nik });
-            // Remove success params from URL after reading
             const newParams = new URLSearchParams(searchParams);
             newParams.delete('success');
             newParams.delete('nama');
             newParams.delete('nik');
             setSearchParams(newParams, { replace: true });
         }
-    }, []); // Only on mount
+    }, []);
 
-    // Filter and Sort peserta (client-side)
-    const filteredPeserta = useMemo(() => {
-        let result = pesertaList.filter((p) => {
-            const matchSearch = p.nama.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                p.nik.includes(searchQuery);
-            const matchKategori = !selectedKategori || p.kategori === selectedKategori;
-            const matchGender = selectedGender === 'all' || 
-                (selectedGender === 'L' && p.jenis_kelamin === 'Laki-Laki') ||
-                (selectedGender === 'P' && p.jenis_kelamin === 'Perempuan');
-            
-            // Age filter
-            let matchAge = true;
-            if (selectedAgeRange.min !== null || selectedAgeRange.max !== null) {
-                const age = calculateAge(p.tanggal_lahir);
-                if (selectedAgeRange.min !== null && age < selectedAgeRange.min) matchAge = false;
-                if (selectedAgeRange.max !== null && selectedAgeRange.max !== 999 && age > selectedAgeRange.max) matchAge = false;
-                if (selectedAgeRange.max === 999 && selectedAgeRange.min !== null && age < selectedAgeRange.min) matchAge = false;
-            }
-            
-            return matchSearch && matchKategori && matchGender && matchAge;
-        });
-
-        // Apply Sorting
-        result.sort((a, b) => {
-            switch (selectedSort) {
-                case 'nama-asc':
-                    return a.nama.localeCompare(b.nama);
-                case 'nama-desc':
-                    return b.nama.localeCompare(a.nama);
-                case 'umur-asc':
-                    return calculateAge(a.tanggal_lahir) - calculateAge(b.tanggal_lahir);
-                case 'umur-desc':
-                    return calculateAge(b.tanggal_lahir) - calculateAge(a.tanggal_lahir);
-                case 'terbaru':
-                    return Number(b.id) - Number(a.id);
-                default:
-                    return 0;
-            }
-        });
-
-        return result;
-    }, [pesertaList, searchQuery, selectedKategori, selectedSort, selectedGender, selectedAgeRange]);
-
-    // Pagination
-    const totalPages = Math.ceil(filteredPeserta.length / ITEMS_PER_PAGE);
-    const paginatedPeserta = useMemo(() => {
-        return filteredPeserta.slice(
-            (currentPage - 1) * ITEMS_PER_PAGE,
-            currentPage * ITEMS_PER_PAGE
-        );
-    }, [filteredPeserta, currentPage]);
-
-    // Count per kategori
+    // Get counts from dashboard stats (fallback to 0)
     const kategoryCounts = useMemo(() => {
-        const counts: Record<string, number> = {};
-        Object.keys(kategoriConfig).forEach(key => {
-            counts[key] = pesertaList.filter((p) => p.kategori === key).length;
-        });
-        return counts;
-    }, [pesertaList]);
+        if (!dashboardStats?.kategori) {
+            return Object.keys(kategoriConfig).reduce((acc, key) => ({ ...acc, [key]: 0 }), {});
+        }
+        return dashboardStats.kategori;
+    }, [dashboardStats]);
 
     // Actions
     const handleFilterChange = useCallback((kategori: KategoriKey | null) => {
@@ -232,12 +220,12 @@ export function usePesertaList() {
 
     return {
         // Data
-        paginatedPeserta,
-        filteredPeserta,
+        paginatedPeserta: pesertaList, // Now just the data from API
+        filteredPeserta: pesertaList, // Same as paginated in server-side mode
         kategoryCounts,
         isLoading,
         error: queryError?.message || null,
-        totalDataCount: pesertaList.length,
+        totalDataCount,
         successData,
 
         // State
@@ -262,7 +250,7 @@ export function usePesertaList() {
         handleNextPage,
         handleGoToPage,
         handleDismissSuccess,
-        handleHoverPeserta, // Prefetch on hover
+        handleHoverPeserta,
         refresh,
 
         // Helpers
@@ -271,3 +259,4 @@ export function usePesertaList() {
         sortOptions,
     };
 }
+
