@@ -58,7 +58,7 @@ export function LaporanPeriodSelection({
                     onClick={onGenerate}
                     disabled={!selectedReport || isLoading}
                     className={`px-6 py-2.5 rounded-xl cursor-pointer font-semibold flex items-center justify-center gap-2 ${selectedReport && !isLoading
-                        ? 'bg-slate-800 text-white'
+                        ? 'bg-linear-to-r from-slate-800 to-slate-900 hover:from-slate-700 hover:to-slate-800 text-white'
                         : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                         }`}
                 >

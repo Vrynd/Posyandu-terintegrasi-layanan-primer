@@ -245,11 +245,10 @@ export function useLaporanData() {
 
                     return {
                         'No': index + 1,
-                        'Tanggal': k.tanggal_kunjungan ? new Date(k.tanggal_kunjungan).toLocaleDateString('id-ID') : '-',
+                        'Tanggal Pemeriksaan': k.tanggal_kunjungan ? new Date(k.tanggal_kunjungan).toLocaleDateString('id-ID') : '-',
                         'Nama Peserta': k.peserta_nama || (k as any).peserta?.nama || pesertaInfo?.nama || '-',
-                        'NIK': (k as any).peserta_nik || (k as any).peserta?.nik || pesertaInfo?.nik || '-',
-                        'Kategori': getKategoriLabel(k.peserta_kategori || (k as any).peserta?.kategori || pesertaInfo?.kategori || ''),
-                        'Lokasi': k.lokasi === 'posyandu' ? 'Posyandu' : 'Kunjungan Rumah',
+                        'Lokasi Pemeriksaan': k.lokasi === 'posyandu' ? 'Posyandu' : 'Kunjungan Rumah',
+                        'Status Rujukan': k.rujuk ? 'Dirujuk' : 'Tidak',
                     };
                 });
             } else if (type === 'participants') {
@@ -268,9 +267,9 @@ export function useLaporanData() {
                     'No': index + 1,
                     'Nama': p.nama,
                     'NIK': p.nik,
-                    'Kategori': getKategoriLabel(p.kategori),
-                    'Jenis Kelamin': p.jenis_kelamin || '-',
+                    'Kategori Peserta': getKategoriLabel(p.kategori),
                     'Telepon': (p as any).telepon || '-',
+                    'Status BPJS': ((p as any).kepesertaan_bpjs ?? (p as any).kepesertaanBpjs) ? 'Terdaftar' : 'Tidak',
                 }));
             } else {
                 // Activity log - not available without backend

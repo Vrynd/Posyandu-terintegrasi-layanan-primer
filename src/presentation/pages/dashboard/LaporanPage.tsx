@@ -5,7 +5,8 @@ import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 import { 
     LaporanTypeSelection, 
     LaporanPeriodSelection, 
-    LaporanPreview 
+    LaporanPreview,
+    LaporanStatsSummary 
 } from '../../components/laporan';
 
 export function LaporanPage() {
@@ -43,6 +44,12 @@ export function LaporanPage() {
                     <span className="font-medium text-gray-900">Laporan</span>
                 </nav>
             </div>
+
+            {/* Statistics Summary - appears before report selection */}
+            <LaporanStatsSummary
+                month={selectedMonth}
+                year={currentYear}
+            />
 
             {/* Step 1: Report Type Selection */}
             <LaporanTypeSelection

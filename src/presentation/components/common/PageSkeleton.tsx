@@ -7,6 +7,7 @@ import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import { PesertaSkeleton, PesertaAddSkeleton, PesertaDetailSkeleton } from '../peserta';
 import { PemeriksaanSkeleton, PemeriksaanAddSkeleton } from '../pemeriksaan';
+import { LaporanSkeleton } from '../laporan';
 import { DashboardSkeleton } from '../dashboard/DashboardSkeleton';
 
 
@@ -82,6 +83,10 @@ export function PageSkeleton() {
     // Match /dashboard/examinations/:category/:id pattern
     if (/^\/dashboard\/examinations\/[^/]+\/\d+/.test(pathname)) {
         return <PemeriksaanAddSkeleton />;
+    }
+    
+    if (pathname.startsWith('/dashboard/reports')) {
+        return <LaporanSkeleton />;
     }
     
     return <GenericPageSkeleton />;

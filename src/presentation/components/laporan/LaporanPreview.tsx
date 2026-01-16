@@ -1,4 +1,4 @@
-import { FileText, Loader2, AlertTriangle, RefreshCw } from 'lucide-react';
+import { FileText, AlertTriangle, RefreshCw } from 'lucide-react';
 
 interface LaporanPreviewProps {
     reportLabel: string;
@@ -30,10 +30,32 @@ export function LaporanPreview({
 
             <div className="p-6">
                 {isLoading ? (
-                    <div className="py-12 text-center">
-                        <Loader2 className="w-8 h-8 text-blue-600 animate-spin mx-auto mb-2" />
-                        <p className="text-gray-500 text-sm">Memuat preview...</p>
-                        <p className="text-gray-400 text-xs mt-1">Maks 10 detik</p>
+                    <div className="overflow-x-auto rounded-xl border border-gray-100">
+                        <table className="w-full">
+                            <thead>
+                                <tr className="border-b border-gray-100 bg-gray-50">
+                                    {['No', 'Tanggal', 'Nama Peserta', 'Lokasi', 'Status'].map((col) => (
+                                        <th key={col} className="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase">
+                                            {col}
+                                        </th>
+                                    ))}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {[...Array(5)].map((_, index) => (
+                                    <tr key={index} className="border-b border-gray-50">
+                                        <td className="py-3 px-4"><div className="h-4 w-6 bg-gray-200 rounded animate-pulse" /></td>
+                                        <td className="py-3 px-4"><div className="h-4 w-24 bg-gray-200 rounded animate-pulse" /></td>
+                                        <td className="py-3 px-4"><div className="h-4 w-32 bg-gray-200 rounded animate-pulse" /></td>
+                                        <td className="py-3 px-4"><div className="h-4 w-24 bg-gray-200 rounded animate-pulse" /></td>
+                                        <td className="py-3 px-4"><div className="h-4 w-16 bg-gray-200 rounded animate-pulse" /></td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                        <div className="py-3 px-4 text-center">
+                            <p className="text-xs text-gray-400">Memuat preview data...</p>
+                        </div>
                     </div>
                 ) : error ? (
                     <div className="py-12 text-center">
