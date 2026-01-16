@@ -4,13 +4,19 @@
  * Uses React Query for optimal caching
  */
 
-import { useMemo, useEffect } from 'react';
+import { useMemo, useEffect, useCallback } from 'react';
 import { Clock, ArrowRight, Calendar, ChevronLeft, ChevronRight, ClipboardList } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { BeatLoader } from 'react-spinners';
 import { kategoriConfig } from '../../constants/kategoriConfig';
 import { useKunjunganList, usePesertaList } from '@/data/queries';
 import type { KategoriKey } from '@/domain/entities/Peserta';
+
+// Prefetch function for PemeriksaanAddPage
+const prefetchPemeriksaanAddPage = () => import('../../pages/dashboard/PemeriksaanAddPage');
+
+// Track prefetch status
+let isPrefetched = false;
 
 interface RecentPemeriksaanProps {
     currentPage: number;
@@ -95,6 +101,15 @@ export function RecentPemeriksaan({ currentPage, onPageChange }: RecentPemeriksa
     const handlePrevPage = () => onPageChange(Math.max(1, currentPage - 1));
     const handleNextPage = () => onPageChange(Math.min(totalPages, currentPage + 1));
 
+    // Prefetch on hover/focus
+    const handlePrefetch = useCallback(() => {
+        if (isPrefetched) return;
+        isPrefetched = true;
+        prefetchPemeriksaanAddPage().catch(() => {
+            isPrefetched = false;
+        });
+    }, []);
+
     // Loading state
     if (isLoading) {
         return (
@@ -166,15 +181,15 @@ export function RecentPemeriksaan({ currentPage, onPageChange }: RecentPemeriksa
                         const kategori = (item.peserta_kategori || 'produktif') as KategoriKey;
                         const config = kategoriConfig[kategori] || kategoriConfig.produktif;
                         const Icon = config.icon;
-
-                        const handleClick = () => {
-                            navigate(`/dashboard/examinations/${config.urlSlug}/${item.peserta_id}`);
-                        };
+                        const route = `/dashboard/examinations/${config.urlSlug}/${item.peserta_id}`;
 
                         return (
                             <div
                                 key={item.id}
-                                onClick={handleClick}
+                                onClick={() => navigate(route)}
+                                onMouseEnter={handlePrefetch}
+                                onFocus={handlePrefetch}
+                                tabIndex={0}
                                 className="group bg-gray-50 border border-gray-100 hover:border-gray-300 rounded-xl p-4 cursor-pointer transition-colors"
                             >
                                 {/* Top - Icon and Category Label */}

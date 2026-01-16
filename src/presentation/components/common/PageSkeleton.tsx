@@ -5,7 +5,8 @@
 
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
-import { PesertaSkeleton, PesertaAddSkeleton } from '../peserta';
+import { PesertaSkeleton, PesertaAddSkeleton, PesertaDetailSkeleton } from '../peserta';
+import { PemeriksaanSkeleton, PemeriksaanAddSkeleton } from '../pemeriksaan';
 import { DashboardSkeleton } from '../dashboard/DashboardSkeleton';
 
 
@@ -67,6 +68,20 @@ export function PageSkeleton() {
     
     if (pathname.startsWith('/dashboard/participants/register')) {
         return <PesertaAddSkeleton />;
+    }
+    
+    // Match /dashboard/participants/:category/:id pattern (detail page)
+    if (/^\/dashboard\/participants\/[^/]+\/\d+/.test(pathname)) {
+        return <PesertaDetailSkeleton />;
+    }
+    
+    if (pathname === '/dashboard/examinations' || pathname === '/dashboard/examinations/') {
+        return <PemeriksaanSkeleton />;
+    }
+    
+    // Match /dashboard/examinations/:category/:id pattern
+    if (/^\/dashboard\/examinations\/[^/]+\/\d+/.test(pathname)) {
+        return <PemeriksaanAddSkeleton />;
     }
     
     return <GenericPageSkeleton />;

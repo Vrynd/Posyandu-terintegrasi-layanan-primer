@@ -9,7 +9,8 @@
         Step2Pemeriksaan, 
         Step3WaktuLokasi, 
         Step4Konfirmasi, 
-        PemeriksaanWizardFooter 
+        PemeriksaanWizardFooter,
+        PemeriksaanAddSkeleton 
     } from '@/presentation/components/pemeriksaan';
     import { kategoriConfig } from '@/presentation/constants/kategoriConfig';
 
@@ -49,7 +50,7 @@
         useDocumentTitle(selectedPeserta ? `Pemeriksaan: ${selectedPeserta.nama}` : 'Pemeriksaan');
 
         if (isLoading) {
-            return <FullPageLoading message="Memuat data peserta..." />;
+            return <PemeriksaanAddSkeleton />;
         }
 
         if (isSaving) {

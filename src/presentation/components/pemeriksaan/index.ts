@@ -9,3 +9,5 @@ export * from './PemeriksaanCategoryFilter';
 export * from './FilterModal';
 export * from './SortModal';
 export * from './RecentPemeriksaan';
+export * from './PemeriksaanSkeleton';
+export * from './PemeriksaanAddSkeleton';

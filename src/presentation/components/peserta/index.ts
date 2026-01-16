@@ -15,3 +15,4 @@ export { PesertaListItem } from './PesertaListItem';
 export { PesertaLastVisitCard } from './PesertaLastVisitCard';
 export { PesertaSkeleton } from './PesertaSkeleton';
 export { PesertaAddSkeleton } from './PesertaAddSkeleton';
+export { PesertaDetailSkeleton } from './PesertaDetailSkeleton';

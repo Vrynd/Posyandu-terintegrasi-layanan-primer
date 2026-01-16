@@ -19,6 +19,7 @@ import {
     PesertaEditModal,
     PesertaDeleteModal,
     PesertaLastVisitCard,
+    PesertaDetailSkeleton,
 } from '../../components/peserta';
 import { FullPageLoading } from '../../components/common';
 
@@ -72,9 +73,9 @@ export function PesertaDetailPage() {
         return <FullPageLoading message="Menyimpan perubahan..." />;
     }
 
-    // Navigating state - full screen overlay
+    // Navigating state - show skeleton for consistency
     if (isNavigating) {
-        return <FullPageLoading message="Memuat halaman pemeriksaan..." />;
+        return <PesertaDetailSkeleton />;
     }
 
     // Deleting state - full screen overlay
@@ -82,9 +83,9 @@ export function PesertaDetailPage() {
         return <FullPageLoading message="Menghapus peserta..." />;
     }
 
-    // Loading state - full screen overlay like logout
+    // Loading state - show skeleton for consistency
     if (isLoading) {
-        return <FullPageLoading message="Memuat data peserta..." />;
+        return <PesertaDetailSkeleton />;
     }
 
     // Error state - show error message with retry button
