@@ -13,3 +13,5 @@ export { PesertaListToolbar } from './PesertaListToolbar';
 export { PesertaListResults } from './PesertaListResults';
 export { PesertaListItem } from './PesertaListItem';
 export { PesertaLastVisitCard } from './PesertaLastVisitCard';
+export { PesertaSkeleton } from './PesertaSkeleton';
+export { PesertaAddSkeleton } from './PesertaAddSkeleton';

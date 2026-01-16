@@ -35,6 +35,7 @@ export function HeroOverview() {
 
     // Weather & Time state
     const [weather, setWeather] = useState<{ temp: number; desc: string } | null>(null);
+    const [weatherLoading, setWeatherLoading] = useState(true);
     const [currentTime, setCurrentTime] = useState(new Date());
 
     // Update time every minute
@@ -97,6 +98,7 @@ export function HeroOverview() {
                     const { data, timestamp } = JSON.parse(cached);
                     if (Date.now() - timestamp < CACHE_DURATION_MS) {
                         setWeather(data);
+                        setWeatherLoading(false);
                         console.log('[Weather] Using cached data for location');
                         return;
                     }
@@ -118,6 +120,7 @@ export function HeroOverview() {
                 };
 
                 setWeather(weatherData);
+                setWeatherLoading(false);
 
                 // Save to cache with location key
                 try {
@@ -131,6 +134,7 @@ export function HeroOverview() {
                 }
             } catch (error) {
                 console.warn('[Weather] Failed to fetch:', error);
+                setWeatherLoading(false);
             }
         };
 
@@ -286,15 +290,19 @@ export function HeroOverview() {
                             </span>
                         </div>
 
-                        {/* Weather Container */}
-                        {weather && (
-                            <div className="flex items-center gap-2 px-3 py-1.5 bg-white/5 border border-white/10 rounded-xl backdrop-blur-sm">
-                                <CloudSun className="w-3.5 h-3.5 lg:w-4 lg:h-4 text-amber-400 shrink-0" />
+                        {/* Weather Container - Always visible with loading state */}
+                        <div className="flex items-center gap-2 px-3 py-1.5 bg-white/5 border border-white/10 rounded-xl backdrop-blur-sm">
+                            <CloudSun className="w-3.5 h-3.5 lg:w-4 lg:h-4 text-amber-400 shrink-0" />
+                            {weatherLoading ? (
+                                <BeatLoader color="#e2e8f0" size={6} margin={2} />
+                            ) : weather ? (
                                 <span className="text-xs sm:text-sm font-medium text-slate-200">
                                     {weather.temp}°C <span className="hidden sm:inline text-slate-500">• {weather.desc}</span>
                                 </span>
-                            </div>
-                        )}
+                            ) : (
+                                <span className="text-xs sm:text-sm font-medium text-slate-400">--°C</span>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>

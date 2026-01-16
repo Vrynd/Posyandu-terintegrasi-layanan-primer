@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Users, ClipboardPlus, FileText, ArrowRight, Zap, Bug } from 'lucide-react';
+import { Users, ClipboardPlus, FileText, ArrowRight, Zap, Bug, Loader2 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { ComingSoonModal } from '../common/ComingSoonModal';
 
@@ -14,13 +14,43 @@ interface QuickAction {
     comingSoon?: boolean;
 }
 
+// Prefetch map - maps routes to their lazy import functions
+const prefetchMap: Record<string, () => Promise<unknown>> = {
+    '/dashboard/participants': () => import('../../pages/dashboard/PesertaPage'),
+    '/dashboard/examinations': () => import('../../pages/dashboard/PemeriksaanPage'),
+    '/dashboard/reports': () => import('../../pages/dashboard/LaporanPage'),
+    '/dashboard/complaints': () => import('../../pages/dashboard/PengaduanPage'),
+};
+
+// Track which routes have been prefetched (for hover optimization)
+const prefetchedRoutes = new Set<string>();
+
+// Track which routes have been visited (for loading indicator logic)
+const visitedRoutes = new Set<string>();
+
 /**
  * QuickActions - 2x2 Grid action cards for Posyandu ILP
+ * Implements prefetching on hover for faster navigation
  */
 export function QuickActions() {
     const navigate = useNavigate();
     const [showModal, setShowModal] = useState(false);
     const [modalFeature, setModalFeature] = useState('');
+    const [loadingAction, setLoadingAction] = useState<string | null>(null);
+
+    // Prefetch handler - downloads chunk on hover/focus
+    const handlePrefetch = useCallback((route?: string) => {
+        if (!route || prefetchedRoutes.has(route)) return;
+        
+        const prefetchFn = prefetchMap[route];
+        if (prefetchFn) {
+            prefetchedRoutes.add(route);
+            prefetchFn().catch(() => {
+                // If prefetch fails, remove from set so it can be retried
+                prefetchedRoutes.delete(route);
+            });
+        }
+    }, []);
 
     const actions: QuickAction[] = [
         {
@@ -61,12 +91,36 @@ export function QuickActions() {
         },
     ];
 
-    const handleClick = (action: QuickAction) => {
+    const handleClick = async (action: QuickAction) => {
         if (action.comingSoon) {
             setModalFeature(action.label);
             setShowModal(true);
         } else if (action.route) {
-            navigate(action.route);
+            // Check if user has already visited this route (chunk is definitely ready)
+            const hasVisited = visitedRoutes.has(action.route);
+            
+            if (hasVisited) {
+                // Already visited - navigate immediately without loading indicator
+                navigate(action.route);
+            } else {
+                // First visit - show loading indicator
+                setLoadingAction(action.id);
+                
+                // Ensure chunk is loaded before navigating
+                const prefetchFn = prefetchMap[action.route];
+                if (prefetchFn && !prefetchedRoutes.has(action.route)) {
+                    try {
+                        await prefetchFn();
+                        prefetchedRoutes.add(action.route);
+                    } catch {
+                        // Continue with navigation even if prefetch fails
+                    }
+                }
+                
+                // Mark as visited and navigate
+                visitedRoutes.add(action.route);
+                navigate(action.route);
+            }
         }
     };
 
@@ -88,11 +142,16 @@ export function QuickActions() {
                 <div className="grid grid-cols-2 gap-4">
                     {actions.map((action) => {
                         const IconComponent = action.icon;
+                        const isLoading = loadingAction === action.id;
+                        
                         return (
                             <button
                                 key={action.id}
                                 onClick={() => handleClick(action)}
-                                className={`group bg-gray-50 hover:bg-white rounded-xl p-4 border border-gray-100 hover:border-gray-200 transition-all duration-300 text-left ${action.comingSoon ? 'relative' : ''
+                                onMouseEnter={() => handlePrefetch(action.route)}
+                                onFocus={() => handlePrefetch(action.route)}
+                                disabled={isLoading}
+                                className={`group bg-gray-50 hover:bg-white rounded-xl p-4 border border-gray-100 hover:border-gray-200 transition-all duration-300 text-left ${action.comingSoon ? 'relative' : ''} ${isLoading ? 'opacity-80 cursor-wait' : ''
                                     }`}
                             >
                                 {/* Coming Soon Badge */}
@@ -102,10 +161,14 @@ export function QuickActions() {
                                     </div>
                                 )}
 
-                                {/* Icon */}
+                                {/* Icon - Shows spinner when loading */}
                                 <div className={`w-10 h-10 rounded-xl bg-linear-to-br ${action.bgGradient} flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-300 ${action.comingSoon ? 'opacity-70' : ''
                                     }`}>
-                                    <IconComponent className="w-5 h-5 text-white" strokeWidth={2} />
+                                    {isLoading ? (
+                                        <Loader2 className="w-5 h-5 text-white animate-spin" strokeWidth={2} />
+                                    ) : (
+                                        <IconComponent className="w-5 h-5 text-white" strokeWidth={2} />
+                                    )}
                                 </div>
 
                                 {/* Label */}

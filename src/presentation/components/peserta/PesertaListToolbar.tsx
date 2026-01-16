@@ -1,5 +1,6 @@
-import { useState } from 'react';
-import { Search, Plus, Filter, ArrowUpDown, SlidersHorizontal, ChevronDown, X } from 'lucide-react';
+import { useState, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Search, Plus, Filter, ArrowUpDown, SlidersHorizontal, ChevronDown, X, Loader2 } from 'lucide-react';
 import type { KategoriKey } from '@/domain/entities/Peserta';
 import type { SortType, GenderFilter, AgeRange } from '@/presentation/hooks/usePesertaList';
 import { kategoriConfig } from '@/presentation/constants/kategoriConfig';
@@ -8,6 +9,13 @@ import {
     PesertaSortModal, 
     PesertaFilterModal 
 } from './modals';
+
+// Prefetch function for PesertaAddPage
+const prefetchPesertaAddPage = () => import('../../pages/dashboard/PesertaAddPage');
+
+// Track prefetch and visit status
+let isPrefetched = false;
+let isVisited = false;
 
 interface PesertaListToolbarProps {
     searchQuery: string;
@@ -20,7 +28,7 @@ interface PesertaListToolbarProps {
     onGenderChange: (gender: GenderFilter) => void;
     selectedAgeRange: AgeRange;
     onAgeRangeChange: (ageRange: AgeRange) => void;
-    onAddPeserta: () => void;
+    onAddPeserta?: () => void; // Made optional - button handles navigation internally
 }
 
 const getSortLabel = (sort: SortType): string => {
@@ -52,13 +60,49 @@ export function PesertaListToolbar({
     onGenderChange,
     selectedAgeRange,
     onAgeRangeChange,
-    onAddPeserta,
+    // onAddPeserta - no longer used, navigation handled internally
 }: PesertaListToolbarProps) {
+    const navigate = useNavigate();
     const [isKategoriOpen, setIsKategoriOpen] = useState(false);
     const [isSortOpen, setIsSortOpen] = useState(false);
     const [isFilterOpen, setIsFilterOpen] = useState(false);
+    const [isAddLoading, setIsAddLoading] = useState(false);
 
     const filterCount = getFilterCount(selectedGender, selectedAgeRange);
+
+    // Prefetch on hover/focus
+    const handlePrefetch = useCallback(() => {
+        if (isPrefetched) return;
+        isPrefetched = true;
+        prefetchPesertaAddPage().catch(() => {
+            isPrefetched = false;
+        });
+    }, []);
+
+    // Handle add peserta click with loading indicator
+    const handleAddClick = useCallback(async () => {
+        const route = '/dashboard/participants/register';
+        
+        if (isVisited) {
+            // Already visited - navigate immediately
+            navigate(route);
+        } else {
+            // First visit - show loading and prefetch
+            setIsAddLoading(true);
+            
+            if (!isPrefetched) {
+                try {
+                    await prefetchPesertaAddPage();
+                    isPrefetched = true;
+                } catch {
+                    // Continue even if prefetch fails
+                }
+            }
+            
+            isVisited = true;
+            navigate(route);
+        }
+    }, [navigate]);
 
     return (
         <>
@@ -85,10 +129,17 @@ export function PesertaListToolbar({
                             )}
                         </div>
                         <button
-                            onClick={onAddPeserta}
-                            className="px-6 py-2 cursor-pointer bg-linear-to-r from-slate-800 to-slate-900 hover:from-slate-700 hover:to-slate-800 text-white text-sm font-medium rounded-xl flex items-center gap-2 transition-colors whitespace-nowrap"
+                            onClick={handleAddClick}
+                            onMouseEnter={handlePrefetch}
+                            onFocus={handlePrefetch}
+                            disabled={isAddLoading}
+                            className={`px-6 py-2 cursor-pointer bg-linear-to-r from-slate-800 to-slate-900 hover:from-slate-700 hover:to-slate-800 text-white text-sm font-medium rounded-xl flex items-center gap-2 transition-colors whitespace-nowrap ${isAddLoading ? 'opacity-80 cursor-wait' : ''}`}
                         >
-                            <Plus className="w-5 h-5" />
+                            {isAddLoading ? (
+                                <Loader2 className="w-5 h-5 animate-spin" />
+                            ) : (
+                                <Plus className="w-5 h-5" />
+                            )}
                             <span className="hidden sm:inline">Peserta Baru</span>
                         </button>
                     </div>
