@@ -1,24 +1,28 @@
-/**
- * Axios API Configuration
- * Centralized API client with interceptors for authentication
- */
+// Konfigurasi Axios API
+// Client API terpusat dengan interceptors untuk autentikasi
 
 import axios from "axios";
+import { 
+  TOKEN_KEY, 
+  DEFAULT_API_URL, 
+  API_TIMEOUT, 
+  DEFAULT_CONTENT_TYPE 
+} from "./constants";
 
-// Token key for localStorage
-export const TOKEN_KEY = "posyandu_auth_token";
+// Re-export TOKEN_KEY untuk backward compatibility
+export { TOKEN_KEY };
 
-// Create axios instance
+// Buat axios instance
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:8000/api",
+  baseURL: import.meta.env.VITE_API_URL || DEFAULT_API_URL,
   headers: {
-    "Content-Type": "application/json",
+    "Content-Type": DEFAULT_CONTENT_TYPE,
     Accept: "application/json",
   },
-  timeout: 30000, // 30 seconds
+  timeout: API_TIMEOUT,
 });
 
-// Request interceptor - attach Bearer token
+// Request interceptor - pasang Bearer token
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem(TOKEN_KEY);
@@ -32,40 +36,36 @@ api.interceptors.request.use(
   }
 );
 
-// Response interceptor - handle common errors
+// Response interceptor - tangani error umum
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     const status = error.response?.status;
 
-    // Handle 401 Unauthorized - clear token
+    // Tangani 401 Unauthorized - hapus token
     if (status === 401) {
       localStorage.removeItem(TOKEN_KEY);
     }
 
-    // 429 (Rate Limit) and 423 (Account Locked) are handled by the form's error display
-    // No toast needed - error message will be shown in the red error box
+    // 429 (Rate Limit) dan 423 (Account Locked) ditangani oleh form error display
+    // Tidak perlu toast - pesan error akan ditampilkan di kotak error merah
 
     return Promise.reject(error);
   }
 );
 
-/**
- * Get the base URL for the API (without /api suffix)
- */
+// Dapatkan base URL untuk API (tanpa suffix /api)
 export const getBaseUrl = () => {
-  const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:8000/api";
+  const apiUrl = import.meta.env.VITE_API_URL || DEFAULT_API_URL;
   return apiUrl.replace(/\/api$/, '');
 };
 
-/**
- * Get storage URL for uploaded files
- * @param path - The path returned from API (e.g., "pengaduan/abc123.jpg")
- * @returns Full URL to the file
- */
+// Dapatkan URL storage untuk file yang diupload
+// path: path yang dikembalikan dari API (contoh: "pengaduan/abc123.jpg")
+// returns: URL lengkap ke file
 export const getStorageUrl = (path: string): string => {
   if (!path) return '';
-  // If already a full URL, return as-is
+  // Jika sudah URL lengkap, kembalikan apa adanya
   if (path.startsWith('http://') || path.startsWith('https://')) {
     return path;
   }
