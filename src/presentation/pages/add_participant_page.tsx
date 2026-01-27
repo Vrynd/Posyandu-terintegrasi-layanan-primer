@@ -1,22 +1,26 @@
-/**
- * PesertaAddPage - Step Wizard Form for Adding New Participant
- * Refactored version using focused components and custom hook
- *
- * Route: /dashboard/pendaftaran/tambah-peserta
- */
-
 import { useNavigate, Link } from "react-router-dom";
-import { Home, ChevronRight, Users, User, MapPin, ClipboardCheck } from "lucide-react";
+import {
+  Home,
+  ChevronRight,
+  Users,
+  User,
+  MapPin,
+  ClipboardCheck,
+} from "lucide-react";
 import { usePesertaAdd } from "@/presentation/hooks/usePesertaAdd";
 import { useDocumentTitle } from "@/presentation/hooks/useDocumentTitle";
-import { StepIndicator, FullPageLoading, type Step } from "@/presentation/components/common";
+import {
+  StepIndicator,
+  FullPageLoading,
+  type Step,
+} from "@/presentation/components/common";
 import { kategoriConfig } from "@/presentation/constants/kategoriConfig";
-import { 
-  CategoryStep, 
-  PersonalDataStep, 
-  AddressStep, 
-  ConfirmationStep, 
-  PesertaAddFooter 
+import {
+  CategoryStep,
+  PersonalDataStep,
+  AddressStep,
+  ConfirmationStep,
+  PesertaAddFooter,
 } from "@/presentation/components/peserta/add";
 
 const steps: Step[] = [
@@ -26,8 +30,8 @@ const steps: Step[] = [
   { id: 4, title: "Konfirmasi", icon: ClipboardCheck },
 ];
 
-export function PesertaAddPage() {
-  useDocumentTitle('Tambah Peserta');
+export function AddParticipantPage() {
+  useDocumentTitle("Peserta Baru");
   const navigate = useNavigate();
   const {
     currentStep,
@@ -56,21 +60,31 @@ export function PesertaAddPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Tambah Peserta</h1>
-          <p className="text-gray-500 text-sm mt-1">Daftarkan peserta baru ke posyandu</p>
+          <h1 className="text-2xl font-bold text-gray-900">Peserta Baru</h1>
+          <p className="text-gray-500 text-sm mt-1 leading-relaxed capitalize">
+            Daftarkan peserta baru ke posyandu
+          </p>
         </div>
         <nav className="hidden sm:flex items-center gap-2 text-sm">
-          <Link to="/dashboard" className="flex items-center gap-1 text-gray-500 hover:text-gray-700 transition-colors">
+          <Link
+            to="/dashboard"
+            className="flex items-center gap-1 text-gray-500 hover:text-gray-700 transition-colors"
+          >
             <Home className="w-4 h-4" />
             <span>Dashboard</span>
           </Link>
           <ChevronRight className="w-4 h-4 text-gray-400" />
-          <Link to="/dashboard/participants" className="text-gray-500 hover:text-gray-700 transition-colors">
-            Daftar Peserta
+          <Link
+            to="/dashboard/participants"
+            className="text-gray-500 hover:text-gray-700 transition-colors"
+          >
+            Pendaftaran
           </Link>
           <ChevronRight className="w-4 h-4 text-gray-400" />
           <span className="font-medium text-gray-900">
-            {form.kategori ? `Tambah ${kategoriConfig[form.kategori].label}` : "Tambah"}
+            {form.kategori
+              ? `Peserta ${kategoriConfig[form.kategori].label}`
+              : "Tambah Peserta Baru"}
           </span>
         </nav>
       </div>
@@ -81,15 +95,15 @@ export function PesertaAddPage() {
       {/* Steps Content */}
       <div className="mb-6">
         {currentStep === 1 && (
-          <CategoryStep 
-            selectedKategori={form.kategori} 
-            onKategoriChange={(key) => handleChange("kategori", key)} 
+          <CategoryStep
+            selectedKategori={form.kategori}
+            onKategoriChange={(key) => handleChange("kategori", key)}
           />
         )}
 
         {currentStep === 2 && (
-          <PersonalDataStep 
-            form={form} 
+          <PersonalDataStep
+            form={form}
             handleChange={handleChange}
             categoryRequiredLabel={getCategoryRequiredLabel()}
             categoryFieldValue={getCategoryFieldValue()}
@@ -99,17 +113,17 @@ export function PesertaAddPage() {
         )}
 
         {currentStep === 3 && (
-          <AddressStep 
-            form={form} 
-            handleChange={handleChange} 
+          <AddressStep
+            form={form}
+            handleChange={handleChange}
             onReset={() => handleResetStep(3)}
             errors={errors}
           />
         )}
 
         {currentStep === 4 && (
-          <ConfirmationStep 
-            form={form} 
+          <ConfirmationStep
+            form={form}
             categoryRequiredLabel={getCategoryRequiredLabel()}
             categoryFieldValue={getCategoryFieldValue()}
           />
@@ -117,7 +131,7 @@ export function PesertaAddPage() {
       </div>
 
       {/* Footer Navigation */}
-      <PesertaAddFooter 
+      <PesertaAddFooter
         currentStep={currentStep}
         isLoading={isLoading}
         onPrev={currentStep === 1 ? handleBatal : handlePrev}

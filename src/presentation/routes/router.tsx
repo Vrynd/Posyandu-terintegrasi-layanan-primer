@@ -1,113 +1,169 @@
-import { lazy } from 'react';
-import { createBrowserRouter, Navigate } from 'react-router-dom';
-import { AppLayout } from '../components/layouts/AppLayout';
-import { LoginSuspenseWrapper } from './login_suspense';
-import { ProtectedRoute, PublicRoute } from './protected_route';
+import { lazy } from "react";
+import { createBrowserRouter, Navigate } from "react-router-dom";
+import { AppLayout } from "../components/layouts/AppLayout";
+import { LoginSuspenseWrapper } from "./login_suspense";
+import { ProtectedRoute, PublicRoute } from "./protected_route";
 
 // Lazy loaded - Halaman Auth
-const LoginPage = lazy(() => import('../pages/auth/LoginPage').then(m => ({ default: m.LoginPage })));
-const RegisterPage = lazy(() => import('../pages/auth/RegisterPage').then(m => ({ default: m.RegisterPage })));
+const LoginPage = lazy(() =>
+  import("../pages/login_page").then((m) => ({ default: m.LoginPage })),
+);
+const RegisterPage = lazy(() =>
+  import("../pages/register_page").then((m) => ({ default: m.RegisterPage })),
+);
 
 // Lazy loaded - Halaman Dashboard
-const DashboardPage = lazy(() => import('../pages/dashboard/DashboardPage').then(m => ({ default: m.DashboardPage })));
-const PesertaPage = lazy(() => import('../pages/dashboard/PesertaPage').then(m => ({ default: m.PesertaPage })));
-const PesertaAddPage = lazy(() => import('../pages/dashboard/PesertaAddPage').then(m => ({ default: m.PesertaAddPage })));
-const PesertaDetailPage = lazy(() => import('../pages/dashboard/PesertaDetailPage').then(m => ({ default: m.PesertaDetailPage })));
-const PemeriksaanPage = lazy(() => import('../pages/dashboard/PemeriksaanPage').then(m => ({ default: m.PemeriksaanPage })));
-const PemeriksaanAddPage = lazy(() => import('../pages/dashboard/PemeriksaanAddPage').then(m => ({ default: m.PemeriksaanAddPage })));
-const LaporanPage = lazy(() => import('../pages/dashboard/LaporanPage').then(m => ({ default: m.LaporanPage })));
-const PengaduanPage = lazy(() => import('../pages/dashboard/PengaduanPage').then(m => ({ default: m.PengaduanPage })));
-const PengaduanAddPage = lazy(() => import('../pages/dashboard/PengaduanAddPage').then(m => ({ default: m.PengaduanAddPage })));
-const PengaduanDetailPage = lazy(() => import('../pages/dashboard/PengaduanDetailPage').then(m => ({ default: m.PengaduanDetailPage })));
-const AccountSettingsPage = lazy(() => import('../pages/dashboard/AccountSettingsPage').then(m => ({ default: m.AccountSettingsPage })));
+const DashboardPage = lazy(() =>
+  import("../pages/dashboard_page").then((m) => ({
+    default: m.DashboardPage,
+  })),
+);
+const ParticipantPage = lazy(() =>
+  import("../pages/participant_page").then((m) => ({
+    default: m.ParticipantPage,
+  })),
+);
+const AddParticipantPage = lazy(() =>
+  import("../pages/add_participant_page").then((m) => ({
+    default: m.AddParticipantPage,
+  })),
+);
+const DetailParticipantPage = lazy(() =>
+  import("../pages/detail_participant_page").then((m) => ({
+    default: m.DetailParticipantPage,
+  })),
+);
+const ExaminationPage = lazy(() =>
+  import("../pages/examination_page").then((m) => ({
+    default: m.ExaminationPage,
+  })),
+);
+const AddExaminationPage = lazy(() =>
+  import("../pages/add_examination_page").then((m) => ({
+    default: m.AddExaminationPage,
+  })),
+);
+const ReportPage = lazy(() =>
+  import("../pages/report_page").then((m) => ({
+    default: m.ReportPage,
+  })),
+);
+const ComplaintPage = lazy(() =>
+  import("../pages/complaint_page").then((m) => ({
+    default: m.ComplaintPage,
+  })),
+);
+const AddComplaintPage = lazy(() =>
+  import("../pages/add_complaint_page").then((m) => ({
+    default: m.AddComplaintPage,
+  })),
+);
+const DetailComplaintPage = lazy(() =>
+  import("../pages/detail_complaint_page").then((m) => ({
+    default: m.DetailComplaintPage,
+  })),
+);
+const AccountSettingsPage = lazy(() =>
+  import("../pages/account_settings_page").then((m) => ({
+    default: m.AccountSettingsPage,
+  })),
+);
 
 // Konfigurasi route aplikasi
 export const router = createBrowserRouter([
-    // Redirect root
-    {
-        path: '/',
-        element: <Navigate to="/login" replace />,
-    },
+  // Redirect root
+  {
+    path: "/",
+    element: <Navigate to="/login" replace />,
+  },
 
-    // Route publik (login, register)
-    {
-        element: <PublicRoute />,
+  // Route publik (login, register)
+  {
+    element: <PublicRoute />,
+    children: [
+      {
+        path: "/login",
+        element: (
+          <LoginSuspenseWrapper>
+            <LoginPage />
+          </LoginSuspenseWrapper>
+        ),
+      },
+      {
+        path: "/register",
+        element: (
+          <LoginSuspenseWrapper>
+            <RegisterPage />
+          </LoginSuspenseWrapper>
+        ),
+      },
+    ],
+  },
+
+  // Route terproteksi (memerlukan autentikasi)
+  {
+    element: <ProtectedRoute />,
+    children: [
+      {
+        element: <AppLayout />,
         children: [
-            {
-                path: '/login',
-                element: <LoginSuspenseWrapper><LoginPage /></LoginSuspenseWrapper>,
-            },
-            {
-                path: '/register',
-                element: <LoginSuspenseWrapper><RegisterPage /></LoginSuspenseWrapper>,
-            },
+          // Dashboard & Aksi Cepat
+          {
+            path: "/dashboard",
+            element: <DashboardPage />,
+          },
+
+          // Manajemen Peserta
+          {
+            path: "/dashboard/participants",
+            element: <ParticipantPage />,
+          },
+          {
+            path: "/dashboard/participants/register/:category?",
+            element: <AddParticipantPage />,
+          },
+          {
+            path: "/dashboard/participants/:category/:id",
+            element: <DetailParticipantPage />,
+          },
+
+          // Pemeriksaan
+          {
+            path: "/dashboard/examinations",
+            element: <ExaminationPage />,
+          },
+          {
+            path: "/dashboard/examinations/:category/:id",
+            element: <AddExaminationPage />,
+          },
+
+          // Laporan
+          {
+            path: "/dashboard/reports",
+            element: <ReportPage />,
+          },
+
+          // Pengaduan
+          {
+            path: "/dashboard/complaints",
+            element: <ComplaintPage />,
+          },
+          {
+            path: "/dashboard/complaints/new",
+            element: <AddComplaintPage />,
+          },
+          {
+            path: "/dashboard/complaints/:id",
+            element: <DetailComplaintPage />,
+          },
+
+          // Pengaturan
+          {
+            path: "/dashboard/settings",
+            element: <AccountSettingsPage />,
+          },
         ],
-    },
-
-    // Route terproteksi (memerlukan autentikasi)
-    {
-        element: <ProtectedRoute />,
-        children: [
-            {
-                element: <AppLayout />,
-                children: [
-                    // Dashboard & Aksi Cepat
-                    {
-                        path: '/dashboard',
-                        element: <DashboardPage />,
-                    },
-
-                    // Manajemen Peserta
-                    {
-                        path: '/dashboard/participants',
-                        element: <PesertaPage />,
-                    },
-                    {
-                        path: '/dashboard/participants/register/:category?',
-                        element: <PesertaAddPage />,
-                    },
-                    {
-                        path: '/dashboard/participants/:category/:id',
-                        element: <PesertaDetailPage />,
-                    },
-
-                    // Pemeriksaan
-                    {
-                        path: '/dashboard/examinations',
-                        element: <PemeriksaanPage />,
-                    },
-                    {
-                        path: '/dashboard/examinations/:category/:id',
-                        element: <PemeriksaanAddPage />,
-                    },
-
-                    // Laporan
-                    {
-                        path: '/dashboard/reports',
-                        element: <LaporanPage />,
-                    },
-
-                    // Pengaduan
-                    {
-                        path: '/dashboard/complaints',
-                        element: <PengaduanPage />,
-                    },
-                    {
-                        path: '/dashboard/complaints/new',
-                        element: <PengaduanAddPage />,
-                    },
-                    {
-                        path: '/dashboard/complaints/:id',
-                        element: <PengaduanDetailPage />,
-                    },
-
-                    // Pengaturan
-                    {
-                        path: '/dashboard/settings',
-                        element: <AccountSettingsPage />,
-                    },
-                ],
-            },
-        ],
-    },
+      },
+    ],
+  },
 ]);
