@@ -1,11 +1,7 @@
 import { useLogin } from "../hooks/useLogin";
 import { useDocumentTitle } from "../hooks/useDocumentTitle";
-import {
-  AuthBrandingPanel,
-  LoadingOverlay,
-  MobileLogo,
-  LoginForm,
-} from "../components/auth";
+import { LoginForm } from "../components/auth";
+import { FullPageLoading } from "../components/common";
 
 export function LoginPage() {
   useDocumentTitle("Masuk");
@@ -24,39 +20,22 @@ export function LoginPage() {
   } = useLogin();
 
   return (
-    <div className="min-h-screen bg-slate-100 flex relative">
-      {isLoading && <LoadingOverlay message="Memproses login..." />}
+    <>
+      {isLoading && <FullPageLoading message="Memproses login..." />}
 
-      <AuthBrandingPanel />
-
-      {/* Right Side - Login Form */}
-      <div className="flex-1 flex items-center justify-center p-6 lg:p-12 overflow-y-auto">
-        <div className="w-full max-w-md">
-          <MobileLogo />
-
-          <LoginForm
-            identifier={identifier}
-            password={password}
-            showPassword={showPassword}
-            identifierError={identifierError}
-            passwordError={passwordError}
-            generalError={generalError}
-            isLoading={isLoading}
-            onIdentifierChange={setIdentifier}
-            onPasswordChange={setPassword}
-            onTogglePassword={toggleShowPassword}
-            onSubmit={handleSubmit}
-          />
-
-          {/* Location info - mobile only, outside card */}
-          <div className="lg:hidden mt-8 text-center">
-            <p className="text-sm text-gray-500">
-              Desa Tondomulyo, Kec. Jakenan, Kab. Pati
-            </p>
-            <p className="text-xs text-gray-400">Jawa Tengah • Indonesia</p>
-          </div>
-        </div>
-      </div>
-    </div>
+      <LoginForm
+        identifier={identifier}
+        password={password}
+        showPassword={showPassword}
+        identifierError={identifierError}
+        passwordError={passwordError}
+        generalError={generalError}
+        isLoading={isLoading}
+        onIdentifierChange={setIdentifier}
+        onPasswordChange={setPassword}
+        onTogglePassword={toggleShowPassword}
+        onSubmit={handleSubmit}
+      />
+    </>
   );
 }

@@ -7,8 +7,8 @@
 import { Suspense, useState } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import { Stethoscope } from 'lucide-react';
-import { UserDropdown, LogoutConfirmModal, FullPageLoading, PageSkeleton } from '../common';
-import { useAuth } from '../../hooks/useAuth';
+import { UserDropdown, LogoutConfirmModal, FullPageLoading, PageSkeleton } from '../components/common';
+import { useAuth } from '../hooks/useAuth';
 
 export function AppLayout() {
     const navigate = useNavigate();

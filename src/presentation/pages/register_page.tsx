@@ -2,12 +2,8 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 import { useRegister } from "../hooks/useRegister";
 import { useDocumentTitle } from "../hooks/useDocumentTitle";
-import {
-  AuthBrandingPanel,
-  LoadingOverlay,
-  MobileLogo,
-  RegisterForm,
-} from "../components/auth";
+import { RegisterForm } from "../components/auth";
+import { FullPageLoading } from "../components/common";
 
 export function RegisterPage() {
   useDocumentTitle("Daftar");
@@ -35,7 +31,6 @@ export function RegisterPage() {
   const [showPasswordConfirmation, setShowPasswordConfirmation] =
     useState(false);
 
-  // Show toast on error
   const onSubmit = async (e: React.FormEvent) => {
     try {
       await handleSubmit(e);
@@ -47,51 +42,34 @@ export function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-100 flex relative">
-      {isLoading && <LoadingOverlay message="Memproses pendaftaran..." />}
+    <>
+      {isLoading && <FullPageLoading message="Memproses pendaftaran..." />}
 
-      <AuthBrandingPanel />
-
-      {/* Right Side - Register Form */}
-      <div className="flex-1 flex items-center justify-center p-6 lg:p-12 overflow-y-auto">
-        <div className="w-full max-w-md">
-          <MobileLogo />
-
-          <RegisterForm
-            name={name}
-            email={email}
-            password={password}
-            passwordConfirmation={passwordConfirmation}
-            nik={nik}
-            phoneNumber={phoneNumber}
-            showPassword={showPassword}
-            showPasswordConfirmation={showPasswordConfirmation}
-            fieldErrors={fieldErrors}
-            generalError={generalError}
-            isLoading={isLoading}
-            passwordStrength={passwordStrength}
-            onNameChange={setName}
-            onEmailChange={setEmail}
-            onPasswordChange={setPassword}
-            onPasswordConfirmationChange={setPasswordConfirmation}
-            onNikChange={setNik}
-            onPhoneNumberChange={setPhoneNumber}
-            onTogglePassword={() => setShowPassword(!showPassword)}
-            onTogglePasswordConfirmation={() =>
-              setShowPasswordConfirmation(!showPasswordConfirmation)
-            }
-            onSubmit={onSubmit}
-          />
-
-          {/* Location info - mobile only, outside card */}
-          <div className="lg:hidden mt-8 text-center">
-            <p className="text-sm text-gray-500">
-              Desa Tondomulyo, Kec. Jakenan, Kab. Pati
-            </p>
-            <p className="text-xs text-gray-400">Jawa Tengah • Indonesia</p>
-          </div>
-        </div>
-      </div>
-    </div>
+      <RegisterForm
+        name={name}
+        email={email}
+        password={password}
+        passwordConfirmation={passwordConfirmation}
+        nik={nik}
+        phoneNumber={phoneNumber}
+        showPassword={showPassword}
+        showPasswordConfirmation={showPasswordConfirmation}
+        fieldErrors={fieldErrors}
+        generalError={generalError}
+        isLoading={isLoading}
+        passwordStrength={passwordStrength}
+        onNameChange={setName}
+        onEmailChange={setEmail}
+        onPasswordChange={setPassword}
+        onPasswordConfirmationChange={setPasswordConfirmation}
+        onNikChange={setNik}
+        onPhoneNumberChange={setPhoneNumber}
+        onTogglePassword={() => setShowPassword(!showPassword)}
+        onTogglePasswordConfirmation={() =>
+          setShowPasswordConfirmation(!showPasswordConfirmation)
+        }
+        onSubmit={onSubmit}
+      />
+    </>
   );
 }

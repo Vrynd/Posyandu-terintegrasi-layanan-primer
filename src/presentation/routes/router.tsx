@@ -1,7 +1,7 @@
 import { lazy } from "react";
 import { createBrowserRouter, Navigate } from "react-router-dom";
-import { AppLayout } from "../components/layouts/AppLayout";
-import { LoginSuspenseWrapper } from "./login_suspense";
+import { AppLayout } from "../layouts/AppLayout";
+import { AuthLayout } from "../layouts/AuthLayout";
 import { ProtectedRoute, PublicRoute } from "./protected_route";
 
 // Lazy loaded - Halaman Auth
@@ -77,25 +77,16 @@ export const router = createBrowserRouter([
     element: <Navigate to="/login" replace />,
   },
 
-  // Route publik (login, register)
+  // Route publik (login, register) dengan AuthLayout
   {
     element: <PublicRoute />,
     children: [
       {
-        path: "/login",
-        element: (
-          <LoginSuspenseWrapper>
-            <LoginPage />
-          </LoginSuspenseWrapper>
-        ),
-      },
-      {
-        path: "/register",
-        element: (
-          <LoginSuspenseWrapper>
-            <RegisterPage />
-          </LoginSuspenseWrapper>
-        ),
+        element: <AuthLayout />,
+        children: [
+          { path: "/login", element: <LoginPage /> },
+          { path: "/register", element: <RegisterPage /> },
+        ],
       },
     ],
   },
