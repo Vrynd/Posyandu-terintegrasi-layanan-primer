@@ -8,7 +8,7 @@ import 'react-loading-skeleton/dist/skeleton.css';
 import { PesertaSkeleton, PesertaAddSkeleton, PesertaDetailSkeleton } from '../peserta';
 import { PemeriksaanSkeleton, PemeriksaanAddSkeleton } from '../pemeriksaan';
 import { LaporanSkeleton } from '../laporan';
-import { DashboardSkeleton } from '../dashboard/DashboardSkeleton';
+import { DashboardSkeleton } from '../dashboard/dashboard_skeleton';
 
 
 /**
