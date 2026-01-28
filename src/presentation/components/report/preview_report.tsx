@@ -1,0 +1,150 @@
+import { FileText, AlertTriangle, RefreshCw } from 'lucide-react';
+
+interface PreviewReportProps {
+   reportLabel: string;
+   isLoading: boolean;
+   error: string | null;
+   data: any[];
+   onReset: () => void;
+}
+
+interface PreviewHeaderProps {
+   label: string;
+}
+
+interface PreviewErrorProps {
+   message: string;
+   onReset: () => void;
+}
+
+interface PreviewTableProps {
+   data: any[];
+}
+
+function PreviewHeader({ label }: PreviewHeaderProps) {
+   return (
+      <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+         <h2 className="font-semibold text-gray-900 flex items-center gap-2">
+            <div className="w-7 h-7 rounded-lg bg-blue-50 flex items-center justify-center">
+               <span className="text-xs font-bold text-blue-600">3</span>
+            </div>
+            Preview {label}
+         </h2>
+         <span className="text-xs text-gray-400">Menampilkan 10 data pertama</span>
+      </div>
+   );
+}
+
+function PreviewLoading() {
+   return (
+      <div className="overflow-x-auto rounded-xl border border-gray-100">
+         <table className="w-full">
+            <thead>
+               <tr className="border-b border-gray-100 bg-gray-50">
+                  {['No', 'Tanggal', 'Nama Peserta', 'Lokasi', 'Status'].map((col) => (
+                     <th key={col} className="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase">
+                        {col}
+                     </th>
+                  ))}
+               </tr>
+            </thead>
+            <tbody>
+               {[...Array(5)].map((_, index) => (
+                  <tr key={index} className="border-b border-gray-50">
+                     <td className="py-3 px-4"><div className="h-4 w-6 bg-gray-200 rounded animate-pulse" /></td>
+                     <td className="py-3 px-4"><div className="h-4 w-24 bg-gray-200 rounded animate-pulse" /></td>
+                     <td className="py-3 px-4"><div className="h-4 w-32 bg-gray-200 rounded animate-pulse" /></td>
+                     <td className="py-3 px-4"><div className="h-4 w-24 bg-gray-200 rounded animate-pulse" /></td>
+                     <td className="py-3 px-4"><div className="h-4 w-16 bg-gray-200 rounded animate-pulse" /></td>
+                  </tr>
+               ))}
+            </tbody>
+         </table>
+         <div className="py-3 px-4 text-center">
+            <p className="text-xs text-gray-400">Memuat preview data...</p>
+         </div>
+      </div>
+   );
+}
+
+function PreviewError({ message, onReset }: PreviewErrorProps) {
+   return (
+      <div className="py-12 text-center">
+         <AlertTriangle className="w-10 h-10 text-amber-500 mx-auto mb-3" />
+         <p className="text-gray-700 font-medium mb-2">Gagal Memuat Preview</p>
+         <p className="text-gray-500 text-sm mb-4">{message}</p>
+         <button
+            onClick={onReset}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm"
+         >
+            <RefreshCw className="w-4 h-4" />
+            Pilih Ulang
+         </button>
+      </div>
+   );
+}
+
+function PreviewEmpty() {
+   return (
+      <div className="py-12 text-center">
+         <FileText className="w-12 h-12 text-gray-300 mx-auto mb-2" />
+         <p className="text-gray-500">Belum ada data untuk laporan ini</p>
+         <p className="text-gray-400 text-sm mt-2">Silakan input data peserta atau pemeriksaan terlebih dahulu</p>
+      </div>
+   );
+}
+
+function PreviewTable({ data }: PreviewTableProps) {
+   return (
+      <div className="overflow-x-auto rounded-xl border border-gray-100">
+         <table className="w-full">
+            <thead>
+               <tr className="border-b border-gray-100 bg-gray-50">
+                  {Object.keys(data[0]).map((key) => (
+                     <th key={key} className="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase">
+                        {key}
+                     </th>
+                  ))}
+               </tr>
+            </thead>
+            <tbody>
+               {data.map((row, index) => (
+                  <tr key={index} className="border-b border-gray-50 hover:bg-gray-50">
+                     {Object.values(row).map((value: any, cellIndex) => (
+                        <td key={cellIndex} className="py-3 px-4 text-sm text-gray-700">
+                           {value || '-'}
+                        </td>
+                     ))}
+                  </tr>
+               ))}
+            </tbody>
+         </table>
+      </div>
+   );
+}
+
+export function PreviewReport({
+   reportLabel,
+   isLoading,
+   error,
+   data,
+   onReset
+}: PreviewReportProps) {
+   return (
+      <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+         <PreviewHeader label={reportLabel} />
+
+         <div className="p-6">
+            {isLoading ? (
+               <PreviewLoading />
+            ) : error ? (
+               <PreviewError message={error} onReset={onReset} />
+            ) : data.length === 0 ? (
+               <PreviewEmpty />
+            ) : (
+               <PreviewTable data={data} />
+            )}
+         </div>
+      </div>
+   );
+}

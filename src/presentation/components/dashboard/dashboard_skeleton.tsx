@@ -1,6 +1,6 @@
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
-import { TARGET_SERVICES, DASHBOARD_YEAR } from './config';
+import { TARGET_SERVICES } from './config';
 
 // Konstanta visual untuk sinkronisasi tampilan kerangka komponen (skeleton)
 const SKELETON_COLORS = {
@@ -40,9 +40,6 @@ export function DashboardSkeleton() {
 
                   {/* Kerangka baris informasi tanggal, waktu, dan cuaca */}
                   <div className="relative mt-4 pt-4 border-t border-white/10 flex flex-wrap items-center gap-3">
-                     <div className="flex items-center gap-2 px-3 py-1.5 bg-white/5 border border-white/10 rounded-xl">
-                        <span className="text-xs font-medium text-slate-400">Tahun {DASHBOARD_YEAR}</span>
-                     </div>
                      <Skeleton width={180} height={34} borderRadius={12} baseColor={SKELETON_COLORS.overlayBase} highlightColor={SKELETON_COLORS.base} />
                      <Skeleton width={80} height={34} borderRadius={12} baseColor={SKELETON_COLORS.overlayBase} highlightColor={SKELETON_COLORS.base} />
                      <Skeleton width={130} height={34} borderRadius={12} baseColor={SKELETON_COLORS.overlayBase} highlightColor={SKELETON_COLORS.base} />

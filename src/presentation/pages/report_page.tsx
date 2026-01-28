@@ -3,11 +3,11 @@ import { Link } from "react-router-dom";
 import { useLaporan } from "../hooks/useLaporan";
 import { useDocumentTitle } from "../hooks/useDocumentTitle";
 import {
-  LaporanTypeSelection,
-  LaporanPeriodSelection,
-  LaporanPreview,
-  LaporanStatsSummary,
-} from "../components/laporan";
+  ReportType,
+  MonthlyReport,
+  PreviewReport,
+  StatsSummary,
+} from "../components/report";
 
 export function ReportPage() {
   useDocumentTitle("Laporan");
@@ -51,17 +51,17 @@ export function ReportPage() {
       </div>
 
       {/* Statistics Summary - appears before report selection */}
-      <LaporanStatsSummary month={selectedMonth} year={currentYear} />
+      <StatsSummary month={selectedMonth} year={currentYear} />
 
       {/* Step 1: Report Type Selection */}
-      <LaporanTypeSelection
+      <ReportType
         reports={reports}
         selectedReport={selectedReport}
         onToggle={handleReportToggle}
       />
 
       {/* Step 2: Period Selection & Download */}
-      <LaporanPeriodSelection
+      <MonthlyReport
         selectedReport={selectedReport}
         selectedMonth={selectedMonth}
         onMonthChange={setSelectedMonth}
@@ -73,7 +73,7 @@ export function ReportPage() {
 
       {/* Step 3: Preview */}
       {selectedReport && (
-        <LaporanPreview
+        <PreviewReport
           reportLabel={getReportLabel()}
           isLoading={isLoadingPreview}
           error={previewError}

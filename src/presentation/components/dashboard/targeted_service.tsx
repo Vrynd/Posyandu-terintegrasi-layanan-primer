@@ -48,7 +48,7 @@ function ServiceCard({
    );
 }
 
-export function Service({ stats, isLoading }: ServiceProps) {
+export function TargetedService({ stats, isLoading }: ServiceProps) {
 
    // Render grid layanan sasaran dashboard
    return (

@@ -6,7 +6,7 @@ import { useWeather } from '../../hooks/useWeather';
 import { QuickSearch } from './quick_search';
 import { Welcome } from './welcome';
 import { WeatherClock } from './weather_clock';
-import { Service } from './targeted_service';
+import { TargetedService } from './targeted_service';
 
 export function HeroOverview() {
    // Mengambil seluruh data global yang dibutuhkan component hero
@@ -60,7 +60,7 @@ export function HeroOverview() {
                weatherLoading={isWeatherLoading}
             />
          </div>
-         <Service stats={stats?.kategori} isLoading={isStatsLoading} />
+         <TargetedService stats={stats?.kategori} isLoading={isStatsLoading} />
          <QuickSearch isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
       </div>
    );

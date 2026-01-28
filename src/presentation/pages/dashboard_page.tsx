@@ -1,9 +1,11 @@
-import { HeroOverview } from '../components/dashboard/hero_overview';
-import { QuickActions } from '../components/dashboard/quick_action';
-import { VisitChart } from '../components/dashboard/visit_chart';
-import { ParticipantDistributionChart } from '../components/dashboard/participant_distribution_chart';
-import { NewParticipantChart } from '../components/dashboard/new_participant_chart';
-import { SystemFlow } from '../components/dashboard/system_flow';
+import {
+  HeroOverview,
+  QuickActions,
+  VisitChart,
+  ParticipantDistributionChart,
+  NewParticipantChart,
+  SystemFlow
+} from '../components/dashboard';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 
 

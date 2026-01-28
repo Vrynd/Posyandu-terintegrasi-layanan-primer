@@ -1,19 +1,10 @@
-/**
- * PageSkeleton - Skeleton loading state for lazy-loaded pages
- * Routes to page-specific skeletons or uses generic fallback
- */
-
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import { PesertaSkeleton, PesertaAddSkeleton, PesertaDetailSkeleton } from '../peserta';
 import { PemeriksaanSkeleton, PemeriksaanAddSkeleton } from '../pemeriksaan';
-import { LaporanSkeleton } from '../laporan';
-import { DashboardSkeleton } from '../dashboard/dashboard_skeleton';
+import { DashboardSkeleton } from '../dashboard';
+import { ReportSkeleton } from '../report';
 
-
-/**
- * GenericPageSkeleton - General skeleton for other pages
- */
 export function GenericPageSkeleton() {
     return (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-4">
@@ -51,43 +42,39 @@ export function GenericPageSkeleton() {
     );
 }
 
-/**
- * PageSkeleton - Default export that can be used as Suspense fallback
- * Automatically detects route and shows appropriate skeleton
- */
 export function PageSkeleton() {
     // Check current route for page-specific skeleton
     const pathname = window.location.pathname;
-    
+
     if (pathname === '/dashboard' || pathname === '/dashboard/') {
         return <DashboardSkeleton />;
     }
-    
+
     if (pathname === '/dashboard/participants' || pathname === '/dashboard/participants/') {
         return <PesertaSkeleton />;
     }
-    
+
     if (pathname.startsWith('/dashboard/participants/register')) {
         return <PesertaAddSkeleton />;
     }
-    
+
     // Match /dashboard/participants/:category/:id pattern (detail page)
     if (/^\/dashboard\/participants\/[^/]+\/\d+/.test(pathname)) {
         return <PesertaDetailSkeleton />;
     }
-    
+
     if (pathname === '/dashboard/examinations' || pathname === '/dashboard/examinations/') {
         return <PemeriksaanSkeleton />;
     }
-    
+
     // Match /dashboard/examinations/:category/:id pattern
     if (/^\/dashboard\/examinations\/[^/]+\/\d+/.test(pathname)) {
         return <PemeriksaanAddSkeleton />;
     }
-    
+
     if (pathname.startsWith('/dashboard/reports')) {
-        return <LaporanSkeleton />;
+        return <ReportSkeleton />;
     }
-    
+
     return <GenericPageSkeleton />;
 }
