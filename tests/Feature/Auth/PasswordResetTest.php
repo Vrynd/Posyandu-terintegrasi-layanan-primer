@@ -74,6 +74,5 @@ test('password cannot be reset with invalid token', function () {
         'password_confirmation' => 'New-Password123!',
     ]);
 
-
     $response->assertSessionHasErrors('email');
 });

@@ -91,7 +91,6 @@ test('correct password must be provided to update password', function () {
             'password_confirmation' => 'New-Password123!',
         ]);
 
-
     $response
         ->assertSessionHasErrors('current_password')
         ->assertRedirect(route('security.edit'));

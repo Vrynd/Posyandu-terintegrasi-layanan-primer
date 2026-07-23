@@ -79,7 +79,9 @@ const categories = [
 <template>
     <Head title="Sistem Pelayanan Kesehatan Terpadu - Posyandu Tondomulyo" />
 
-    <div class="min-h-screen bg-zinc-950 font-sans text-white antialiased selection:bg-indigo-500 selection:text-white">
+    <div
+        class="min-h-screen bg-zinc-950 font-sans text-white antialiased selection:bg-indigo-500 selection:text-white"
+    >
         <!-- Ambient Background (Grid Contours) -->
         <div class="pointer-events-none fixed inset-0 z-0 overflow-hidden">
             <!-- Gradient Orbs -->
@@ -107,12 +109,25 @@ const categories = [
                             stroke-opacity="0.05"
                         />
                     </pattern>
-                    <radialGradient id="minor-grid-fade" cx="50%" cy="30%" r="70%">
+                    <radialGradient
+                        id="minor-grid-fade"
+                        cx="50%"
+                        cy="30%"
+                        r="70%"
+                    >
                         <stop offset="0%" stop-color="white" stop-opacity="1" />
-                        <stop offset="100%" stop-color="white" stop-opacity="0" />
+                        <stop
+                            offset="100%"
+                            stop-color="white"
+                            stop-opacity="0"
+                        />
                     </radialGradient>
                     <mask id="minor-grid-mask">
-                        <rect width="100%" height="100%" fill="url(#minor-grid-fade)" />
+                        <rect
+                            width="100%"
+                            height="100%"
+                            fill="url(#minor-grid-fade)"
+                        />
                     </mask>
                 </defs>
                 <rect
@@ -147,12 +162,25 @@ const categories = [
                             stroke-opacity="0.25"
                         />
                     </pattern>
-                    <radialGradient id="major-grid-fade" cx="50%" cy="25%" r="65%">
+                    <radialGradient
+                        id="major-grid-fade"
+                        cx="50%"
+                        cy="25%"
+                        r="65%"
+                    >
                         <stop offset="0%" stop-color="white" stop-opacity="1" />
-                        <stop offset="100%" stop-color="white" stop-opacity="0" />
+                        <stop
+                            offset="100%"
+                            stop-color="white"
+                            stop-opacity="0"
+                        />
                     </radialGradient>
                     <mask id="major-grid-mask">
-                        <rect width="100%" height="100%" fill="url(#major-grid-fade)" />
+                        <rect
+                            width="100%"
+                            height="100%"
+                            fill="url(#major-grid-fade)"
+                        />
                     </mask>
                 </defs>
                 <rect
@@ -163,7 +191,6 @@ const categories = [
                 />
             </svg>
         </div>
-
 
         <div class="relative z-10 flex min-h-screen flex-col">
             <!-- ===== NAVBAR ===== -->
@@ -176,7 +203,7 @@ const categories = [
                     <!-- Brand -->
                     <Link href="/" class="group flex items-center gap-2.5">
                         <div
-                            class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-linear-to-brrom-indigo-400 to-pink-400 text-white shadow-lg shadow-indigo-500/20 transition-transform duration-300 group-hover:scale-105"
+                            class="bg-linear-to-brrom-indigo-400 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl to-pink-400 text-white shadow-lg shadow-indigo-500/20 transition-transform duration-300 group-hover:scale-105"
                         >
                             <HeartPulse class="h-4 w-4" />
                         </div>
@@ -261,7 +288,7 @@ const categories = [
                                     >
                                 </div>
                                 <h1
-                                    class="font-display text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl leading-[1.08]"
+                                    class="font-display text-4xl leading-[1.08] font-bold tracking-tight text-white sm:text-5xl lg:text-6xl"
                                 >
                                     Posyandu Lebih
                                     <span
@@ -270,12 +297,11 @@ const categories = [
                                     >
                                 </h1>
                                 <p
-                                    class="mx-auto mt-5 max-w-xl text-base text-zinc-400 leading-relaxed sm:text-lg lg:mx-0"
+                                    class="mx-auto mt-5 max-w-xl text-base leading-relaxed text-zinc-400 sm:text-lg lg:mx-0"
                                 >
-                                    Platform pencatatan dan pengelolaan
-                                    posyandu untuk seluruh kelompok sasaran
-                                    kesehatan &mdash; dari Ibu Hamil hingga
-                                    Lansia.
+                                    Platform pencatatan dan pengelolaan posyandu
+                                    untuk seluruh kelompok sasaran kesehatan
+                                    &mdash; dari Ibu Hamil hingga Lansia.
                                 </p>
                                 <div
                                     class="mt-8 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center lg:justify-start"
@@ -343,7 +369,9 @@ const categories = [
                                     class="relative space-y-4 rounded-2xl border border-zinc-800 bg-zinc-900 p-6"
                                 >
                                     <!-- Card Header -->
-                                    <div class="flex items-center justify-between">
+                                    <div
+                                        class="flex items-center justify-between"
+                                    >
                                         <div class="flex items-center gap-2.5">
                                             <div
                                                 class="flex h-8 w-8 items-center justify-center rounded-lg bg-linear-to-br from-indigo-400 to-pink-400 text-white"
@@ -512,7 +540,7 @@ const categories = [
                                         <HeartPulse class="h-6 w-6" />
                                     </div>
                                     <div
-                                        class="mb-1 text-xs font-semibold text-pink-400 uppercase tracking-widest"
+                                        class="mb-1 text-xs font-semibold tracking-widest text-pink-400 uppercase"
                                     >
                                         01
                                     </div>
@@ -520,10 +548,10 @@ const categories = [
                                         Ibu Hamil
                                     </h3>
                                     <p
-                                        class="mt-1.5 text-xs text-zinc-500 leading-relaxed"
+                                        class="mt-1.5 text-xs leading-relaxed text-zinc-500"
                                     >
-                                        Pemantauan kehamilan, ANC, dan
-                                        persiapan persalinan.
+                                        Pemantauan kehamilan, ANC, dan persiapan
+                                        persalinan.
                                     </p>
                                 </div>
                             </div>
@@ -542,7 +570,7 @@ const categories = [
                                         <Activity class="h-6 w-6" />
                                     </div>
                                     <div
-                                        class="mb-1 text-xs font-semibold text-indigo-400 uppercase tracking-widest"
+                                        class="mb-1 text-xs font-semibold tracking-widest text-indigo-400 uppercase"
                                     >
                                         02
                                     </div>
@@ -550,7 +578,7 @@ const categories = [
                                         Balita
                                     </h3>
                                     <p
-                                        class="mt-1.5 text-xs text-zinc-500 leading-relaxed"
+                                        class="mt-1.5 text-xs leading-relaxed text-zinc-500"
                                     >
                                         Pemantauan tumbuh kembang anak usia 0
                                         sampai 5 tahun.
@@ -572,7 +600,7 @@ const categories = [
                                         <GraduationCap class="h-6 w-6" />
                                     </div>
                                     <div
-                                        class="mb-1 text-xs font-semibold text-pink-400 uppercase tracking-widest"
+                                        class="mb-1 text-xs font-semibold tracking-widest text-pink-400 uppercase"
                                     >
                                         03
                                     </div>
@@ -580,7 +608,7 @@ const categories = [
                                         Anak Remaja
                                     </h3>
                                     <p
-                                        class="mt-1.5 text-xs text-zinc-500 leading-relaxed"
+                                        class="mt-1.5 text-xs leading-relaxed text-zinc-500"
                                     >
                                         Kesehatan reproduksi dan nutrisi remaja
                                         10 sampai 18 tahun.
@@ -602,7 +630,7 @@ const categories = [
                                         <Briefcase class="h-6 w-6" />
                                     </div>
                                     <div
-                                        class="mb-1 text-xs font-semibold text-indigo-400 uppercase tracking-widest"
+                                        class="mb-1 text-xs font-semibold tracking-widest text-indigo-400 uppercase"
                                     >
                                         04
                                     </div>
@@ -610,17 +638,17 @@ const categories = [
                                         Usia Produktif
                                     </h3>
                                     <p
-                                        class="mt-1.5 text-xs text-zinc-500 leading-relaxed"
+                                        class="mt-1.5 text-xs leading-relaxed text-zinc-500"
                                     >
-                                        Deteksi dini penyakit tidak menular
-                                        pada usia 18 sampai 59 tahun.
+                                        Deteksi dini penyakit tidak menular pada
+                                        usia 18 sampai 59 tahun.
                                     </p>
                                 </div>
                             </div>
 
                             <!-- Lansia -->
                             <div
-                                class="group relative overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900 p-6 transition-all duration-300 sm:col-span-2 hover:-translate-y-1 hover:border-pink-500/40 lg:col-span-1"
+                                class="group relative overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900 p-6 transition-all duration-300 hover:-translate-y-1 hover:border-pink-500/40 sm:col-span-2 lg:col-span-1"
                             >
                                 <div
                                     class="absolute top-0 right-0 h-24 w-24 rounded-bl-full bg-pink-500/5 transition-all duration-300 group-hover:bg-pink-500/10"
@@ -632,7 +660,7 @@ const categories = [
                                         <Heart class="h-6 w-6" />
                                     </div>
                                     <div
-                                        class="mb-1 text-xs font-semibold text-pink-400 uppercase tracking-widest"
+                                        class="mb-1 text-xs font-semibold tracking-widest text-pink-400 uppercase"
                                     >
                                         05
                                     </div>
@@ -640,7 +668,7 @@ const categories = [
                                         Lansia
                                     </h3>
                                     <p
-                                        class="mt-1.5 text-xs text-zinc-500 leading-relaxed"
+                                        class="mt-1.5 text-xs leading-relaxed text-zinc-500"
                                     >
                                         Pemantauan kesehatan dan kualitas hidup
                                         warga 60 tahun ke atas.
@@ -691,11 +719,10 @@ const categories = [
                                     Jadwal Terlaksana
                                 </div>
                                 <p
-                                    class="mt-3 text-xs text-zinc-500 leading-relaxed"
+                                    class="mt-3 text-xs leading-relaxed text-zinc-500"
                                 >
                                     Seluruh jadwal kegiatan posyandu
-                                    terdokumentasi dan terpantau secara
-                                    digital.
+                                    terdokumentasi dan terpantau secara digital.
                                 </p>
                             </div>
 
@@ -717,7 +744,7 @@ const categories = [
                                     Kelompok Sasaran
                                 </div>
                                 <p
-                                    class="mt-3 text-xs text-zinc-500 leading-relaxed"
+                                    class="mt-3 text-xs leading-relaxed text-zinc-500"
                                 >
                                     Mulai dari Ibu Hamil, Balita, Remaja, Usia
                                     Produktif, hingga Lansia terlayani dalam
@@ -745,10 +772,10 @@ const categories = [
                                     Laporan Otomatis
                                 </div>
                                 <p
-                                    class="mt-3 text-xs text-zinc-500 leading-relaxed"
+                                    class="mt-3 text-xs leading-relaxed text-zinc-500"
                                 >
-                                    Laporan bulanan dihasilkan otomatis dan
-                                    siap dikirim ke Puskesmas setiap bulan.
+                                    Laporan bulanan dihasilkan otomatis dan siap
+                                    dikirim ke Puskesmas setiap bulan.
                                 </p>
                             </div>
 
@@ -770,7 +797,7 @@ const categories = [
                                     Data Tercadangkan
                                 </div>
                                 <p
-                                    class="mt-3 text-xs text-zinc-500 leading-relaxed"
+                                    class="mt-3 text-xs leading-relaxed text-zinc-500"
                                 >
                                     Backup data posyandu terjadwal otomatis
                                     sehingga data warga tidak pernah hilang.
@@ -813,7 +840,7 @@ const categories = [
                                     Pendaftaran
                                 </h3>
                                 <p
-                                    class="mt-2 text-sm text-zinc-400 leading-relaxed"
+                                    class="mt-2 text-sm leading-relaxed text-zinc-400"
                                 >
                                     Registrasi warga, ibu hamil, dan balita ke
                                     sistem secara mudah dan terstruktur.
@@ -833,7 +860,7 @@ const categories = [
                                     Pemeriksaan
                                 </h3>
                                 <p
-                                    class="mt-2 text-sm text-zinc-400 leading-relaxed"
+                                    class="mt-2 text-sm leading-relaxed text-zinc-400"
                                 >
                                     Pencatatan hasil pemeriksaan kesehatan,
                                     antropometri, dan status gizi secara
@@ -854,7 +881,7 @@ const categories = [
                                     Laporan
                                 </h3>
                                 <p
-                                    class="mt-2 text-sm text-zinc-400 leading-relaxed"
+                                    class="mt-2 text-sm leading-relaxed text-zinc-400"
                                 >
                                     Rekapitulasi laporan bulanan otomatis siap
                                     dikirim ke Puskesmas dan Dinas Kesehatan.
@@ -874,7 +901,7 @@ const categories = [
                                     Jadwal Kegiatan
                                 </h3>
                                 <p
-                                    class="mt-2 text-sm text-zinc-400 leading-relaxed"
+                                    class="mt-2 text-sm leading-relaxed text-zinc-400"
                                 >
                                     Manajemen jadwal posyandu rutin, imunisasi,
                                     dan kegiatan kesehatan komunitas.
@@ -894,7 +921,7 @@ const categories = [
                                     Pengaduan
                                 </h3>
                                 <p
-                                    class="mt-2 text-sm text-zinc-400 leading-relaxed"
+                                    class="mt-2 text-sm leading-relaxed text-zinc-400"
                                 >
                                     Kanal penerimaan dan pengelolaan pengaduan
                                     warga terkait layanan posyandu.
@@ -914,7 +941,7 @@ const categories = [
                                     Backup Data
                                 </h3>
                                 <p
-                                    class="mt-2 text-sm text-zinc-400 leading-relaxed"
+                                    class="mt-2 text-sm leading-relaxed text-zinc-400"
                                 >
                                     Pencadangan data posyandu secara berkala dan
                                     terjadwal untuk keamanan informasi.
@@ -934,7 +961,7 @@ const categories = [
                                     Log Aktivitas
                                 </h3>
                                 <p
-                                    class="mt-2 text-sm text-zinc-400 leading-relaxed"
+                                    class="mt-2 text-sm leading-relaxed text-zinc-400"
                                 >
                                     Rekam jejak seluruh aktivitas pengguna untuk
                                     keperluan audit dan akuntabilitas sistem.
@@ -955,7 +982,7 @@ const categories = [
                                         Keamanan Ganda
                                     </h3>
                                     <p
-                                        class="mt-2 text-sm text-zinc-400 leading-relaxed"
+                                        class="mt-2 text-sm leading-relaxed text-zinc-400"
                                     >
                                         Login dengan Email atau NIK 16-digit
                                         &amp; password enkripsi kuat untuk
@@ -1000,7 +1027,7 @@ const categories = [
                                     >
                                 </h2>
                                 <p
-                                    class="mt-6 text-lg text-zinc-400 leading-relaxed"
+                                    class="mt-6 text-lg leading-relaxed text-zinc-400"
                                 >
                                     Masuk ke sistem menggunakan akun Kader atau
                                     Administrator dan mulai catat, pantau, serta
@@ -1086,7 +1113,9 @@ const categories = [
                                     ></span
                                 >
                             </div>
-                            <p class="mt-3 text-sm text-zinc-400 leading-relaxed">
+                            <p
+                                class="mt-3 text-sm leading-relaxed text-zinc-400"
+                            >
                                 Platform digital pengelolaan posyandu berbasis
                                 Integrasi Layanan Primer (ILP) untuk mendukung
                                 kesehatan masyarakat Indonesia.
@@ -1101,7 +1130,7 @@ const categories = [
                         <!-- Kategori Layanan -->
                         <div>
                             <h4
-                                class="mb-4 text-xs font-semibold text-white uppercase tracking-wider"
+                                class="mb-4 text-xs font-semibold tracking-wider text-white uppercase"
                             >
                                 Kategori Layanan
                             </h4>
@@ -1117,7 +1146,7 @@ const categories = [
                         <!-- Modul Sistem -->
                         <div>
                             <h4
-                                class="mb-4 text-xs font-semibold text-white uppercase tracking-wider"
+                                class="mb-4 text-xs font-semibold tracking-wider text-white uppercase"
                             >
                                 Modul Sistem
                             </h4>
@@ -1133,7 +1162,7 @@ const categories = [
                         <!-- Akses Sistem -->
                         <div class="col-span-2 sm:col-span-1">
                             <h4
-                                class="mb-4 text-xs font-semibold text-white uppercase tracking-wider"
+                                class="mb-4 text-xs font-semibold tracking-wider text-white uppercase"
                             >
                                 Akses Sistem
                             </h4>

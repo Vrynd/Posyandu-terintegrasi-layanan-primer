@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { HTMLAttributes } from 'vue';
 import { Form } from '@inertiajs/vue3';
+import type { HTMLAttributes } from 'vue';
 import InputError from '@/components/InputError.vue';
 import PasswordInput from '@/components/PasswordInput.vue';
 import TextLink from '@/components/TextLink.vue';
@@ -34,17 +34,25 @@ const props = defineProps<{
 
 <template>
     <div :class="cn('flex flex-col gap-6', props.class)">
-        <Card class="rounded-2xl border-zinc-800 bg-zinc-900/90 text-white shadow-2xl backdrop-blur-xl">
+        <Card
+            class="rounded-2xl border-zinc-800 bg-zinc-900/90 text-white shadow-2xl backdrop-blur-xl"
+        >
             <CardHeader class="space-y-1.5 px-6 pt-6 pb-2 text-left">
-                <CardTitle class="font-display text-xl font-bold tracking-tight text-white">
+                <CardTitle
+                    class="font-display text-xl font-bold tracking-tight text-white"
+                >
                     Masuk ke Akun Anda
                 </CardTitle>
                 <CardDescription class="text-xs leading-relaxed text-zinc-400">
-                    Masukkan Email atau 16 Digit NIK dan password Anda untuk melanjutkan
+                    Masukkan Email atau 16 Digit NIK dan password Anda untuk
+                    melanjutkan
                 </CardDescription>
             </CardHeader>
             <CardContent class="px-6 py-5">
-                <div v-if="status" class="mb-4 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-center text-xs font-semibold text-emerald-400">
+                <div
+                    v-if="status"
+                    class="mb-4 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-center text-xs font-semibold text-emerald-400"
+                >
                     {{ status }}
                 </div>
 
@@ -55,7 +63,10 @@ const props = defineProps<{
                 >
                     <FieldGroup>
                         <Field>
-                            <FieldLabel for="email" class="text-xs font-medium text-zinc-300">
+                            <FieldLabel
+                                for="email"
+                                class="text-xs font-medium text-zinc-300"
+                            >
                                 Email atau NIK
                             </FieldLabel>
                             <Input
@@ -74,7 +85,10 @@ const props = defineProps<{
 
                         <Field>
                             <div class="flex items-center justify-between">
-                                <FieldLabel for="password" class="text-xs font-medium text-zinc-300">
+                                <FieldLabel
+                                    for="password"
+                                    class="text-xs font-medium text-zinc-300"
+                                >
                                     Password
                                 </FieldLabel>
                                 <TextLink
@@ -99,12 +113,18 @@ const props = defineProps<{
                         </Field>
 
                         <Field>
-                            <div class="flex items-center justify-between pt-0.5">
+                            <div
+                                class="flex items-center justify-between pt-0.5"
+                            >
                                 <FieldLabel
                                     for="remember"
                                     class="flex cursor-pointer items-center space-x-2 text-xs font-normal text-zinc-400 hover:text-zinc-200"
                                 >
-                                    <Checkbox id="remember" name="remember" :tabindex="3" />
+                                    <Checkbox
+                                        id="remember"
+                                        name="remember"
+                                        :tabindex="3"
+                                    />
                                     <span>Ingat saya</span>
                                 </FieldLabel>
                             </div>
@@ -113,12 +133,15 @@ const props = defineProps<{
                         <Field>
                             <Button
                                 type="submit"
-                                class="h-10 w-full rounded-xl bg-linear-to-r from-indigo-500 to-pink-500 text-sm font-semibold text-white shadow-lg shadow-indigo-500/20 transition-all duration-300 hover:opacity-90 disabled:opacity-50 cursor-pointer"
+                                class="h-10 w-full cursor-pointer rounded-xl bg-linear-to-r from-indigo-500 to-pink-500 text-sm font-semibold text-white shadow-lg shadow-indigo-500/20 transition-all duration-300 hover:opacity-90 disabled:opacity-50"
                                 :tabindex="4"
                                 :disabled="processing"
                                 data-test="login-button"
                             >
-                                <Spinner v-if="processing" class="mr-2 h-4 w-4 text-white" />
+                                <Spinner
+                                    v-if="processing"
+                                    class="mr-2 h-4 w-4 text-white"
+                                />
                                 <span>Masuk ke Sistem</span>
                             </Button>
                             <Button
@@ -128,9 +151,14 @@ const props = defineProps<{
                             >
                                 Masuk dengan Google
                             </Button>
-                            <FieldDescription class="mt-2 text-center text-xs text-zinc-400">
+                            <FieldDescription
+                                class="mt-2 text-center text-xs text-zinc-400"
+                            >
                                 Belum punya akun?
-                                <a href="#" class="font-medium text-white underline underline-offset-4 hover:text-indigo-400">
+                                <a
+                                    href="#"
+                                    class="font-medium text-white underline underline-offset-4 hover:text-indigo-400"
+                                >
                                     Hubungi Admin
                                 </a>
                             </FieldDescription>

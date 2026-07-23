@@ -78,4 +78,3 @@ class User extends Authenticatable
         return $this->locked_until !== null && $this->locked_until->isFuture();
     }
 }
-

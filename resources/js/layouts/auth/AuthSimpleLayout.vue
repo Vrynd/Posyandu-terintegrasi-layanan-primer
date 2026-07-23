@@ -16,14 +16,17 @@ defineProps<{
         <!-- Ambient Grid Background (DESIGN.md) -->
         <div class="pointer-events-none absolute inset-0 overflow-hidden">
             <div
-                class="absolute -top-40 -right-40 h-[500px] w-[500px] rounded-full bg-indigo-500/10 blur-3xl"
+                class="absolute -top-40 -right-40 h-125 w-125 rounded-full bg-indigo-500/10 blur-3xl"
             ></div>
             <div
-                class="absolute -bottom-40 -left-40 h-[450px] w-[450px] rounded-full bg-pink-500/5 blur-3xl"
+                class="absolute -bottom-40 -left-40 h-112.5 w-112.5 rounded-full bg-pink-500/5 blur-3xl"
             ></div>
 
             <!-- Grid Contour Layer -->
-            <svg class="absolute inset-0 h-full w-full opacity-40" aria-hidden="true">
+            <svg
+                class="absolute inset-0 h-full w-full opacity-40"
+                aria-hidden="true"
+            >
                 <defs>
                     <pattern
                         id="auth-simple-grid-contour"
@@ -40,7 +43,11 @@ defineProps<{
                         />
                     </pattern>
                 </defs>
-                <rect width="100%" height="100%" fill="url(#auth-simple-grid-contour)" />
+                <rect
+                    width="100%"
+                    height="100%"
+                    fill="url(#auth-simple-grid-contour)"
+                />
             </svg>
         </div>
 
@@ -53,15 +60,19 @@ defineProps<{
                         class="group flex items-center gap-3 transition-transform duration-300 hover:scale-105"
                     >
                         <div
-                            class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-400 to-pink-400 text-white shadow-lg shadow-indigo-500/20"
+                            class="flex h-10 w-10 items-center justify-center rounded-xl bg-linear-to-br from-indigo-400 to-pink-400 text-white shadow-lg shadow-indigo-500/20"
                         >
                             <HeartPulse class="h-5 w-5" />
                         </div>
                         <div class="leading-tight">
-                            <span class="font-display text-lg font-bold tracking-tight text-white">
+                            <span
+                                class="font-display text-lg font-bold tracking-tight text-white"
+                            >
                                 Posyandu Tondomulyo
                             </span>
-                            <span class="block text-[11px] font-medium text-zinc-400">
+                            <span
+                                class="block text-[11px] font-medium text-zinc-400"
+                            >
                                 Integrasi Layanan Primer
                             </span>
                         </div>
@@ -74,4 +85,3 @@ defineProps<{
         </div>
     </div>
 </template>
-

@@ -4,7 +4,6 @@ import InputError from '@/components/InputError.vue';
 import PasswordInput from '@/components/PasswordInput.vue';
 import TextLink from '@/components/TextLink.vue';
 import { Button } from '@/components/ui/button';
-// import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
@@ -38,11 +37,15 @@ defineProps<{
         v-bind="store.form()"
         :reset-on-success="['password']"
         v-slot="{ errors, processing }"
-        class="flex flex-col gap-6">
-
+        class="flex flex-col gap-6"
+    >
         <div class="grid gap-5">
             <div class="grid gap-2.5">
-                <Label for="email" class="text-xs font-medium text-zinc-300">Email atau NIK</Label>
+                <Label
+                    for="email"
+                    class="text-xs font-medium text-foreground/90"
+                    >Email atau NIK</Label
+                >
                 <Input
                     id="email"
                     type="text"
@@ -52,19 +55,24 @@ defineProps<{
                     :tabindex="1"
                     autocomplete="username"
                     placeholder="email@example.com"
-                    class="h-11 rounded-xl border border-zinc-700 bg-zinc-800 px-3.5 text-sm text-white placeholder:text-zinc-500 transition-all duration-200 focus:border-zinc-400 focus:ring-1 focus:ring-zinc-400/20 focus:outline-none"
+                    class="h-11 rounded-xl px-3.5 text-sm"
                 />
                 <InputError :message="errors.email" />
             </div>
 
             <div class="grid gap-2.5">
                 <div class="flex items-center justify-between">
-                    <Label for="password" class="text-xs font-medium text-zinc-300">Password</Label>
+                    <Label
+                        for="password"
+                        class="text-xs font-medium text-foreground/90"
+                        >Password</Label
+                    >
                     <TextLink
                         v-if="canResetPassword"
                         :href="request()"
-                        class="text-xs text-zinc-400 transition-colors hover:text-white"
-                        :tabindex="5">
+                        class="text-xs text-muted-foreground transition-colors hover:text-foreground"
+                        :tabindex="5"
+                    >
                         Lupa password?
                     </TextLink>
                 </div>
@@ -76,7 +84,7 @@ defineProps<{
                     :tabindex="2"
                     autocomplete="current-password"
                     placeholder="Password"
-                    class="h-11 rounded-xl border border-zinc-700 bg-zinc-800 px-3.5 text-sm text-white placeholder:text-zinc-500 transition-all duration-200 focus:border-zinc-400 focus:ring-1 focus:ring-zinc-400/20 focus:outline-none"
+                    class="h-11 rounded-xl px-3.5 text-sm"
                 />
                 <InputError :message="errors.password" />
             </div>
@@ -87,20 +95,21 @@ defineProps<{
                 size="lg"
                 :tabindex="4"
                 :disabled="processing"
-                data-test="login-button">
+                data-test="login-button"
+            >
                 <Spinner v-if="processing" class="mr-2 h-4 w-4 text-white" />
                 <span>Masuk Ke Dashboard</span>
             </Button>
 
-            <p class="mt-2 text-center text-xs text-zinc-500">
+            <p class="mt-2 text-center text-xs text-muted-foreground">
                 Belum memiliki akun?
                 <TextLink
                     href="#"
-                    class="font-medium text-zinc-400 transition-colors hover:text-indigo-400">
+                    class="font-semibold text-indigo-400 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-500"
+                >
                     Silakan hubungi Admin
                 </TextLink>
             </p>
         </div>
     </Form>
 </template>
-

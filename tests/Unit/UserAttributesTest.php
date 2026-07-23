@@ -2,11 +2,11 @@
 
 use App\Enums\UserRole;
 use App\Models\User;
+use Carbon\CarbonInterface;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 uses(TestCase::class, RefreshDatabase::class);
-
 
 test('user model casts nik, role, failed_login_attempts, and locked_until correctly', function () {
     $user = User::factory()->create([
@@ -19,7 +19,7 @@ test('user model casts nik, role, failed_login_attempts, and locked_until correc
     expect($user->nik)->toBe('3512345678901234')
         ->and($user->role)->toBe(UserRole::Administrator)
         ->and($user->failed_login_attempts)->toBe(3)
-        ->and($user->locked_until)->toBeInstanceOf(Carbon\CarbonInterface::class);
+        ->and($user->locked_until)->toBeInstanceOf(CarbonInterface::class);
 
 });
 
@@ -40,4 +40,3 @@ test('user lock helper method works correctly', function () {
     expect($unlockedUser->isLocked())->toBeFalse()
         ->and($lockedUser->isLocked())->toBeTrue();
 });
-
