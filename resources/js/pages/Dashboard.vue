@@ -10,10 +10,6 @@ defineOptions({
                 title: 'Dashboard',
                 href: dashboard(),
             },
-            {
-                title: 'Dashboard Layanan',
-                href: dashboard(),
-            },
         ],
     },
 });
