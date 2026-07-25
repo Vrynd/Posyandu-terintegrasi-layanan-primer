@@ -13,9 +13,12 @@ import {
     X,
 } from '@lucide/vue';
 import { computed, ref, watch } from 'vue';
+import { Dialog, DialogContent, DialogClose } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
 import { useSearchModal } from '@/composables/useSearchModal';
 
 const { isSearchOpen, closeSearchModal } = useSearchModal();
+
 const searchQuery = ref('');
 
 const closeModal = () => {
@@ -23,9 +26,10 @@ const closeModal = () => {
     searchQuery.value = '';
 };
 
+// Application Search Items
 const searchItems = [
     {
-        title: 'Dashboard',
+        title: 'Dashboard Utama',
         category: 'Utama',
         href: '/dashboard',
         icon: LayoutDashboard,
@@ -62,7 +66,7 @@ const searchItems = [
     {
         title: 'Kelola Kode Undangan',
         category: 'Manajemen Sistem',
-        href: '#',
+        href: '/admin/invitations',
         icon: Shield,
         isLocked: false,
     },
@@ -82,7 +86,7 @@ const searchItems = [
     },
 ];
 
-const filteredSearch = computed(() => {
+const filteredSearchItems = computed(() => {
     if (!searchQuery.value.trim()) {
         return searchItems;
     }
@@ -113,104 +117,107 @@ watch(isSearchOpen, (newVal) => {
 </script>
 
 <template>
-    <Teleport to="body">
-        <div
-            v-if="isSearchOpen"
-            class="fixed inset-0 z-50 flex items-start justify-center p-4 pt-16 sm:pt-24"
+    <Dialog
+        :open="isSearchOpen"
+        @update:open="
+            (val) => {
+                if (!val) closeSearchModal();
+            }
+        "
+    >
+        <DialogContent
+            @pointerDownOutside="closeModal"
+            class="top-16 max-w-lg translate-y-0 overflow-hidden rounded-2xl border border-border bg-card p-0 text-card-foreground shadow-2xl sm:top-24 [&>button]:hidden"
         >
-            <div
-                @click="closeModal"
-                class="fixed inset-0 bg-black/25 backdrop-blur-sm transition-opacity"
-            />
-            <div
-                class="relative w-full max-w-lg overflow-hidden rounded-2xl border border-zinc-700/80 bg-zinc-900 text-white shadow-2xl transition-all"
-            >
-                <div
-                    class="flex items-center border-b border-zinc-800 px-4 py-3"
-                >
-                    <Search class="mr-3 h-4 w-4 shrink-0 text-zinc-400" />
-                    <input
+            <div class="flex items-center gap-2 border-b border-border p-3">
+                <div class="relative flex-1">
+                    <Search
+                        class="pointer-events-none absolute top-1/2 left-3 z-10 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+                    />
+                    <div
+                        class="pointer-events-none absolute top-1/2 left-8 z-10 h-4 w-px -translate-y-1/2 bg-border"
+                    />
+                    <Input
                         type="text"
                         v-model="searchQuery"
                         placeholder="Cari fitur, menu, atau layanan..."
                         autoFocus
-                        class="w-full bg-transparent text-sm font-medium text-white placeholder:text-zinc-500 focus:outline-hidden"
+                        class="h-8 w-full rounded-lg border border-border bg-background pr-3 pl-11 text-sm font-medium text-foreground shadow-none placeholder:text-muted-foreground/70 focus-visible:ring-0 focus-visible:outline-none"
                     />
-                    <button
-                        type="button"
-                        @click="closeModal"
-                        class="ml-2 rounded-md p-1 text-zinc-400 hover:bg-zinc-800 hover:text-white"
-                    >
-                        <X class="h-4 w-4" />
-                    </button>
+                </div>
+                <DialogClose
+                    class="flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-full bg-muted text-muted-foreground transition-all hover:text-foreground"
+                >
+                    <X class="h-4 w-4" />
+                </DialogClose>
+            </div>
+
+            <div class="no-scrollbar max-h-80 overflow-y-auto p-2">
+                <div
+                    v-if="filteredSearchItems.length === 0"
+                    class="py-8 text-center text-sm text-muted-foreground"
+                >
+                    Tidak ada menu yang sesuai dengan "{{ searchQuery }}".
                 </div>
 
-                <div class="no-scrollbar max-h-80 overflow-y-auto p-2">
+                <div v-else class="flex flex-col gap-1">
                     <div
-                        v-if="filteredSearch.length === 0"
-                        class="py-8 text-center text-sm text-zinc-400"
+                        v-for="item in filteredSearchItems"
+                        :key="item.title"
+                        @click="navigateTo(item)"
+                        :class="[
+                            'flex items-center justify-between rounded-xl px-3 py-2.5 text-sm transition-colors',
+                            item.isLocked
+                                ? 'cursor-not-allowed opacity-50'
+                                : 'cursor-pointer hover:bg-zinc-100 hover:text-zinc-900 dark:hover:bg-zinc-800/80 dark:hover:text-white',
+                        ]"
                     >
-                        Tidak ada menu yang sesuai dengan "{{ searchQuery }}".
-                    </div>
-
-                    <div v-else class="flex flex-col gap-1">
-                        <div
-                            v-for="item in filteredSearch"
-                            :key="item.title"
-                            @click="navigateTo(item)"
-                            :class="[
-                                'flex items-center justify-between rounded-xl px-3 py-2.5 text-sm transition-colors',
-                                item.isLocked
-                                    ? 'cursor-not-allowed opacity-50'
-                                    : 'cursor-pointer hover:bg-zinc-800',
-                            ]"
-                        >
-                            <div class="flex items-center gap-3">
-                                <div
-                                    class="flex h-8 w-8 items-center justify-center rounded-lg border border-zinc-700/80 bg-zinc-950"
-                                >
-                                    <component
-                                        :is="item.icon"
-                                        class="h-4 w-4 text-indigo-400"
-                                    />
+                        <div class="flex items-center gap-3">
+                            <div
+                                class="flex h-8 w-8 items-center justify-center rounded-lg border border-border bg-muted"
+                            >
+                                <component
+                                    :is="item.icon"
+                                    class="h-4 w-4 text-primary"
+                                />
+                            </div>
+                            <div>
+                                <div class="font-medium text-foreground">
+                                    {{ item.title }}
                                 </div>
-                                <div>
-                                    <div class="font-medium text-white">
-                                        {{ item.title }}
-                                    </div>
-                                    <div class="text-xs text-zinc-400">
-                                        {{ item.category }}
-                                    </div>
+                                <div class="text-xs text-muted-foreground">
+                                    {{ item.category }}
                                 </div>
                             </div>
-
-                            <span
-                                v-if="item.isLocked"
-                                class="inline-flex items-center gap-1 rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold text-amber-400"
-                            >
-                                <Lock class="h-3 w-3" />
-                                Segera Hadir
-                            </span>
                         </div>
-                    </div>
-                </div>
 
-                <div
-                    class="flex items-center justify-between border-t border-zinc-800 bg-zinc-950 px-4 py-2 text-xs text-zinc-400"
-                >
-                    <span>Posyandu Tondomulyo</span>
-                    <div class="flex items-center gap-2">
                         <span
-                            >Tekan
-                            <kbd
-                                class="rounded border border-zinc-700/80 bg-zinc-900 px-1 font-mono text-[10px]"
-                                >ESC</kbd
-                            >
-                            untuk menutup</span
+                            v-if="item.isLocked"
+                            class="inline-flex items-center gap-1 rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold text-amber-500 dark:text-amber-400"
                         >
+                            <Lock class="h-3 w-3" />
+                            Segera Hadir
+                        </span>
                     </div>
                 </div>
             </div>
-        </div>
-    </Teleport>
+
+            <div
+                class="flex items-center justify-between border-t border-border bg-muted/50 px-4 py-3 text-xs text-muted-foreground"
+            >
+                <span>Posyandu Tondomulyo</span>
+                <div class="flex items-center gap-2">
+                    <span>
+                        Tekan
+                        <kbd
+                            class="rounded border border-border bg-background px-1 font-mono text-[10px]"
+                        >
+                            ESC
+                        </kbd>
+                        untuk menutup
+                    </span>
+                </div>
+            </div>
+        </DialogContent>
+    </Dialog>
 </template>

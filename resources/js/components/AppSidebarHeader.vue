@@ -9,7 +9,7 @@ import { SidebarTrigger } from '@/components/ui/sidebar';
     >
         <div class="flex flex-1 items-center gap-3 overflow-hidden">
             <SidebarTrigger
-                class="h-8.5 w-8.5 shrink-0 cursor-pointer rounded-full border border-zinc-700/80 bg-linear-to-r from-zinc-800/90 via-zinc-900 to-zinc-800/90 text-zinc-300 shadow-xs transition-colors hover:border-zinc-600 hover:text-white dark:border-zinc-700/80 dark:from-zinc-800/90 dark:via-zinc-900 dark:to-zinc-800/90"
+                class="h-8.5 w-8.5 shrink-0 cursor-pointer rounded-full border border-white/10 bg-linear-to-b from-zinc-800 via-zinc-900 to-zinc-950 text-white shadow-xs transition-colors hover:bg-zinc-800"
             />
             <HeaderWidgetBar />
         </div>

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useForm } from '@inertiajs/vue3';
+import { useMediaQuery } from '@vueuse/core';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -20,6 +21,7 @@ import {
 import { Spinner } from '@/components/ui/spinner';
 
 const isOpen = defineModel<boolean>('open', { default: false });
+const isDesktop = useMediaQuery('(min-width: 640px)');
 
 const invitationForm = useForm({
     code: '',
@@ -41,10 +43,9 @@ const resetCode = () => {
 </script>
 
 <template>
-    <!-- 1. Desktop Modal Dialog (>= sm screens) -->
-    <Dialog v-model:open="isOpen">
+    <Dialog v-if="isDesktop" v-model:open="isOpen">
         <DialogContent
-            class="hidden rounded-2xl border border-border bg-card p-6 text-card-foreground sm:block sm:max-w-md"
+            class="rounded-2xl border border-border bg-card p-6 text-card-foreground sm:max-w-md"
         >
             <DialogHeader class="pb-2 text-left">
                 <DialogTitle
@@ -53,8 +54,7 @@ const resetCode = () => {
                     Masuk via Kode Undangan
                 </DialogTitle>
                 <DialogDescription class="text-xs text-muted-foreground">
-                    Masukkan 16 digit kode undangan yang telah dibuat oleh
-                    Administrator Posyandu Tondomulyo.
+                    Masukkan kode undangan yang telah dibuat oleh Administrator
                 </DialogDescription>
             </DialogHeader>
 
@@ -71,7 +71,7 @@ const resetCode = () => {
                         for="desktop-invitation-code"
                         class="text-xs font-medium text-foreground/90"
                     >
-                        Kode Undangan (16 Karakter)
+                        Kode Undangan
                     </Label>
                     <Input
                         id="desktop-invitation-code"
@@ -95,26 +95,24 @@ const resetCode = () => {
                     />
                     <span>Masuk via Kode Undangan</span>
                 </Button>
-
                 <p class="mt-1 text-center text-xs text-muted-foreground">
-                    Kode tidak valid atau sudah terpakai?
+                    Kode tidak valid?
                     <button
                         type="button"
                         @click="resetCode"
-                        class="cursor-pointer font-semibold text-indigo-400 transition-colors hover:text-indigo-300 hover:underline dark:text-indigo-400 dark:hover:text-indigo-300"
+                        class="cursor-pointer font-semibold text-indigo-500 transition-colors hover:text-indigo-400 hover:underline dark:text-indigo-400"
                     >
-                        Ganti Kode Lain
+                        Ganti kode lain
                     </button>
                 </p>
             </form>
         </DialogContent>
     </Dialog>
 
-    <!-- 2. Mobile Bottom Sheet (< sm screens) -->
-    <Sheet v-model:open="isOpen">
+    <Sheet v-else v-model:open="isOpen">
         <SheetContent
             side="bottom"
-            class="rounded-t-3xl border-t border-border bg-card p-6 text-card-foreground sm:hidden"
+            class="rounded-t-3xl border-t border-border bg-card p-6 text-card-foreground"
         >
             <SheetHeader class="p-0 text-left">
                 <SheetTitle
@@ -166,13 +164,13 @@ const resetCode = () => {
                 </Button>
 
                 <p class="mt-1 text-center text-xs text-muted-foreground">
-                    Kode sudah terpakai?
+                    Kode tidak valid?
                     <button
                         type="button"
                         @click="resetCode"
-                        class="cursor-pointer font-semibold text-indigo-400 transition-colors hover:text-indigo-300 hover:underline dark:text-indigo-400 dark:hover:text-indigo-300"
+                        class="cursor-pointer font-semibold text-indigo-500 transition-colors hover:text-indigo-400 hover:underline dark:text-indigo-400"
                     >
-                        Ganti Kode Lain
+                        Ganti kode lain
                     </button>
                 </p>
             </form>
