@@ -2,9 +2,12 @@
 
 namespace App\Providers;
 
+use App\Enums\UserRole;
+use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 
@@ -24,6 +27,10 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureDefaults();
+
+        Gate::define('manage-invitations', function (User $user) {
+            return $user->role === UserRole::Administrator;
+        });
     }
 
     /**
@@ -37,12 +44,12 @@ class AppServiceProvider extends ServiceProvider
             app()->isProduction(),
         );
 
-        Password::defaults(fn (): Password => Password::min(8)
-            ->mixedCase()
-            ->letters()
-            ->numbers()
-            ->symbols()
+        Password::defaults(
+            fn (): Password => Password::min(8)
+                ->mixedCase()
+                ->letters()
+                ->numbers()
+                ->symbols()
         );
-
     }
 }

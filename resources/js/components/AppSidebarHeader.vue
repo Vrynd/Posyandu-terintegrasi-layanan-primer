@@ -5,7 +5,7 @@ import { SidebarTrigger } from '@/components/ui/sidebar';
 
 <template>
     <header
-        class="flex h-16 shrink-0 items-center justify-between gap-3 border-b border-sidebar-border/70 px-4 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-14 md:px-6"
+        class="flex h-16 shrink-0 items-center justify-between gap-3 border-b border-sidebar-border/70 px-5 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-14"
     >
         <div class="flex flex-1 items-center gap-3 overflow-hidden">
             <SidebarTrigger

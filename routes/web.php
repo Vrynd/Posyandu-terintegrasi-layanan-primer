@@ -17,6 +17,10 @@ Route::middleware('guest')->group(function () {
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::inertia('dashboard', 'Dashboard')->name('dashboard');
+
+    Route::middleware('can:manage-invitations')->group(function () {
+        Route::inertia('invitations', 'admin/Invitations')->name('invitations.index');
+    });
 });
 
 require __DIR__.'/settings.php';

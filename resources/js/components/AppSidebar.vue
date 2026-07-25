@@ -89,7 +89,7 @@ const navGroups = computed<NavGroup[]>(() => {
             items: [
                 {
                     title: 'Kode Undangan',
-                    href: '#',
+                    href: '/invitations',
                     icon: KeyRound,
                 },
                 {

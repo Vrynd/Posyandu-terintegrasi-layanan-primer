@@ -66,7 +66,7 @@ const searchItems = [
     {
         title: 'Kelola Kode Undangan',
         category: 'Manajemen Sistem',
-        href: '/admin/invitations',
+        href: '/invitations',
         icon: Shield,
         isLocked: false,
     },
