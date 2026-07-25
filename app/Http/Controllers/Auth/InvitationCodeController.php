@@ -38,7 +38,7 @@ class InvitationCodeController extends Controller
         $invitation = InvitationCode::with('user')->where('code_hash', $codeHash)->first();
 
         if (! $invitation || ! $invitation->isValid() || ! $invitation->user) {
-            RateLimiter::hit($rateKey, 900); // 15 minutes lockout window
+            RateLimiter::hit($rateKey, 900);
 
             throw ValidationException::withMessages([
                 'code' => ['Kode undangan tidak valid, atau sudah pernah digunakan.'],
@@ -46,7 +46,6 @@ class InvitationCodeController extends Controller
         }
 
         RateLimiter::clear($rateKey);
-
         $user = $invitation->user;
 
         if (! $user->hasVerifiedEmail()) {

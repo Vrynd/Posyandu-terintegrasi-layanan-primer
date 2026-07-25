@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\InvitationController;
 use App\Http\Controllers\Auth\InvitationCodeController;
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
@@ -19,7 +20,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::inertia('dashboard', 'Dashboard')->name('dashboard');
 
     Route::middleware('can:manage-invitations')->group(function () {
-        Route::inertia('invitations', 'admin/Invitations')->name('invitations.index');
+        Route::get('invitations', [InvitationController::class, 'index'])->name('invitations.index');
     });
 });
 

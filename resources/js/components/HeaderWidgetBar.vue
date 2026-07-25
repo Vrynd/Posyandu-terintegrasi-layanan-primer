@@ -20,7 +20,7 @@ const { openSearchModal } = useSearchModal();
             </div>
         </div>
 
-        <div class="flex flex-1 items-center justify-center px-1">
+        <div class="flex flex-1 items-center justify-center">
             <div
                 @click="openSearchModal"
                 class="group relative flex w-full cursor-pointer items-center"
