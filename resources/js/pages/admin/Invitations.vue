@@ -1,9 +1,16 @@
 <script setup lang="ts">
-import { Head } from '@inertiajs/vue3';
-import { AlertTriangle, CheckCircle2, KeyRound, UserCheck } from '@lucide/vue';
+import { Head, Link } from '@inertiajs/vue3';
+import {
+    AlertTriangle,
+    CheckCircle2,
+    KeyRound,
+    UserCheck,
+    Plus,
+} from '@lucide/vue';
 import { computed } from 'vue';
 import Heading from '@/components/Heading.vue';
 import MetricCard from '@/components/MetricCard.vue';
+import { Button } from '@/components/ui/button';
 import { dashboard } from '@/routes';
 
 defineOptions({
@@ -12,10 +19,6 @@ defineOptions({
             {
                 title: 'Dashboard',
                 href: dashboard(),
-            },
-            {
-                title: 'Kode Undangan',
-                href: '/invitations',
             },
         ],
     },
@@ -67,11 +70,25 @@ const metricList = computed(() => [
 <template>
     <Head title="Kelola Kode Undangan" />
 
-    <div class="flex h-full flex-1 flex-col p-4 md:p-6">
-        <Heading
-            title="Kelola Kode Undangan"
-            description="Manajemen dan pembuatan kode registrasi akun"
-        />
+    <div class="flex h-full flex-1 flex-col p-4 sm:p-5">
+        <div class="mb-8 flex items-center justify-between gap-4">
+            <Heading
+                title="Kelola Kode Undangan"
+                description="Manajemen dan pembuatan kode registrasi akun"
+                variant="small"
+            />
+
+            <Link href="/invitations/create">
+                <Button
+                    type="button"
+                    variant="default"
+                    class="font-semibold hover:bg-primary/85 hover:ring-2 hover:ring-primary/30"
+                >
+                    <Plus class="h-4 w-4" />
+                    Buat Kode Undangan
+                </Button>
+            </Link>
+        </div>
 
         <div class="grid grid-cols-2 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <MetricCard

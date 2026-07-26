@@ -21,6 +21,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::middleware('can:manage-invitations')->group(function () {
         Route::get('invitations', [InvitationController::class, 'index'])->name('invitations.index');
+        Route::get('invitations/create', [InvitationController::class, 'create'])->name('invitations.create');
+        Route::post('invitations', [InvitationController::class, 'store'])->name('invitations.store');
     });
 });
 
