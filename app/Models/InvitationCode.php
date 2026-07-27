@@ -10,7 +10,9 @@ use Illuminate\Support\Carbon;
 
 /**
  * @property int $id
- * @property int $user_id
+ * @property int|null $user_id
+ * @property string|null $recipient_name
+ * @property string|null $recipient_email
  * @property string $code_hash
  * @property bool $is_used
  * @property Carbon|null $used_at
@@ -26,6 +28,8 @@ class InvitationCode extends Model
 
     protected $fillable = [
         'user_id',
+        'recipient_name',
+        'recipient_email',
         'code_hash',
         'is_used',
         'used_at',

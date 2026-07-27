@@ -60,7 +60,7 @@ const isInvitationModalOpen = ref(false);
                     :tabindex="1"
                     autocomplete="username"
                     placeholder="email@example.com"
-                    class="h-11 rounded-xl px-3.5 text-sm"
+                    class="h-10 rounded-md text-sm"
                 />
                 <InputError :message="errors.email" />
             </div>
@@ -89,15 +89,16 @@ const isInvitationModalOpen = ref(false);
                     :tabindex="2"
                     autocomplete="current-password"
                     placeholder="Password"
-                    class="h-11 rounded-xl px-3.5 text-sm"
+                    class="h-10 rounded-md text-sm"
                 />
                 <InputError :message="errors.password" />
             </div>
 
             <Button
                 type="submit"
-                class="mt-1 h-11 w-full cursor-pointer rounded-xl bg-linear-to-r from-indigo-500 to-pink-500 text-sm font-semibold text-white shadow-lg shadow-indigo-500/20 transition-all duration-300 hover:opacity-90 disabled:opacity-50"
+                variant="default"
                 size="lg"
+                class="shadow-lg shadow-indigo-500/20 transition-all duration-300 hover:opacity-90 disabled:opacity-50"
                 :tabindex="4"
                 :disabled="processing"
                 data-test="login-button"
@@ -119,6 +120,5 @@ const isInvitationModalOpen = ref(false);
         </div>
     </Form>
 
-    <!-- Standalone Invitation Code Component (Desktop Dialog + Mobile Bottom Sheet) -->
     <InvitationCodeModal v-model:open="isInvitationModalOpen" />
 </template>

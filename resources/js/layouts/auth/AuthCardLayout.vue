@@ -137,16 +137,16 @@ defineProps<{
                 <Card
                     class="gap-2 rounded-2xl border-border bg-card py-0 text-card-foreground shadow-lg backdrop-blur-xl transition-colors duration-300"
                 >
-                    <CardHeader class="px-6 pt-6 pb-0 text-left sm:px-8">
+                    <CardHeader class="px-5 pt-6 pb-0 text-left sm:px-6">
                         <CardTitle
-                            class="font-display text-2xl font-semibold tracking-tight text-card-foreground"
+                            class="font-display text-xl leading-none font-semibold tracking-tight text-card-foreground"
                             >{{ title }}</CardTitle
                         >
                         <CardDescription class="text-xs text-muted-foreground">
                             {{ description }}
                         </CardDescription>
                     </CardHeader>
-                    <CardContent class="px-6 py-6 sm:px-8">
+                    <CardContent class="px-5 py-5 sm:px-6 sm:py-6">
                         <slot />
                     </CardContent>
                 </Card>

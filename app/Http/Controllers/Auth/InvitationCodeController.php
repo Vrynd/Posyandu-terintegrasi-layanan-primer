@@ -2,12 +2,16 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Models\InvitationCode;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Validation\Rules\Password;
 use Illuminate\Validation\ValidationException;
 
 class InvitationCodeController extends Controller
@@ -19,9 +23,12 @@ class InvitationCodeController extends Controller
     {
         $validated = $request->validate([
             'code' => ['required', 'string', 'size:16'],
+            'password' => ['required', 'string', Password::defaults(), 'confirmed'],
         ], [
             'code.required' => 'Kode undangan wajib diisi.',
-            'code.size' => 'Kode undangan harus persis 16 karakter.',
+            'code.size' => 'Kode undangan harus 16 karakter.',
+            'password.required' => 'Password wajib diisi.',
+            'password.confirmed' => 'Konfirmasi password tidak cocok.',
         ]);
 
         $rateKey = 'invitation-code:'.$request->ip();
@@ -35,9 +42,9 @@ class InvitationCodeController extends Controller
         }
 
         $codeHash = InvitationCode::hash($validated['code']);
-        $invitation = InvitationCode::with('user')->where('code_hash', $codeHash)->first();
+        $invitation = InvitationCode::where('code_hash', $codeHash)->first();
 
-        if (! $invitation || ! $invitation->isValid() || ! $invitation->user) {
+        if (! $invitation || ! $invitation->isValid()) {
             RateLimiter::hit($rateKey, 900);
 
             throw ValidationException::withMessages([
@@ -46,17 +53,25 @@ class InvitationCodeController extends Controller
         }
 
         RateLimiter::clear($rateKey);
-        $user = $invitation->user;
 
-        if (! $user->hasVerifiedEmail()) {
-            $user->markEmailAsVerified();
-        }
+        $user = User::create([
+            'name' => $invitation->recipient_name ?? 'Kader Posyandu',
+            'email' => $invitation->recipient_email ?? 'kader@posyandu.test',
+            'password' => Hash::make($validated['password']),
+            'role' => UserRole::Kader,
+        ]);
 
-        $invitation->markAsUsed();
+        $user->markEmailAsVerified();
+
+        $invitation->update([
+            'user_id' => $user->id,
+            'is_used' => true,
+            'used_at' => now(),
+        ]);
 
         Auth::login($user);
         $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        return redirect()->route('dashboard');
     }
 }
