@@ -23,6 +23,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('invitations', [InvitationController::class, 'index'])->name('invitations.index');
         Route::get('invitations/create', [InvitationController::class, 'create'])->name('invitations.create');
         Route::post('invitations', [InvitationController::class, 'store'])->name('invitations.store');
+        Route::post('invitations/{invitation}/regenerate', [InvitationController::class, 'regenerate'])->name('invitations.regenerate');
+        Route::delete('invitations/{invitation}', [InvitationController::class, 'destroy'])->name('invitations.destroy');
     });
 });
 

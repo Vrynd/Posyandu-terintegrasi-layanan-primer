@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Form, Head, Link, usePage } from '@inertiajs/vue3';
 import { Check, Copy, KeyRound, Loader2, Sparkles } from '@lucide/vue';
-import { computed, ref } from 'vue';
+import { computed } from 'vue';
 import { store } from '@/actions/App/Http/Controllers/Admin/InvitationController';
 import Heading from '@/components/Heading.vue';
 import InputError from '@/components/InputError.vue';
@@ -17,6 +17,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
+import { useClipboard } from '@/composables/useClipboard';
 import { dashboard } from '@/routes';
 
 defineOptions({
@@ -30,19 +31,15 @@ defineOptions({
 });
 
 const page = usePage();
-const flashResult = computed(
+const createdInvitation = computed(
     () => (page.props as any).flash?.success_invitation,
 );
 
-const isCopied = ref(false);
+const { copied, copyToClipboard } = useClipboard();
 const copyToken = () => {
-    if (!flashResult.value) {
-        return;
+    if (createdInvitation.value?.raw_code) {
+        copyToClipboard(createdInvitation.value.raw_code);
     }
-
-    navigator.clipboard.writeText(flashResult.value.raw_code);
-    isCopied.value = true;
-    setTimeout(() => (isCopied.value = false), 2000);
 };
 </script>
 
@@ -156,7 +153,7 @@ const copyToken = () => {
                     </CardHeader>
 
                     <CardContent class="flex-1 p-4 sm:p-5">
-                        <div v-if="flashResult" class="space-y-4">
+                        <div v-if="createdInvitation" class="space-y-4">
                             <div class="space-y-1.5">
                                 <span
                                     class="text-xs font-medium text-muted-foreground"
@@ -172,10 +169,10 @@ const copyToken = () => {
                                     <span
                                         class="font-mono text-2xl font-bold tracking-[0.15em] text-foreground"
                                     >
-                                        {{ flashResult.raw_code }}
+                                        {{ createdInvitation.raw_code }}
                                     </span>
                                     <Check
-                                        v-if="isCopied"
+                                        v-if="copied"
                                         class="h-4 w-4 shrink-0 text-emerald-500"
                                     />
                                     <Copy
@@ -193,7 +190,7 @@ const copyToken = () => {
                                         Penerima
                                     </dt>
                                     <dd class="font-semibold text-foreground">
-                                        {{ flashResult.recipient_name }}
+                                        {{ createdInvitation.recipient_name }}
                                     </dd>
                                 </div>
                                 <Separator />
@@ -202,7 +199,7 @@ const copyToken = () => {
                                         Email Terdaftar
                                     </dt>
                                     <dd class="font-medium text-foreground">
-                                        {{ flashResult.recipient_email }}
+                                        {{ createdInvitation.recipient_email }}
                                     </dd>
                                 </div>
                                 <Separator />

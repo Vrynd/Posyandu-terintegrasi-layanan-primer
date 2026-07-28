@@ -21,15 +21,17 @@ class InvitationController extends Controller
 
         $invitations = InvitationCode::with('user:id,name,email')
             ->when($search, function ($query, $s) {
-                $query->where('code_hash', 'like', "%{$s}%")
-                    ->orWhereHas('user', fn ($q) => $q->where('name', 'like', "%{$s}%"));
+                $query->where('recipient_name', 'like', "%{$s}%")
+                    ->orWhere('recipient_email', 'like', "%{$s}%")
+                    ->orWhereHas('user', fn ($q) => $q->where('name', 'like', "%{$s}%")->orWhere('email', 'like', "%{$s}%"));
             })
             ->latest()
-            ->paginate(10)
+            ->paginate(12)
             ->withQueryString()
             ->through(fn ($item) => [
                 'id' => $item->id,
-                'code_hash' => $item->code_hash,
+                'recipient_name' => $item->recipient_name ?? $item->user->name ?? 'Calon Kader',
+                'recipient_email' => $item->recipient_email ?? $item->user->email ?? '-',
                 'is_used' => $item->is_used,
                 'used_at' => $item->used_at?->format('d M Y, H:i'),
                 'expires_at' => $item->expires_at->format('d M Y'),
@@ -95,5 +97,38 @@ class InvitationController extends Controller
             'recipient_name' => $validated['recipient_name'],
             'recipient_email' => $validated['recipient_email'],
         ]);
+    }
+
+    /**
+     * Regenerate an existing invitation code with a new random code.
+     */
+    public function regenerate(InvitationCode $invitation): RedirectResponse
+    {
+        if ($invitation->is_used) {
+            return back()->with('error', 'Kode yang sudah terpakai tidak dapat diterbitkan ulang.');
+        }
+
+        $rawCode = strtoupper(Str::random(16));
+
+        $invitation->update([
+            'code_hash' => InvitationCode::hash($rawCode),
+            'expires_at' => now()->addDays(7),
+        ]);
+
+        return back()->with('success_invitation', [
+            'raw_code' => $rawCode,
+            'recipient_name' => $invitation->recipient_name ?? $invitation->user->name ?? 'Calon Kader',
+            'recipient_email' => $invitation->recipient_email ?? $invitation->user->email ?? '-',
+        ]);
+    }
+
+    /**
+     * Delete an invitation code.
+     */
+    public function destroy(InvitationCode $invitation): RedirectResponse
+    {
+        $invitation->delete();
+
+        return back();
     }
 }
