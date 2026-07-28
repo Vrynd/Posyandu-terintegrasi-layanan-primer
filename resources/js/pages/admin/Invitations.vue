@@ -9,9 +9,11 @@ import {
     Trash2,
     UserCheck,
 } from '@lucide/vue';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
+import ConfirmDialog from '@/components/ConfirmDialog.vue';
 import Heading from '@/components/Heading.vue';
 import MetricCard from '@/components/MetricCard.vue';
+import Pagination from '@/components/Pagination.vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -23,6 +25,7 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
+import { useTableSort } from '@/composables/useTableSort';
 import { dashboard } from '@/routes';
 import type { InvitationItem, InvitationMetrics } from '@/types';
 
@@ -46,9 +49,21 @@ interface Props {
         current_page: number;
         last_page: number;
     };
+    filters?: {
+        search?: string;
+        sort?: string;
+        direction?: 'asc' | 'desc';
+    };
 }
 
 const props = defineProps<Props>();
+
+const {
+    sortField,
+    sortDirection,
+    handleSort,
+    sortedData: sortedInvitations,
+} = useTableSort<InvitationItem>(() => props.invitations?.data ?? []);
 
 const metricList = computed(() => [
     {
@@ -81,20 +96,55 @@ const metricList = computed(() => [
     },
 ]);
 
-const tapTogenerate = (id: number) => {
-    if (confirm('Apakah Anda yakin ingin menerbitkan ulang kode ini?')) {
-        router.post(
-            `/invitations/${id}/regenerate`,
-            {},
-            { preserveScroll: true },
-        );
-    }
+const isRegenerateOpen = ref(false);
+const isDeleteOpen = ref(false);
+const selectedInvitationId = ref<number | null>(null);
+const isProcessing = ref(false);
+
+const openRegenerateModal = (id: number) => {
+    selectedInvitationId.value = id;
+    isRegenerateOpen.value = true;
 };
 
-const tapToDelete = (id: number) => {
-    if (confirm('Apakah Anda yakin ingin menghapus kode undangan ini?')) {
-        router.delete(`/invitations/${id}`, { preserveScroll: true });
+const openDeleteModal = (id: number) => {
+    selectedInvitationId.value = id;
+    isDeleteOpen.value = true;
+};
+
+const executeRegenerate = () => {
+    if (!selectedInvitationId.value) {
+        return;
     }
+
+    isProcessing.value = true;
+    router.post(
+        `/invitations/${selectedInvitationId.value}/regenerate`,
+        {},
+        {
+            preserveScroll: true,
+            onFinish: () => {
+                isProcessing.value = false;
+                isRegenerateOpen.value = false;
+                selectedInvitationId.value = null;
+            },
+        },
+    );
+};
+
+const executeDelete = () => {
+    if (!selectedInvitationId.value) {
+        return;
+    }
+
+    isProcessing.value = true;
+    router.delete(`/invitations/${selectedInvitationId.value}`, {
+        preserveScroll: true,
+        onFinish: () => {
+            isProcessing.value = false;
+            isDeleteOpen.value = false;
+            selectedInvitationId.value = null;
+        },
+    });
 };
 </script>
 
@@ -102,11 +152,12 @@ const tapToDelete = (id: number) => {
     <Head title="Kelola Kode Undangan" />
 
     <div class="flex h-full flex-1 flex-col p-4 sm:p-5">
-        <div class="mb-8 flex items-center justify-between gap-4">
+        <div class="mb-6 flex items-center justify-between gap-4 sm:mb-8">
             <Heading
                 title="Kelola Kode Undangan"
                 description="Manajemen penerbitan dan pemantauan status kode undangan kader"
                 variant="small"
+                class="max-w-40 sm:max-w-none"
             />
 
             <Link href="/invitations/create">
@@ -115,8 +166,9 @@ const tapToDelete = (id: number) => {
                     variant="default"
                     class="gap-2 font-semibold hover:bg-primary/85 hover:ring-2 hover:ring-primary/30"
                 >
-                    <Plus class="h-4 w-4" />
-                    Buat Kode Undangan
+                    <Plus class="h-4 w-4 shrink-0" />
+                    <span class="hidden sm:inline">Buat Kode Undangan</span>
+                    <span class="inline sm:hidden">Buat Kode</span>
                 </Button>
             </Link>
         </div>
@@ -136,17 +188,53 @@ const tapToDelete = (id: number) => {
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead>Nama Kader</TableHead>
-                            <TableHead>Alamat Email</TableHead>
+                            <TableHead
+                                sortable
+                                :sort-direction="
+                                    sortField === 'recipient_name'
+                                        ? sortDirection
+                                        : null
+                                "
+                                @sort="handleSort('recipient_name')"
+                                >Nama Kader</TableHead
+                            >
+                            <TableHead
+                                sortable
+                                :sort-direction="
+                                    sortField === 'recipient_email'
+                                        ? sortDirection
+                                        : null
+                                "
+                                @sort="handleSort('recipient_email')"
+                                >Alamat Email</TableHead
+                            >
                             <TableHead>Status</TableHead>
-                            <TableHead>Tanggal Terbit</TableHead>
-                            <TableHead>Masa Berlaku</TableHead>
-                            <TableHead class="text-right">Aksi</TableHead>
+                            <TableHead
+                                sortable
+                                :sort-direction="
+                                    sortField === 'created_at'
+                                        ? sortDirection
+                                        : null
+                                "
+                                @sort="handleSort('created_at')"
+                                >Tanggal Terbit</TableHead
+                            >
+                            <TableHead
+                                sortable
+                                :sort-direction="
+                                    sortField === 'expires_at'
+                                        ? sortDirection
+                                        : null
+                                "
+                                @sort="handleSort('expires_at')"
+                                >Masa Berlaku</TableHead
+                            >
+                            <TableHead class="text-center">Aksi</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         <TableRow
-                            v-for="item in props.invitations.data"
+                            v-for="item in sortedInvitations"
                             :key="item.id"
                         >
                             <TableCell>
@@ -196,23 +284,22 @@ const tapToDelete = (id: number) => {
                                     <Button
                                         v-if="!item.is_used"
                                         type="button"
-                                        variant="outline"
+                                        variant="ghost"
                                         size="sm"
-                                        class="h-8 gap-1.5 text-xs font-medium"
+                                        class="w-8 border-amber-500/30 p-0 text-amber-500 hover:text-amber-600 dark:hover:bg-amber-500/10"
                                         title="Terbitkan Ulang Kode"
-                                        @click="tapTogenerate(item.id)"
+                                        @click="openRegenerateModal(item.id)"
                                     >
-                                        <RefreshCw class="h-3.5 w-3.5" />
-                                        Regenerate
+                                        <RefreshCw class="h-4 w-4" />
                                     </Button>
 
                                     <Button
                                         type="button"
                                         variant="ghost"
                                         size="sm"
-                                        class="h-8 w-8 p-0 text-rose-500 hover:bg-rose-500/10 hover:text-rose-600"
+                                        class="w-8 border-rose-500/30 p-0 text-rose-500 hover:text-rose-600 dark:hover:bg-rose-500/10"
                                         title="Hapus Kode"
-                                        @click="tapToDelete(item.id)"
+                                        @click="openDeleteModal(item.id)"
                                     >
                                         <Trash2 class="h-4 w-4" />
                                     </Button>
@@ -220,7 +307,6 @@ const tapToDelete = (id: number) => {
                             </TableCell>
                         </TableRow>
 
-                        <!-- Empty State -->
                         <TableRow v-if="props.invitations.data.length === 0">
                             <TableCell
                                 :colspan="6"
@@ -241,50 +327,33 @@ const tapToDelete = (id: number) => {
             </CardContent>
         </Card>
 
-        <!-- Pagination Controls -->
-        <div
-            v-if="props.invitations.links && props.invitations.last_page > 1"
-            class="mt-4 flex flex-col gap-3 px-1 sm:flex-row sm:items-center sm:justify-between"
-        >
-            <p class="text-xs text-muted-foreground">
-                Menampilkan
-                <span class="font-semibold text-foreground">{{
-                    props.invitations.data.length
-                }}</span>
-                dari
-                <span class="font-semibold text-foreground">{{
-                    props.invitations.total
-                }}</span>
-                total data
-            </p>
+        <Pagination
+            :links="props.invitations.links"
+            :current-count="props.invitations.data.length"
+            :total="props.invitations.total"
+            :last-page="props.invitations.last_page"
+        />
 
-            <div class="flex items-center gap-1.5">
-                <template
-                    v-for="(link, index) in props.invitations.links"
-                    :key="index"
-                >
-                    <Button
-                        v-if="link.url"
-                        as-child
-                        :variant="link.active ? 'default' : 'outline'"
-                        size="sm"
-                        class="h-8 min-w-8 px-2.5 text-xs font-medium"
-                    >
-                        <Link :href="link.url" preserve-scroll>
-                            <span v-html="link.label" />
-                        </Link>
-                    </Button>
-                    <Button
-                        v-else
-                        disabled
-                        variant="outline"
-                        size="sm"
-                        class="h-8 min-w-8 px-2.5 text-xs font-medium opacity-50"
-                    >
-                        <span v-html="link.label" />
-                    </Button>
-                </template>
-            </div>
-        </div>
+        <ConfirmDialog
+            v-model:open="isRegenerateOpen"
+            title="Terbitkan Ulang Kode Undangan?"
+            description="Kode undangan saat ini akan dibatalkan dan kode undangan baru dengan masa berlaku 7 hari akan diterbitkan untuk kader ini."
+            confirm-text="Terbitkan Ulang"
+            cancel-text="Batal"
+            variant="default"
+            :processing="isProcessing"
+            @confirm="executeRegenerate"
+        />
+
+        <ConfirmDialog
+            v-model:open="isDeleteOpen"
+            title="Hapus Kode Undangan?"
+            description="Apakah Anda yakin ingin menghapus kode undangan ini? Data yang dihapus tidak dapat dikembalikan."
+            confirm-text="Hapus Kode"
+            cancel-text="Batal"
+            variant="destructive"
+            :processing="isProcessing"
+            @confirm="executeDelete"
+        />
     </div>
 </template>

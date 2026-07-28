@@ -17,15 +17,13 @@ class InvitationController extends Controller
      */
     public function index(Request $request): Response
     {
-        $search = $request->input('search');
+        $sortField = in_array($request->input('sort'), ['recipient_name', 'recipient_email', 'created_at', 'expires_at', 'is_used'])
+            ? (string) $request->input('sort')
+            : 'created_at';
+        $sortDirection = strtolower((string) $request->input('direction', 'desc')) === 'asc' ? 'asc' : 'desc';
 
         $invitations = InvitationCode::with('user:id,name,email')
-            ->when($search, function ($query, $s) {
-                $query->where('recipient_name', 'like', "%{$s}%")
-                    ->orWhere('recipient_email', 'like', "%{$s}%")
-                    ->orWhereHas('user', fn ($q) => $q->where('name', 'like', "%{$s}%")->orWhere('email', 'like', "%{$s}%"));
-            })
-            ->latest()
+            ->orderBy($sortField, $sortDirection)
             ->paginate(4)
             ->withQueryString()
             ->through(fn ($item) => [
@@ -35,9 +33,11 @@ class InvitationController extends Controller
                 'is_used' => $item->is_used,
                 'used_at' => $item->used_at?->format('d M Y, H:i'),
                 'expires_at' => $item->expires_at->format('d M Y'),
+                'expires_at_raw' => $item->expires_at->toIso8601String(),
                 'is_expired' => ! $item->is_used && $item->expires_at->isPast(),
                 'is_expiring_soon' => ! $item->is_used && $item->expires_at->isFuture() && $item->expires_at->diffInDays(now()) <= 3,
                 'created_at' => $item->created_at?->format('d M Y, H:i'),
+                'created_at_raw' => $item->created_at?->toIso8601String(),
                 'user' => $item->user ? [
                     'name' => $item->user->name,
                     'email' => $item->user->email,
@@ -53,7 +53,8 @@ class InvitationController extends Controller
             ],
             'invitations' => $invitations,
             'filters' => [
-                'search' => $search ?? '',
+                'sort' => $sortField,
+                'direction' => $sortDirection,
             ],
         ]);
     }

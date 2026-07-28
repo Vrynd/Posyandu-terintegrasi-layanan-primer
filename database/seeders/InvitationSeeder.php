@@ -21,7 +21,7 @@ class InvitationSeeder extends Seeder
             ['name' => 'Maya Kartika', 'email' => 'maya.kartika@posyandu.test'],
         ];
 
-        foreach ($newActiveCadres as $cadre) {
+        foreach ($newActiveCadres as $index => $cadre) {
             InvitationCode::updateOrCreate(
                 ['recipient_email' => $cadre['email']],
                 [
@@ -30,7 +30,8 @@ class InvitationSeeder extends Seeder
                     'code_hash' => InvitationCode::hash(strtoupper(Str::random(16))),
                     'is_used' => false,
                     'used_at' => null,
-                    'expires_at' => now()->addDays(7),
+                    'expires_at' => now()->addDays($index + 2),
+                    'created_at' => now()->subHours($index * 6),
                 ]
             );
         }
@@ -52,6 +53,7 @@ class InvitationSeeder extends Seeder
                     'is_used' => true,
                     'used_at' => now()->subDays($index + 1),
                     'expires_at' => now()->addDays(7 - $index),
+                    'created_at' => now()->subDays($index + 2),
                 ]
             );
         }
@@ -73,6 +75,7 @@ class InvitationSeeder extends Seeder
                     'is_used' => false,
                     'used_at' => null,
                     'expires_at' => now()->subDays($index + 1),
+                    'created_at' => now()->subDays($index + 5),
                 ]
             );
         }
