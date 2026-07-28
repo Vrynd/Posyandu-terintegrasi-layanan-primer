@@ -26,7 +26,7 @@ class InvitationController extends Controller
                     ->orWhereHas('user', fn ($q) => $q->where('name', 'like', "%{$s}%")->orWhere('email', 'like', "%{$s}%"));
             })
             ->latest()
-            ->paginate(12)
+            ->paginate(4)
             ->withQueryString()
             ->through(fn ($item) => [
                 'id' => $item->id,
