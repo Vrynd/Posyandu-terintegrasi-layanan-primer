@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Head } from '@inertiajs/vue3';
+import { Head, router } from '@inertiajs/vue3';
 import {
     KeyRound,
     Pencil,
@@ -8,7 +8,9 @@ import {
     Users,
     UserX,
 } from '@lucide/vue';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
+import { status } from '@/actions/App/Http/Controllers/Admin/UserController';
+import ConfirmDialog from '@/components/ConfirmDialog.vue';
 import Heading from '@/components/Heading.vue';
 import MetricCard from '@/components/MetricCard.vue';
 import Pagination from '@/components/Pagination.vue';
@@ -53,17 +55,12 @@ interface Props {
         }>;
     };
 }
-
 const props = defineProps<Props>();
 
-const rawUsers = computed(() => props.users?.data ?? []);
-const {
-    sortField,
-    sortDirection,
-    handleSort,
-    sortedData: sortedUsers,
-} = useTableSort<UserItem>(rawUsers);
+const isConfirmOpen = ref(false);
+const selectedUser = ref<UserItem | null>(null);
 
+const rawUsers = computed(() => props.users?.data ?? []);
 const metricList = computed(() => [
     {
         title: 'Total Kader',
@@ -95,6 +92,13 @@ const metricList = computed(() => [
     },
 ]);
 
+const {
+    sortField,
+    sortDirection,
+    handleSort,
+    sortedData: sortedUsers,
+} = useTableSort<UserItem>(rawUsers);
+
 const getInitials = (name: string) => {
     return name
         .split(' ')
@@ -102,6 +106,27 @@ const getInitials = (name: string) => {
         .slice(0, 2)
         .join('')
         .toUpperCase();
+};
+
+const openConfirmModal = (user: UserItem) => {
+    selectedUser.value = user;
+    isConfirmOpen.value = true;
+};
+
+const tapToConfirm = () => {
+    if (selectedUser.value) {
+        router.patch(
+            status.url(selectedUser.value.id),
+            {},
+            {
+                preserveScroll: true,
+                onFinish: () => {
+                    isConfirmOpen.value = false;
+                    selectedUser.value = null;
+                },
+            },
+        );
+    }
 };
 </script>
 
@@ -261,9 +286,18 @@ const getInitials = (name: string) => {
                                         variant="ghost"
                                         size="sm"
                                         class="w-8 text-rose-500 hover:text-rose-600 dark:hover:bg-rose-500/10"
-                                        title="Nonaktifkan Akun"
+                                        :title="
+                                            user.is_active
+                                                ? 'Nonaktifkan Akun'
+                                                : 'Aktifkan Akun'
+                                        "
+                                        @click="openConfirmModal(user)"
                                     >
-                                        <UserX class="h-4 w-4" />
+                                        <UserCheck
+                                            v-if="!user.is_active"
+                                            class="h-4 w-4 text-emerald-500"
+                                        />
+                                        <UserX v-else class="h-4 w-4" />
                                     </Button>
                                 </div>
                             </TableCell>
@@ -291,4 +325,23 @@ const getInitials = (name: string) => {
             class="mt-6"
         />
     </div>
+
+    <ConfirmDialog
+        v-model:open="isConfirmOpen"
+        :title="
+            selectedUser?.is_active
+                ? 'Nonaktifkan Akun Kader'
+                : 'Aktifkan Kembali Akun Kader'
+        "
+        :description="
+            selectedUser?.is_active
+                ? `Apakah Anda yakin ingin menonaktifkan akun kader ${selectedUser?.name}? Akun ini tidak akan dapat login ke sistem sampai diaktifkan kembali.`
+                : `Apakah Anda yakin ingin mengaktifkan kembali akun kader ${selectedUser?.name}?`
+        "
+        :confirm-text="
+            selectedUser?.is_active ? 'Ya, Nonaktifkan' : 'Ya, Aktifkan'
+        "
+        :variant="selectedUser?.is_active ? 'destructive' : 'default'"
+        @confirm="tapToConfirm"
+    />
 </template>

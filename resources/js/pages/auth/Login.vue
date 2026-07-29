@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { Form, Head } from '@inertiajs/vue3';
+import { TriangleAlert } from '@lucide/vue';
 import { ref } from 'vue';
-import InputError from '@/components/InputError.vue';
 import InvitationCodeModal from '@/components/InvitationCodeModal.vue';
 import PasswordInput from '@/components/PasswordInput.vue';
 import TextLink from '@/components/TextLink.vue';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -44,6 +45,18 @@ const isInvitationModalOpen = ref(false);
         v-slot="{ errors, processing }"
         class="flex flex-col gap-6"
     >
+        <Alert
+            v-if="errors.email || errors.password"
+            variant="destructive"
+            class="border-rose-500/30 bg-rose-500/10 text-rose-600 dark:text-rose-400"
+        >
+            <TriangleAlert class="h-4 w-4 text-rose-500" />
+            <AlertTitle class="font-semibold">Gagal Masuk</AlertTitle>
+            <AlertDescription>
+                {{ errors.email || errors.password }}
+            </AlertDescription>
+        </Alert>
+
         <div class="grid gap-5">
             <div class="grid gap-2.5">
                 <Label
@@ -62,7 +75,6 @@ const isInvitationModalOpen = ref(false);
                     placeholder="email@example.com"
                     class="h-10 rounded-md text-sm"
                 />
-                <InputError :message="errors.email" />
             </div>
 
             <div class="grid gap-2.5">
@@ -91,7 +103,6 @@ const isInvitationModalOpen = ref(false);
                     placeholder="Password"
                     class="h-10 rounded-md text-sm"
                 />
-                <InputError :message="errors.password" />
             </div>
 
             <Button

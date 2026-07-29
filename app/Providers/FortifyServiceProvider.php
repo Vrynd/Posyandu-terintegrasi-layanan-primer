@@ -82,6 +82,12 @@ class FortifyServiceProvider extends ServiceProvider
                 ]);
             }
 
+            if (! $user->is_active) {
+                throw ValidationException::withMessages([
+                    Fortify::username() => ['Akun Anda telah dinonaktifkan. Silakan hubungi Administrator.'],
+                ]);
+            }
+
             if (Hash::check($request->password, $user->password)) {
                 if ($user->failed_login_attempts > 0 || $user->locked_until !== null) {
                     $user->forceFill([

@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -18,8 +20,8 @@ class UserController extends Controller
     {
         $cadre = User::where('role', UserRole::Kader);
         $totalCount = (clone $cadre)->count();
-        $activeCount = (clone $cadre)->whereNotNull('email_verified_at')->count();
-        $suspendedCount = (clone $cadre)->whereNull('email_verified_at')->count();
+        $activeCount = (clone $cadre)->where('is_active', true)->count();
+        $suspendedCount = (clone $cadre)->where('is_active', false)->count();
         $verifiedProfileCount = (clone $cadre)->whereNotNull('nik')->where('nik', '!=', '')->count();
 
         $users = (clone $cadre)
@@ -32,7 +34,7 @@ class UserController extends Controller
                 'email' => $user->email,
                 'role' => $user->role->value ?? $user->role,
                 'is_profile_complete' => ! empty($user->nik),
-                'is_active' => ! is_null($user->email_verified_at),
+                'is_active' => (bool) $user->is_active,
                 'created_at' => $user->created_at->format('d M Y'),
             ]);
 
@@ -45,5 +47,18 @@ class UserController extends Controller
             ],
             'users' => $users,
         ]);
+    }
+
+    public function status(User $user): RedirectResponse
+    {
+        if (Auth::id() === $user->id) {
+            return back()->with('error', 'Anda tidak dapat menonaktifkan akun sendiri.');
+        }
+        $user->update([
+            'is_active' => ! $user->is_active,
+        ]);
+        $statusText = $user->is_active ? 'diaktifkan' : 'dinonaktifkan';
+
+        return back()->with('success', "Akun kader {$user->name} berhasil {$statusText}.");
     }
 }
