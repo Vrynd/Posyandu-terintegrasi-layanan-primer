@@ -2,8 +2,11 @@
 
 namespace Database\Seeders;
 
+use App\Enums\UserRole;
 use App\Models\InvitationCode;
+use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
 class InvitationSeeder extends Seeder
@@ -13,12 +16,15 @@ class InvitationSeeder extends Seeder
      */
     public function run(): void
     {
-        // 1. Kode Aktif Tambahan (4 Data Baru -> Total 5 Aktif bersama data lama Ratna Wulandari)
+        // 1. Kode Aktif
         $newActiveCadres = [
             ['name' => 'Budi Santoso', 'email' => 'budi.santoso@posyandu.test'],
             ['name' => 'Citra Lestari', 'email' => 'citra.lestari@posyandu.test'],
             ['name' => 'Eko Prasetyo', 'email' => 'eko.prasetyo@posyandu.test'],
+            ['name' => 'Ratna Wulandari', 'email' => 'ratna.wulandari@posyandu.test'],
             ['name' => 'Maya Kartika', 'email' => 'maya.kartika@posyandu.test'],
+            ['name' => 'Nia Ramadhani', 'email' => 'nia.ramadhani@posyandu.test'],
+            ['name' => 'Oki Setiana', 'email' => 'oki.setiana@posyandu.test'],
         ];
 
         foreach ($newActiveCadres as $index => $cadre) {
@@ -36,18 +42,32 @@ class InvitationSeeder extends Seeder
             );
         }
 
-        // 2. Kode Terpakai Tambahan (3 Data Baru -> Total 4 Terpakai bersama data lama Sari Dewi)
+        // 2. Kode Terpakai
         $newUsedCadres = [
             ['name' => 'Fajar Nugraha', 'email' => 'fajar.nugraha@posyandu.test'],
             ['name' => 'Gita Gutawa', 'email' => 'gita.gutawa@posyandu.test'],
             ['name' => 'Hendra Wijaya', 'email' => 'hendra.wijaya@posyandu.test'],
+            ['name' => 'Sari Dewi', 'email' => 'sari.dewi@posyandu.test'],
+            ['name' => 'Putri Ayu', 'email' => 'putri.ayu@posyandu.test'],
+            ['name' => 'Rian Dmasiv', 'email' => 'rian.dmasiv@posyandu.test'],
         ];
 
         foreach ($newUsedCadres as $index => $cadre) {
+            $user = User::updateOrCreate(
+                ['email' => $cadre['email']],
+                [
+                    'name' => $cadre['name'],
+                    'nik' => '351234567890000'.($index + 3),
+                    'role' => UserRole::Kader,
+                    'password' => Hash::make('Kader@Posyandu2026!'),
+                    'email_verified_at' => now(),
+                ]
+            );
+
             InvitationCode::updateOrCreate(
                 ['recipient_email' => $cadre['email']],
                 [
-                    'user_id' => null,
+                    'user_id' => $user->id,
                     'recipient_name' => $cadre['name'],
                     'code_hash' => InvitationCode::hash(strtoupper(Str::random(16))),
                     'is_used' => true,
@@ -58,11 +78,13 @@ class InvitationSeeder extends Seeder
             );
         }
 
-        // 3. Kode Kadaluarsa Tambahan (3 Data Baru -> Total 3 Kadaluarsa)
+        // 3. Kode Kadaluarsa
         $newExpiredCadres = [
             ['name' => 'Indah Permata', 'email' => 'indah.permata@posyandu.test'],
             ['name' => 'Joko Widodo', 'email' => 'joko.widodo@posyandu.test'],
             ['name' => 'Kiki Amalia', 'email' => 'kiki.amalia@posyandu.test'],
+            ['name' => 'Lukman Sardi', 'email' => 'lukman.sardi@posyandu.test'],
+            ['name' => 'Titi Kamal', 'email' => 'titi.kamal@posyandu.test'],
         ];
 
         foreach ($newExpiredCadres as $index => $cadre) {

@@ -66,9 +66,11 @@ class FortifyServiceProvider extends ServiceProvider
                 return null;
             }
 
-            $user = User::where('email', $login)
-                ->orWhere('nik', $login)
-                ->first();
+            $user = User::where('email', $login)->first();
+
+            if (! $user) {
+                $user = User::whereNotNull('nik')->get()->first(fn (User $u) => $u->nik === $login);
+            }
 
             if (! $user) {
                 return null;

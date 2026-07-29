@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\InvitationController;
+use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Auth\InvitationCodeController;
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
@@ -20,6 +21,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::inertia('dashboard', 'Dashboard')->name('dashboard');
 
     Route::middleware('can:manage-invitations')->group(function () {
+        Route::get('users', [UserController::class, 'index'])->name('users.index');
         Route::get('invitations', [InvitationController::class, 'index'])->name('invitations.index');
         Route::get('invitations/create', [InvitationController::class, 'create'])->name('invitations.create');
         Route::post('invitations', [InvitationController::class, 'store'])->name('invitations.store');

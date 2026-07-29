@@ -13,7 +13,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->string('nik', 16)->nullable()->unique()->after('id');
+            $table->text('nik')->nullable()->after('id');
             $table->string('role')->default(UserRole::Kader->value)->after('email');
             $table->integer('failed_login_attempts')->default(0)->after('password');
             $table->timestamp('locked_until')->nullable()->after('failed_login_attempts');

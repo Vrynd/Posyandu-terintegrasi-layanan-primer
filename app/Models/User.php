@@ -51,6 +51,7 @@ class User extends Authenticatable
             'role' => UserRole::class,
             'failed_login_attempts' => 'integer',
             'locked_until' => 'datetime',
+            'nik' => 'encrypted',
         ];
     }
 

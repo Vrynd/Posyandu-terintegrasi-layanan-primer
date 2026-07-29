@@ -229,7 +229,7 @@ const executeDelete = () => {
                                 @sort="handleSort('expires_at')"
                                 >Masa Berlaku</TableHead
                             >
-                            <TableHead class="text-center">Aksi</TableHead>
+                            <TableHead class="text-right">Aksi</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
