@@ -13,6 +13,7 @@ import {
     Stethoscope,
     TrendingUp,
     UserPlus,
+    Users,
 } from '@lucide/vue';
 import { computed } from 'vue';
 import AppLogo from '@/components/AppLogo.vue';
@@ -85,8 +86,13 @@ const navGroups = computed<NavGroup[]>(() => {
 
     if (userRole.value === 'administrator') {
         groups.push({
-            title: 'Manajemen Sistem',
+            title: 'Operasional Sistem',
             items: [
+                {
+                    title: 'Manajemen Pengguna',
+                    href: '/users',
+                    icon: Users,
+                },
                 {
                     title: 'Kode Undangan',
                     href: '/invitations',
