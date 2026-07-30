@@ -6,7 +6,9 @@ import { cn } from "@/lib/utils"
 
 import 'vue-sonner/style.css';
 
-const props = defineProps<ToasterProps>()
+const props = withDefaults(defineProps<ToasterProps>(), {
+  richColors: true,
+})
 </script>
 
 <template>
