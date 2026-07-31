@@ -1,8 +1,12 @@
 <script setup lang="ts">
-import type { HTMLAttributes } from "vue"
+import type { Component, HTMLAttributes } from "vue"
 import { cn } from "@/lib/utils"
 
 const props = defineProps<{
+  label?: string
+  value?: string | number | boolean | null
+  icon?: Component
+  iconClass?: string
   class?: HTMLAttributes["class"]
 }>()
 </script>
@@ -10,8 +14,25 @@ const props = defineProps<{
 <template>
   <div
     data-slot="tile-item"
-    :class="cn('flex items-center justify-between p-3 text-xs sm:px-4 sm:py-3 sm:text-sm', props.class)"
+    :class="cn('flex items-center justify-between p-3 text-xs sm:px-4 sm:py-3', props.class)"
   >
-    <slot />
+    <span class="flex items-center gap-2 text-muted-foreground">
+      <slot name="icon">
+        <component
+          :is="props.icon"
+          v-if="props.icon"
+          :class="cn('h-4 w-4', props.iconClass)"
+        />
+      </slot>
+      <slot name="label">
+        {{ props.label }}
+      </slot>
+    </span>
+
+    <div class="font-medium text-foreground">
+      <slot>
+        {{ props.value }}
+      </slot>
+    </div>
   </div>
 </template>

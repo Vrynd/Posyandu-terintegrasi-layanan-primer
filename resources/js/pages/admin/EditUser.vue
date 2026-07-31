@@ -15,21 +15,10 @@ import StatusBadge from '@/components/StatusBadge.vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-    TileGroup,
-    TileItem,
-    TileLabel,
-    TileValue,
-} from '@/components/ui/tile';
+import { TileGroup, TileItem } from '@/components/ui/tile';
 import UserAvatar from '@/components/UserAvatar.vue';
 import { dashboard } from '@/routes';
-import type { UserItem } from '@/types';
-
-interface Props {
-    user?: UserItem;
-}
-
-const props = defineProps<Props>();
+import type { UserItem as UserType } from '@/types';
 
 defineOptions({
     layout: {
@@ -40,6 +29,12 @@ defineOptions({
         ],
     },
 });
+
+interface Props {
+    user?: UserType;
+}
+
+const props = defineProps<Props>();
 </script>
 
 <template>
@@ -78,7 +73,7 @@ defineOptions({
                             <UserAvatar
                                 :name="props.user?.name ?? 'Kader'"
                                 size="lg"
-                                class="h-14 w-14 shrink-0 text-base font-bold ring-2 ring-indigo-500/20"
+                                class="h-14 w-14 shrink-0 text-base font-bold ring-2 ring-muted"
                             />
                             <div class="min-w-0 flex-1 space-y-0.5 text-left">
                                 <h3
@@ -97,22 +92,20 @@ defineOptions({
                         </div>
 
                         <TileGroup>
-                            <TileItem>
-                                <TileLabel>
-                                    <User class="h-4 w-4 text-indigo-500" />
-                                    Peran
-                                </TileLabel>
-                                <TileValue>
-                                    <Badge
-                                        variant="secondary"
-                                        class="px-2 py-0.5 text-[11px] font-normal"
-                                    >
-                                        Kader Posyandu
-                                    </Badge>
-                                </TileValue>
+                            <TileItem
+                                label="Peran"
+                                :icon="User"
+                                icon-class="text-indigo-500"
+                            >
+                                <Badge
+                                    variant="secondary"
+                                    class="text-accent bg-accent/10 border-accent/30"
+                                >
+                                    Kader Posyandu
+                                </Badge>
                             </TileItem>
-                            <TileItem>
-                                <TileLabel>
+                            <TileItem label="Status Akun">
+                                <template #icon>
                                     <UserCheck
                                         v-if="props.user?.is_active"
                                         class="h-4 w-4 text-emerald-500"
@@ -121,73 +114,49 @@ defineOptions({
                                         v-else
                                         class="h-4 w-4 text-rose-500"
                                     />
-                                    Status Akun
-                                </TileLabel>
-                                <TileValue>
-                                    <StatusBadge
-                                        :color="
-                                            props.user?.is_active
-                                                ? 'emerald'
-                                                : 'rose'
-                                        "
-                                        :text="
-                                            props.user?.is_active
-                                                ? 'Aktif'
-                                                : 'Nonaktif'
-                                        "
-                                    />
-                                </TileValue>
+                                </template>
+                                <StatusBadge
+                                    :color="
+                                        props.user?.is_active
+                                            ? 'emerald'
+                                            : 'rose'
+                                    "
+                                    :text="
+                                        props.user?.is_active
+                                            ? 'Aktif'
+                                            : 'Nonaktif'
+                                    "
+                                />
                             </TileItem>
-                            <TileItem>
-                                <TileLabel>
-                                    <ShieldCheck
-                                        class="h-4 w-4 text-amber-500"
-                                    />
-                                    Status NIK
-                                </TileLabel>
-                                <TileValue>
-                                    <StatusBadge
-                                        :color="
-                                            props.user?.nik
-                                                ? 'emerald'
-                                                : 'amber'
-                                        "
-                                        :text="
-                                            props.user?.nik
-                                                ? 'Lengkap'
-                                                : 'Belum Ada'
-                                        "
-                                    />
-                                </TileValue>
-                            </TileItem>
-                            <TileItem>
-                                <TileLabel>
-                                    <Calendar
-                                        class="h-4 w-4 text-muted-foreground"
-                                    />
-                                    Terdaftar
-                                </TileLabel>
-                                <TileValue>
-                                    {{ props.user?.created_at }}
-                                </TileValue>
-                            </TileItem>
-                        </TileGroup>
-
-                        <div
-                            class="flex items-center justify-between rounded-xl border border-border/80 bg-muted/20 p-3.5 text-xs sm:p-4"
-                        >
-                            <span
-                                class="flex items-center gap-2 text-muted-foreground"
+                            <TileItem
+                                label="Status NIK"
+                                :icon="ShieldCheck"
+                                icon-class="text-amber-500"
                             >
-                                <Clock class="h-4 w-4 text-indigo-400" />
-                                Terakhir Login
-                            </span>
-                            <span class="text-xs font-medium text-foreground">
-                                {{
-                                    props.user?.last_login_at ?? 'Belum Pernah'
-                                }}
-                            </span>
-                        </div>
+                                <StatusBadge
+                                    :color="
+                                        props.user?.nik ? 'emerald' : 'amber'
+                                    "
+                                    :text="
+                                        props.user?.nik
+                                            ? 'Lengkap'
+                                            : 'Belum Ada'
+                                    "
+                                />
+                            </TileItem>
+                            <TileItem
+                                label="Terdaftar"
+                                :value="props.user?.created_at"
+                                :icon="Calendar"
+                            />
+                        </TileGroup>
+                        <TileItem
+                            label="Terakhir Login"
+                            :value="props.user?.last_login_at ?? 'Belum Pernah'"
+                            :icon="Clock"
+                            icon-class="text-indigo-400"
+                            class="rounded-xl border border-border/80 bg-muted/20 p-3.5 sm:p-4"
+                        />
                     </CardContent>
                 </Card>
             </div>
