@@ -28,7 +28,7 @@ class UserController extends Controller
             ->latest('created_at')
             ->paginate(4)
             ->through(fn (User $user) => [
-                'id' => $user->id,
+                'id' => $user->ulid,
                 'name' => $user->name,
                 'nik' => $user->nik ? Str::mask($user->nik, '*', 4, 8) : null,
                 'email' => $user->email,
@@ -46,6 +46,22 @@ class UserController extends Controller
                 'verifiedProfileCount' => $verifiedProfileCount,
             ],
             'users' => $users,
+        ]);
+    }
+
+    public function edit(User $user): Response
+    {
+        return Inertia::render('admin/EditUser', [
+            'user' => [
+                'id' => $user->ulid,
+                'name' => $user->name,
+                'email' => $user->email,
+                'nik' => $user->nik,
+                'role' => $user->role->value ?? $user->role,
+                'is_active' => (bool) $user->is_active,
+                'created_at' => $user->created_at->format('d M Y'),
+                'last_login_at' => $user->last_login_at ? $user->last_login_at->format('d M Y, H:i') : null,
+            ],
         ]);
     }
 

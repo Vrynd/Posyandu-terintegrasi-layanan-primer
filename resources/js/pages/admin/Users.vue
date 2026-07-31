@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Head } from '@inertiajs/vue3';
+import { Head, Link } from '@inertiajs/vue3';
 import {
     KeyRound,
     Pencil,
@@ -226,13 +226,15 @@ const {
                                     class="flex items-center justify-end gap-1"
                                 >
                                     <Button
-                                        type="button"
                                         variant="ghost"
                                         size="sm"
                                         class="w-8 text-indigo-500 hover:text-indigo-600 dark:hover:bg-indigo-500/10"
                                         title="Edit Profil"
+                                        as-child
                                     >
-                                        <Pencil class="h-4 w-4" />
+                                        <Link :href="`/users/${user.id}/edit`">
+                                            <Pencil class="h-4 w-4" />
+                                        </Link>
                                     </Button>
                                     <Button
                                         type="button"

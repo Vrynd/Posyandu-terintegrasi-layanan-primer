@@ -1,12 +1,13 @@
 export interface UserItem {
-    id: number;
+    id: string;
     name: string;
-    nik?: string | null;
     email: string;
+    nik?: string | null;
     role: string;
-    is_profile_complete: boolean;
     is_active: boolean;
     created_at: string;
+    is_profile_complete?: boolean;
+    last_login_at?: string | null;
 }
 
 export interface UserMetrics {

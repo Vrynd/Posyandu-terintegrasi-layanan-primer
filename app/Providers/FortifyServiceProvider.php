@@ -89,12 +89,11 @@ class FortifyServiceProvider extends ServiceProvider
             }
 
             if (Hash::check($request->password, $user->password)) {
-                if ($user->failed_login_attempts > 0 || $user->locked_until !== null) {
-                    $user->forceFill([
-                        'failed_login_attempts' => 0,
-                        'locked_until' => null,
-                    ])->save();
-                }
+                $user->forceFill([
+                    'failed_login_attempts' => 0,
+                    'locked_until' => null,
+                    'last_login_at' => now(),
+                ])->save();
 
                 return $user;
             }
