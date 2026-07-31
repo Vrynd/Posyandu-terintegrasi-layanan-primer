@@ -6,8 +6,10 @@ use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -56,13 +58,38 @@ class UserController extends Controller
                 'id' => $user->ulid,
                 'name' => $user->name,
                 'email' => $user->email,
-                'nik' => $user->nik,
+                'nik' => $user->nik ? Str::mask($user->nik, '*', 4, 8) : null,
                 'role' => $user->role->value ?? $user->role,
                 'is_active' => (bool) $user->is_active,
                 'created_at' => $user->created_at->format('d M Y'),
                 'last_login_at' => $user->last_login_at ? $user->last_login_at->format('d M Y, H:i') : null,
             ],
         ]);
+    }
+
+    public function update(Request $request, User $user): RedirectResponse
+    {
+        $rules = [
+            'name' => ['required', 'string', 'max:255'],
+            'nik' => ['nullable', 'string', 'size:16', Rule::unique('users')->ignore($user->id)],
+        ];
+
+        if ($request->has('email')) {
+            $rules['email'] = ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)];
+        }
+
+        $validated = $request->validate($rules, [
+            'name.required' => 'Nama lengkap wajib diisi.',
+            'email.required' => 'Alamat email wajib diisi.',
+            'email.email' => 'Format alamat email tidak valid.',
+            'email.unique' => 'Alamat email sudah digunakan pengguna lain.',
+            'nik.size' => 'NIK harus berjumlah 16 digit angka.',
+            'nik.unique' => 'NIK ini sudah terdaftar di sistem.',
+        ]);
+
+        $user->update($validated);
+
+        return back()->with('success', "Data profil kader {$user->name} berhasil diperbarui.");
     }
 
     public function status(User $user): RedirectResponse

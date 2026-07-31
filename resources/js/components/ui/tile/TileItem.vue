@@ -16,7 +16,7 @@ const props = defineProps<{
     data-slot="tile-item"
     :class="cn('flex items-center justify-between p-3 text-xs sm:px-4 sm:py-3', props.class)"
   >
-    <span class="flex items-center gap-2 text-muted-foreground">
+    <span class="flex items-center gap-2 text-foreground">
       <slot name="icon">
         <component
           :is="props.icon"
@@ -29,7 +29,7 @@ const props = defineProps<{
       </slot>
     </span>
 
-    <div class="font-medium text-foreground">
+    <div class="font-medium text-muted-foreground">
       <slot>
         {{ props.value }}
       </slot>

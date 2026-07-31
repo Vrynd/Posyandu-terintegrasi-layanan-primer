@@ -114,7 +114,7 @@ const {
             title="Manajemen Pengguna"
             description="Kelola akun, peran, dan status keaktifan kader Posyandu"
             variant="small"
-            class="mb-8"
+            class="mb-6 max-w-40 sm:mb-8 sm:max-w-none"
         />
 
         <div class="grid grid-cols-2 gap-4 sm:grid-cols-2 lg:grid-cols-4">
