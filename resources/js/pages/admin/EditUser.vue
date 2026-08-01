@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { Form, Head, Link, usePage } from '@inertiajs/vue3';
+import { Form, Head, usePage } from '@inertiajs/vue3';
 import {
-    ArrowLeft,
     Calendar,
     Clock,
     History,
@@ -28,6 +27,13 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import { TileGroup, TileItem } from '@/components/ui/tile';
 import UserAvatar from '@/components/UserAvatar.vue';
 import { dashboard } from '@/routes';
@@ -39,7 +45,7 @@ defineOptions({
         breadcrumbs: [
             { title: 'Dashboard', href: dashboard() },
             { title: 'Manajemen Pengguna', href: '/users' },
-            { title: 'Profil', href: '#' },
+            { title: 'Akun', href: '#' },
         ],
     },
 });
@@ -67,24 +73,13 @@ const submitSucces = () => {
     <Head :title="`${props.user?.name ?? 'Pengguna'} - Manajemen Pengguna`" />
 
     <main class="flex h-full flex-1 flex-col p-4 sm:p-5">
-        <header class="mb-6 flex items-center justify-between sm:mb-8">
+        <header>
             <Heading
-                :title="props.user?.name ?? 'Pengguna'"
-                description="Kelola informasi akun, kata sandi, dan hak akses"
+                title="Ubah Data Dan Keamanan"
+                :description="`Kelola informasi akun, kata sandi, dan hak akses milik ${props.user?.name ?? 'pengguna ini'}`"
                 variant="small"
-                class="max-w-40 sm:max-w-none"
+                class="mb-6 sm:mb-8"
             />
-            <Button
-                variant="outline"
-                size="sm"
-                class="md:hidden lg:hidden"
-                as-child
-            >
-                <Link href="/users">
-                    <ArrowLeft class="mr-1.5 h-4 w-4" />
-                    Kembali
-                </Link>
-            </Button>
         </header>
 
         <div class="grid flex-1 grid-cols-1 gap-6 lg:grid-cols-3">
@@ -97,7 +92,7 @@ const submitSucces = () => {
                         class="gap-0 border-b border-border px-4 py-4 sm:px-5 [.border-b]:pb-4"
                     >
                         <CardTitle class="text-sm font-medium">
-                            Profil Pengguna
+                            Informasi Akun
                         </CardTitle>
                     </CardHeader>
 
@@ -170,7 +165,7 @@ const submitSucces = () => {
                                 icon-class="text-cyan-400"
                             />
                         </TileGroup>
-                        <TileGroup>
+                        <TileGroup class="mb-0 sm:mb-0.5">
                             <TileItem
                                 label="Terakhir Login"
                                 :value="
@@ -191,7 +186,7 @@ const submitSucces = () => {
             </aside>
 
             <section
-                class="space-y-5 lg:col-span-2"
+                class="space-y-6 sm:space-y-5 lg:col-span-2"
                 aria-label="Formulir edit informasi pribadi"
             >
                 <Card class="gap-0 border-border/80 bg-card py-0 shadow-xs">
@@ -199,7 +194,7 @@ const submitSucces = () => {
                         class="flex items-center justify-between gap-0 border-b border-border px-4 py-4 sm:px-5 [.border-b]:pb-4"
                     >
                         <CardTitle class="text-sm font-medium"
-                            >Informasi Pribadi</CardTitle
+                            >Data Pengguna</CardTitle
                         >
                         <button
                             type="button"
@@ -305,25 +300,31 @@ const submitSucces = () => {
                                         :class="
                                             isEditing
                                                 ? 'text-foreground/90'
-                                                : 'text-muted-foreground/80'
+                                                : 'text-muted-foreground/90'
                                         "
                                     >
                                         Peran Pengguna
                                     </Label>
-                                    <select
-                                        id="role"
-                                        name="role"
+
+                                    <Select
                                         :default-value="props.user.role"
                                         :disabled="!isEditing"
-                                        class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 sm:h-9.5"
+                                        name="role"
                                     >
-                                        <option value="kader">
-                                            Kader Posyandu
-                                        </option>
-                                        <option value="administrator">
-                                            Administrator
-                                        </option>
-                                    </select>
+                                        <SelectTrigger class="mb-0 h-10 w-full">
+                                            <SelectValue
+                                                placeholder="Pilih Peran Pengguna"
+                                            />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="kader"
+                                                >Kader Posyandu</SelectItem
+                                            >
+                                            <SelectItem value="administrator"
+                                                >Administrator</SelectItem
+                                            >
+                                        </SelectContent>
+                                    </Select>
                                 </div>
                             </div>
                         </CardContent>

@@ -84,7 +84,7 @@ const metricList = computed(() => [
     {
         title: 'Profil Lengkap',
         value: props.metrics?.verifiedProfileCount ?? 0,
-        badgeText: 'Terverifikasi NIK',
+        badgeText: 'Terverifikasi',
         icon: ShieldCheck,
         variant: 'amber' as const,
     },
@@ -112,9 +112,9 @@ const {
     <div class="flex h-full flex-1 flex-col p-4 sm:p-5">
         <Heading
             title="Manajemen Pengguna"
-            description="Kelola akun, peran, dan status keaktifan kader Posyandu"
+            description="Kelola akun, peran, dan status akun pengguna"
             variant="small"
-            class="mb-6 max-w-40 sm:mb-8 sm:max-w-none"
+            class="mb-6 sm:mb-8"
         />
 
         <div class="grid grid-cols-2 gap-4 sm:grid-cols-2 lg:grid-cols-4">

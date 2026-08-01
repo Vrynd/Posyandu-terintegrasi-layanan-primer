@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Enum;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -74,6 +75,7 @@ class UserController extends Controller
         $rules = [
             'name' => ['required', 'string', 'max:255'],
             'nik' => ['nullable', 'string', 'size:16', Rule::unique('users')->ignore($user->id)],
+            'role' => ['required', new Enum(UserRole::class)],
         ];
 
         if ($request->has('email')) {
@@ -82,6 +84,7 @@ class UserController extends Controller
 
         $validated = $request->validate($rules, [
             'name.required' => 'Nama lengkap wajib diisi.',
+            'role.required' => 'Peran pengguna wajib dipilih.',
             'email.required' => 'Alamat email wajib diisi.',
             'email.email' => 'Format alamat email tidak valid.',
             'email.unique' => 'Alamat email sudah digunakan pengguna lain.',

@@ -23,7 +23,7 @@ withDefaults(defineProps<Props>(), {
         </h2>
         <p
             v-if="description"
-            class="hidden text-sm text-muted-foreground sm:block"
+            class="text-sm text-muted-foreground sm:block"
         >
             {{ description }}
         </p>
