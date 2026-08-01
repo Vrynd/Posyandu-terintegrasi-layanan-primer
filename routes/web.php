@@ -25,6 +25,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('users/{user}/edit', [UserController::class, 'edit'])->name('users.edit');
         Route::patch('users/{user}', [UserController::class, 'update'])->name('users.update');
         Route::patch('users/{user}/status', [UserController::class, 'status'])->name('users.status');
+        Route::post('users/{user}/reset-password', [UserController::class, 'resetPassword'])->name('users.reset-password');
+        Route::delete('users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
 
         Route::get('invitations', [InvitationController::class, 'index'])->name('invitations.index');
         Route::get('invitations/create', [InvitationController::class, 'create'])->name('invitations.create');

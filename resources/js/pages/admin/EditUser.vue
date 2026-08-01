@@ -1,24 +1,31 @@
 <script setup lang="ts">
-import { Head, Link, usePage } from '@inertiajs/vue3';
-import { Form } from '@inertiajs/vue3';
+import { Form, Head, Link, usePage } from '@inertiajs/vue3';
 import {
     ArrowLeft,
     Calendar,
     Clock,
+    History,
+    Loader,
+    Lock,
+    Pencil,
     ShieldCheck,
     User,
     UserCheck,
     UserX,
-    Lock,
-    Pencil,
-    Loader,
 } from '@lucide/vue';
 import { ref } from 'vue';
 import { toast } from 'vue-sonner';
 import AlertError from '@/components/AlertError.vue';
 import Heading from '@/components/Heading.vue';
+import ResetUserPassword from '@/components/ResetUserPassword.vue';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+    Card,
+    CardContent,
+    CardFooter,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { TileGroup, TileItem } from '@/components/ui/tile';
@@ -32,7 +39,7 @@ defineOptions({
         breadcrumbs: [
             { title: 'Dashboard', href: dashboard() },
             { title: 'Manajemen Pengguna', href: '/users' },
-            { title: 'Edit Profil Kader', href: '#' },
+            { title: 'Profil', href: '#' },
         ],
     },
 });
@@ -57,14 +64,15 @@ const submitSucces = () => {
 </script>
 
 <template>
-    <Head :title="`Edit Profil - ${props.user?.name ?? 'Kader'}`" />
+    <Head :title="`${props.user?.name ?? 'Pengguna'} - Manajemen Pengguna`" />
 
     <main class="flex h-full flex-1 flex-col p-4 sm:p-5">
         <header class="mb-6 flex items-center justify-between sm:mb-8">
             <Heading
-                :title="`Edit Profil: ${props.user?.name ?? 'Kader'}`"
-                description="Kelola informasi pribadi, kata sandi, dan status akun"
+                :title="props.user?.name ?? 'Pengguna'"
+                description="Kelola informasi akun, kata sandi, dan hak akses"
                 variant="small"
+                class="max-w-40 sm:max-w-none"
             />
             <Button
                 variant="outline"
@@ -80,7 +88,10 @@ const submitSucces = () => {
         </header>
 
         <div class="grid flex-1 grid-cols-1 gap-6 lg:grid-cols-3">
-            <aside class="lg:col-span-1" aria-label="Ringkasan profil kader">
+            <aside
+                class="space-y-6 lg:col-span-1"
+                aria-label="Ringkasan profil kader"
+            >
                 <Card class="gap-0 border-border/80 bg-card py-0 shadow-xs">
                     <CardHeader
                         class="gap-0 border-b border-border px-4 py-4 sm:px-5 [.border-b]:pb-4"
@@ -99,7 +110,9 @@ const submitSucces = () => {
                                 size="lg"
                                 class="ring-indigo/20 h-14 w-14 shrink-0 text-base font-bold ring-2"
                             />
-                            <hgroup class="min-w-0 flex-1 space-y-0.5 text-left">
+                            <hgroup
+                                class="min-w-0 flex-1 space-y-0.5 text-left"
+                            >
                                 <h3
                                     class="truncate text-base font-semibold tracking-tight text-foreground"
                                     :title="props.user?.name"
@@ -118,9 +131,15 @@ const submitSucces = () => {
                         <TileGroup>
                             <TileItem
                                 label="Peran"
-                                value="Kader Posyandu"
+                                :value="
+                                    props.user?.role === 'administrator'
+                                        ? 'Administrator'
+                                        : props.user?.role === 'kader'
+                                          ? 'Kader Posyandu'
+                                          : (props.user?.role ?? '-')
+                                "
                                 :icon="User"
-                                icon-class="text-indigo-500"
+                                icon-class="text-indigo-400"
                             />
                             <TileItem
                                 label="Status Akun"
@@ -148,20 +167,33 @@ const submitSucces = () => {
                                 label="Terdaftar"
                                 :value="props.user?.created_at"
                                 :icon="Calendar"
+                                icon-class="text-cyan-400"
                             />
                         </TileGroup>
-                        <TileItem
-                            label="Terakhir Login"
-                            :value="props.user?.last_login_at ?? 'Belum Pernah'"
-                            :icon="Clock"
-                            icon-class="text-rose-600"
-                            class="rounded-xl border border-border/80 bg-muted/20 p-3.5 sm:p-4"
-                        />
+                        <TileGroup>
+                            <TileItem
+                                label="Terakhir Login"
+                                :value="
+                                    props.user?.last_login_at ?? 'Belum Pernah'
+                                "
+                                :icon="Clock"
+                                icon-class="text-violet-400"
+                            />
+                            <TileItem
+                                label="Terakhir Diperbarui"
+                                :value="props.user?.updated_at ?? '-'"
+                                :icon="History"
+                                icon-class="text-emerald-400"
+                            />
+                        </TileGroup>
                     </CardContent>
                 </Card>
             </aside>
 
-            <section class="space-y-6 lg:col-span-2" aria-label="Formulir edit informasi pribadi">
+            <section
+                class="space-y-5 lg:col-span-2"
+                aria-label="Formulir edit informasi pribadi"
+            >
                 <Card class="gap-0 border-border/80 bg-card py-0 shadow-xs">
                     <CardHeader
                         class="flex items-center justify-between gap-0 border-b border-border px-4 py-4 sm:px-5 [.border-b]:pb-4"
@@ -193,6 +225,7 @@ const submitSucces = () => {
                         v-if="props.user"
                         v-bind="update.form(props.user.id)"
                         v-slot="{ errors, processing }"
+                        :key="String(isEditing)"
                         @success="submitSucces"
                     >
                         <CardContent class="space-y-4 p-4 sm:p-5">
@@ -206,7 +239,12 @@ const submitSucces = () => {
                                 <div class="space-y-2">
                                     <Label
                                         for="name"
-                                        class="text-xs font-medium text-foreground/90"
+                                        class="text-xs font-medium"
+                                        :class="
+                                            isEditing
+                                                ? 'text-foreground/90'
+                                                : 'text-muted-foreground/80'
+                                        "
                                     >
                                         Nama Lengkap
                                     </Label>
@@ -222,8 +260,29 @@ const submitSucces = () => {
                                 </div>
                                 <div class="space-y-2">
                                     <Label
+                                        for="email"
+                                        class="text-xs font-medium text-muted-foreground/80"
+                                    >
+                                        Alamat Email
+                                    </Label>
+                                    <Input
+                                        id="email"
+                                        type="email"
+                                        name="email"
+                                        :default-value="props.user.email"
+                                        disabled
+                                        class="h-10 text-sm disabled:cursor-not-allowed sm:h-9.5"
+                                    />
+                                </div>
+                                <div class="space-y-2">
+                                    <Label
                                         for="nik"
-                                        class="text-xs font-medium text-foreground/90"
+                                        class="text-xs font-medium"
+                                        :class="
+                                            isEditing
+                                                ? 'text-foreground/90'
+                                                : 'text-muted-foreground/80'
+                                        "
                                     >
                                         Nomor Induk Kependudukan
                                     </Label>
@@ -239,11 +298,38 @@ const submitSucces = () => {
                                         class="h-10 font-mono text-sm disabled:cursor-not-allowed sm:h-9.5"
                                     />
                                 </div>
+                                <div class="space-y-2">
+                                    <Label
+                                        for="role"
+                                        class="text-xs font-medium"
+                                        :class="
+                                            isEditing
+                                                ? 'text-foreground/90'
+                                                : 'text-muted-foreground/80'
+                                        "
+                                    >
+                                        Peran Pengguna
+                                    </Label>
+                                    <select
+                                        id="role"
+                                        name="role"
+                                        :default-value="props.user.role"
+                                        :disabled="!isEditing"
+                                        class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 sm:h-9.5"
+                                    >
+                                        <option value="kader">
+                                            Kader Posyandu
+                                        </option>
+                                        <option value="administrator">
+                                            Administrator
+                                        </option>
+                                    </select>
+                                </div>
                             </div>
                         </CardContent>
 
                         <CardFooter
-                            class="flex justify-end border-t border-border px-4 py-3.5 sm:px-5"
+                            class="flex justify-end border-t border-border px-4 py-3.5 sm:px-5 [.border-t]:pt-4"
                         >
                             <Button
                                 type="submit"
@@ -260,6 +346,8 @@ const submitSucces = () => {
                         </CardFooter>
                     </Form>
                 </Card>
+
+                <ResetUserPassword v-if="props.user" :user="props.user" />
             </section>
         </div>
     </main>

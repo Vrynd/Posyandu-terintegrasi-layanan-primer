@@ -22,6 +22,7 @@ declare module '@inertiajs/core' {
             flash?: {
                 success?: string | null;
                 error?: string | null;
+                temp_password?: string | null;
                 success_invitation?: string | null;
             };
             [key: string]: unknown;

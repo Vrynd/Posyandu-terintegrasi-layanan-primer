@@ -8,6 +8,7 @@ use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
@@ -63,6 +64,7 @@ class UserController extends Controller
                 'is_active' => (bool) $user->is_active,
                 'created_at' => $user->created_at->format('d M Y'),
                 'last_login_at' => $user->last_login_at ? $user->last_login_at->format('d M Y, H:i') : null,
+                'updated_at' => $user->updated_at ? $user->updated_at->format('d M Y, H:i') : null,
             ],
         ]);
     }
@@ -89,7 +91,7 @@ class UserController extends Controller
 
         $user->update($validated);
 
-        return back()->with('success', "Data profil kader {$user->name} berhasil diperbarui.");
+        return back()->with('success', "Profil {$user->name} berhasil diperbarui.");
     }
 
     public function status(User $user): RedirectResponse
@@ -102,6 +104,55 @@ class UserController extends Controller
         ]);
         $statusText = $user->is_active ? 'diaktifkan' : 'dinonaktifkan';
 
-        return back()->with('success', "Akun kader {$user->name} berhasil {$statusText}.");
+        return back()->with('success', "Akun {$user->name} berhasil {$statusText}.");
+    }
+
+    private function generateStrongPassword(int $length = 10): string
+    {
+        $uppercase = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+        $lowercase = 'abcdefghijkmnpqrstuvwxyz';
+        $numbers = '23456789';
+        $symbols = '!@#$%&*';
+
+        $pass = [
+            $uppercase[random_int(0, strlen($uppercase) - 1)],
+            $lowercase[random_int(0, strlen($lowercase) - 1)],
+            $numbers[random_int(0, strlen($numbers) - 1)],
+            $symbols[random_int(0, strlen($symbols) - 1)],
+        ];
+
+        $all = $uppercase.$lowercase.$numbers.$symbols;
+        for ($i = count($pass); $i < $length; $i++) {
+            $pass[] = $all[random_int(0, strlen($all) - 1)];
+        }
+
+        shuffle($pass);
+
+        return 'Posyandu#'.implode('', $pass);
+    }
+
+    public function resetPassword(User $user): RedirectResponse
+    {
+        $tempPassword = $this->generateStrongPassword(8);
+        $user->update([
+            'password' => Hash::make($tempPassword),
+        ]);
+
+        return back()
+            ->with('temp_password', $tempPassword)
+            ->with('success', "Kata sandi sementara untuk kader {$user->name} berhasil dibuat.");
+    }
+
+    public function destroy(User $user): RedirectResponse
+    {
+        if (Auth::id() === $user->id) {
+            return back()->with('error', 'Anda tidak dapat menghapus akun Anda sendiri.');
+        }
+        $userName = $user->name;
+        $user->delete();
+
+        return redirect()
+            ->route('users.index')
+            ->with('success', "Akun kader {$userName} berhasil dihapus secara permanen.");
     }
 }
