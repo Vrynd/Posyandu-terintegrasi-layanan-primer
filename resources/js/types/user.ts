@@ -13,7 +13,7 @@ export interface UserItem {
 
 export interface UserMetrics {
     totalCount: number;
-    activeCount: number;
     suspendedCount: number;
     verifiedProfileCount: number;
+    pendingInvitationCount?: number;
 }

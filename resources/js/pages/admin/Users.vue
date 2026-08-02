@@ -1,17 +1,18 @@
 <script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3';
+import { router } from '@inertiajs/vue3';
 import {
-    KeyRound,
     Pencil,
-    ShieldCheck,
+    BadgeCheck,
     UserCheck,
     Users,
     UserX,
+    Ticket,
 } from '@lucide/vue';
 import { computed } from 'vue';
 import ConfirmDialog from '@/components/ConfirmDialog.vue';
 import Heading from '@/components/Heading.vue';
-import MetricCard from '@/components/MetricCard.vue';
+import Metric from '@/components/Metric.vue';
 import Pagination from '@/components/Pagination.vue';
 import StatusBadge from '@/components/StatusBadge.vue';
 import { Button } from '@/components/ui/button';
@@ -61,31 +62,31 @@ const props = defineProps<Props>();
 const rawUsers = computed(() => props.users?.data ?? []);
 const metricList = computed(() => [
     {
-        title: 'Total Kader',
+        title: 'Total Pengguna',
+        description: 'Keseluruhan akun terdaftar',
         value: props.metrics?.totalCount ?? 0,
-        badgeText: 'Terdaftar',
         icon: Users,
         variant: 'emerald' as const,
     },
     {
-        title: 'Akun Aktif',
-        value: props.metrics?.activeCount ?? 0,
-        badgeText: 'Siap Bertugas',
-        icon: UserCheck,
+        title: 'Undangan Belum Diklaim',
+        description: 'Kode undangan belum dipakai',
+        value: props.metrics?.pendingInvitationCount ?? 0,
+        icon: Ticket,
         variant: 'indigo' as const,
     },
     {
-        title: 'Nonaktif',
+        title: 'Akun Nonaktif',
+        description: 'Akun kader yang dinonaktifkan',
         value: props.metrics?.suspendedCount ?? 0,
-        badgeText: 'Perlu Review',
         icon: UserX,
         variant: 'rose' as const,
     },
     {
-        title: 'Profil Lengkap',
+        title: 'Profil Belum Lengkap',
+        description: 'Kader dengan NIK terverifikasi',
         value: props.metrics?.verifiedProfileCount ?? 0,
-        badgeText: 'Terverifikasi',
-        icon: ShieldCheck,
+        icon: BadgeCheck,
         variant: 'amber' as const,
     },
 ]);
@@ -104,6 +105,16 @@ const {
     openConfirmModal,
     confirmToggle,
 } = useToggleStatus();
+
+const goToDetail = (userId: string, event: MouseEvent) => {
+    const target = event.target as HTMLElement;
+
+    if (target.closest('button') || target.closest('a')) {
+        return;
+    }
+
+    router.visit(`/users/${userId}/edit`);
+};
 </script>
 
 <template>
@@ -118,10 +129,13 @@ const {
         />
 
         <div class="grid grid-cols-2 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <MetricCard
+            <Metric
                 v-for="metric in metricList"
                 :key="metric.title"
-                v-bind="metric"
+                :title="metric.title"
+                :value="metric.value"
+                :icon="metric.icon"
+                :variant="metric.variant"
             />
         </div>
 
@@ -180,6 +194,7 @@ const {
                             v-for="user in sortedUsers"
                             :key="user.id"
                             class="transition-colors hover:bg-muted/50"
+                            @click="goToDetail(user.id, $event)"
                         >
                             <TableCell>
                                 <div class="flex items-center gap-3">
@@ -235,15 +250,6 @@ const {
                                         <Link :href="`/users/${user.id}/edit`">
                                             <Pencil class="h-4 w-4" />
                                         </Link>
-                                    </Button>
-                                    <Button
-                                        type="button"
-                                        variant="ghost"
-                                        size="sm"
-                                        class="w-8 text-amber-500 hover:text-amber-600 dark:hover:bg-amber-500/10"
-                                        title="Reset Password"
-                                    >
-                                        <KeyRound class="h-4 w-4" />
                                     </Button>
                                     <Button
                                         type="button"

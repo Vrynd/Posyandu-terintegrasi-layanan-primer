@@ -7,6 +7,7 @@ use App\Enums\UserRole;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -97,5 +98,25 @@ class User extends Authenticatable
     public function getRouteKeyName(): string
     {
         return 'ulid';
+    }
+
+    public function isProfileComplete(): bool
+    {
+        return ! empty($this->name)
+            && ! empty($this->email)
+            && ! empty($this->nik);
+    }
+
+    /**
+     * Scope query to filter users with complete profile.
+     *
+     * @param  Builder<User>  $query
+     * @return Builder<User>
+     */
+    public function scopeWithCompleteProfile(Builder $query): Builder
+    {
+        return $query->whereNotNull('name')->where('name', '!=', '')
+            ->whereNotNull('email')->where('email', '!=', '')
+            ->whereNotNull('nik')->where('nik', '!=', '');
     }
 }

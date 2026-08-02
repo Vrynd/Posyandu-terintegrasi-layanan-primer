@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
+use App\Models\InvitationCode;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -24,9 +25,11 @@ class UserController extends Controller
     {
         $cadre = User::where('role', UserRole::Kader);
         $totalCount = (clone $cadre)->count();
-        $activeCount = (clone $cadre)->where('is_active', true)->count();
         $suspendedCount = (clone $cadre)->where('is_active', false)->count();
-        $verifiedProfileCount = (clone $cadre)->whereNotNull('nik')->where('nik', '!=', '')->count();
+        $verifiedProfileCount = (clone $cadre)->withCompleteProfile()->count();
+        $pendingInvitationCount = InvitationCode::where('is_used', false)
+            ->where('expires_at', '>', now())
+            ->count();
 
         $users = (clone $cadre)
             ->latest('created_at')
@@ -37,7 +40,7 @@ class UserController extends Controller
                 'nik' => $user->nik ? Str::mask($user->nik, '*', 4, 8) : null,
                 'email' => $user->email,
                 'role' => $user->role->value ?? $user->role,
-                'is_profile_complete' => ! empty($user->nik),
+                'is_profile_complete' => $user->isProfileComplete(),
                 'is_active' => (bool) $user->is_active,
                 'created_at' => $user->created_at->format('d M Y'),
             ]);
@@ -45,9 +48,9 @@ class UserController extends Controller
         return Inertia::render('admin/Users', [
             'metrics' => [
                 'totalCount' => $totalCount,
-                'activeCount' => $activeCount,
                 'suspendedCount' => $suspendedCount,
                 'verifiedProfileCount' => $verifiedProfileCount,
+                'pendingInvitationCount' => $pendingInvitationCount,
             ],
             'users' => $users,
         ]);
