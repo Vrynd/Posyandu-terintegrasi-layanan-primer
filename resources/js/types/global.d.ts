@@ -23,7 +23,9 @@ declare module '@inertiajs/core' {
                 success?: string | null;
                 error?: string | null;
                 temp_password?: string | null;
-                success_invitation?: string | null;
+                requires_token?: boolean;
+                pending_email?: string;
+                generated_token?: any;
             };
             [key: string]: unknown;
         };

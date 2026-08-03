@@ -89,6 +89,12 @@ class FortifyServiceProvider extends ServiceProvider
             }
 
             if (Hash::check($request->password, $user->password)) {
+                if (! $user->hasVerifiedEmail()) {
+                    throw ValidationException::withMessages([
+                        'email' => ['Akun Anda memerlukan verifikasi token pertama kali.'],
+                    ])->redirectTo(route('login'));
+                }
+
                 $user->forceFill([
                     'failed_login_attempts' => 0,
                     'locked_until' => null,

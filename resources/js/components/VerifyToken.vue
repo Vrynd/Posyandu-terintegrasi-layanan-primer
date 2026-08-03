@@ -2,7 +2,6 @@
 import { Form } from '@inertiajs/vue3';
 import { useMediaQuery } from '@vueuse/core';
 import InputError from '@/components/InputError.vue';
-import PasswordInput from '@/components/PasswordInput.vue';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -21,7 +20,7 @@ import {
     SheetTitle,
 } from '@/components/ui/sheet';
 import { Spinner } from '@/components/ui/spinner';
-import { invitation } from '@/routes/login';
+import { token } from '@/routes/login';
 
 const isOpen = defineModel<boolean>('open', { default: false });
 const isDesktop = useMediaQuery('(min-width: 640px)');
@@ -34,76 +33,49 @@ const isDesktop = useMediaQuery('(min-width: 640px)');
         >
             <DialogHeader class="gap-1.5">
                 <DialogTitle class="font-display text-card-foreground">
-                    Masuk via Kode Undangan
+                    Verifikasi Token
                 </DialogTitle>
                 <DialogDescription class="text-xs text-muted-foreground">
-                    Masukkan kode undangan yang telah dibuat oleh Administrator
+                    Masukkan token yang telah dibuat oleh Administrator
                 </DialogDescription>
             </DialogHeader>
 
             <Form
-                v-bind="invitation.form()"
+                v-bind="token.form()"
                 reset-on-success
                 @success="isOpen = false"
                 #default="{ errors, processing }"
                 class="mt-5 grid gap-4"
             >
-                <!-- Field 1: Kode Undangan -->
                 <div class="grid gap-2">
                     <Label
                         for="desktop-invitation-code"
                         class="text-xs font-medium text-foreground/90"
                     >
-                        Kode Undangan
+                        Token
                     </Label>
                     <Input
                         id="desktop-invitation-code"
-                        name="code"
+                        name="token"
                         type="text"
+                        inputmode="numeric"
                         required
-                        maxlength="16"
-                        placeholder="Contoh: YGB7UZ5NXC4155WN"
-                        class="h-10 rounded-md font-mono text-sm tracking-wider uppercase"
+                        maxlength="6"
+                        placeholder="Contoh: 123456"
+                        class="h-10 font-mono text-sm"
+                        @input="
+                            (e: Event) => {
+                                const target = e.target as HTMLInputElement;
+                                target.value = target.value.replace(
+                                    /[^0-9]/g,
+                                    '',
+                                );
+                            }
+                        "
                     />
                     <InputError :message="errors.code" />
                 </div>
 
-                <!-- Field 2: Password Baru -->
-                <div class="grid gap-2">
-                    <Label
-                        for="desktop-password"
-                        class="text-xs font-medium text-foreground/90"
-                    >
-                        Password Baru
-                    </Label>
-                    <PasswordInput
-                        id="desktop-password"
-                        name="password"
-                        required
-                        placeholder="Minimal 8 karakter"
-                        class="h-10 rounded-md text-sm"
-                    />
-                </div>
-
-                <!-- Field 3: Konfirmasi Password -->
-                <div class="grid gap-2">
-                    <Label
-                        for="desktop-password-confirmation"
-                        class="text-xs font-medium text-foreground/90"
-                    >
-                        Konfirmasi Password
-                    </Label>
-                    <PasswordInput
-                        id="desktop-password-confirmation"
-                        name="password_confirmation"
-                        required
-                        placeholder="Ulangi password baru"
-                        class="h-10 rounded-md text-sm"
-                    />
-                    <InputError :message="errors.password" />
-                </div>
-
-                <!-- Submit Button -->
                 <Button
                     type="submit"
                     :disabled="processing"
@@ -115,7 +87,7 @@ const isDesktop = useMediaQuery('(min-width: 640px)');
                         v-if="processing"
                         class="mr-2 h-4 w-4 text-white"
                     />
-                    <span>Masuk via Kode Undangan</span>
+                    <span>Verifikasi</span>
                 </Button>
             </Form>
         </DialogContent>
@@ -138,68 +110,41 @@ const isDesktop = useMediaQuery('(min-width: 640px)');
             </SheetHeader>
 
             <Form
-                v-bind="invitation.form()"
+                v-bind="token.form()"
                 reset-on-success
                 @success="isOpen = false"
                 #default="{ errors, processing }"
                 class="mt-5 grid gap-4"
             >
-                <!-- Field 1: Kode Undangan -->
                 <div class="grid gap-2">
                     <Label
-                        for="mobile-invitation-code"
+                        for="desktop-invitation-code"
                         class="text-xs font-medium text-foreground/90"
                     >
-                        Kode Undangan
+                        Token
                     </Label>
                     <Input
-                        id="mobile-invitation-code"
-                        name="code"
+                        id="desktop-invitation-code"
+                        name="token"
                         type="text"
+                        inputmode="numeric"
                         required
-                        maxlength="16"
-                        placeholder="Contoh: YGB7UZ5NXC4155WN"
-                        class="h-10 rounded-md font-mono text-sm tracking-wider uppercase"
+                        maxlength="6"
+                        placeholder="Contoh: 123456"
+                        class="h-10 font-mono text-sm"
+                        @input="
+                            (e: Event) => {
+                                const target = e.target as HTMLInputElement;
+                                target.value = target.value.replace(
+                                    /[^0-9]/g,
+                                    '',
+                                );
+                            }
+                        "
                     />
                     <InputError :message="errors.code" />
                 </div>
 
-                <!-- Field 2: Password Baru -->
-                <div class="grid gap-2">
-                    <Label
-                        for="mobile-password"
-                        class="text-xs font-medium text-foreground/90"
-                    >
-                        Password Baru
-                    </Label>
-                    <PasswordInput
-                        id="mobile-password"
-                        name="password"
-                        required
-                        placeholder="Minimal 8 karakter"
-                        class="h-10 rounded-md text-sm"
-                    />
-                </div>
-
-                <!-- Field 3: Konfirmasi Password -->
-                <div class="grid gap-2">
-                    <Label
-                        for="mobile-password-confirmation"
-                        class="text-xs font-medium text-foreground/90"
-                    >
-                        Konfirmasi Password
-                    </Label>
-                    <PasswordInput
-                        id="mobile-password-confirmation"
-                        name="password_confirmation"
-                        required
-                        placeholder="Ulangi password baru"
-                        class="h-10 rounded-md text-sm"
-                    />
-                    <InputError :message="errors.password" />
-                </div>
-
-                <!-- Submit Button -->
                 <Button
                     type="submit"
                     :disabled="processing"
@@ -211,7 +156,7 @@ const isDesktop = useMediaQuery('(min-width: 640px)');
                         v-if="processing"
                         class="mr-2 h-4 w-4 text-white"
                     />
-                    <span>Masuk via Kode Undangan</span>
+                    <span>Verifikasi</span>
                 </Button>
             </Form>
         </SheetContent>

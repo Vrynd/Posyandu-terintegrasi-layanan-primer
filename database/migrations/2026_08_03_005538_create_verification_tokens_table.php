@@ -11,14 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('invitation_codes', function (Blueprint $table) {
+        Schema::create('verification_tokens', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->string('code_hash', 64)->unique()->index();
+            $table->string('token_hash', 64);
             $table->boolean('is_used')->default(false);
             $table->timestamp('used_at')->nullable();
             $table->timestamp('expires_at');
             $table->timestamps();
+
+            $table->index(['user_id', 'is_used']);
         });
     }
 
@@ -27,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('invitation_codes');
+        Schema::dropIfExists('verification_tokens');
     }
 };

@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { Form, Head } from '@inertiajs/vue3';
+import { usePage } from '@inertiajs/vue3';
 import { TriangleAlert } from '@lucide/vue';
-import { ref } from 'vue';
-import InvitationCodeModal from '@/components/InvitationCodeModal.vue';
+import { ref, watchEffect } from 'vue';
 import PasswordInput from '@/components/PasswordInput.vue';
 import TextLink from '@/components/TextLink.vue';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
+import VerifyToken from '@/components/VerifyToken.vue';
 import { store } from '@/routes/login';
 import { request } from '@/routes/password';
 
@@ -26,7 +27,19 @@ defineProps<{
     canRegister: boolean;
 }>();
 
-const isInvitationModalOpen = ref(false);
+const isVerifyOpen = ref(false);
+const page = usePage();
+watchEffect(() => {
+    const errors = page.props.errors as Record<string, string>;
+    const flash = page.props.flash as any;
+
+    if (
+        flash?.requires_token ||
+        errors?.email?.toLowerCase().includes('verifikasi token')
+    ) {
+        isVerifyOpen.value = true;
+    }
+});
 </script>
 
 <template>
@@ -120,16 +133,12 @@ const isInvitationModalOpen = ref(false);
 
             <p class="mt-2 text-center text-xs text-muted-foreground">
                 Belum memiliki akun?
-                <button
-                    type="button"
-                    @click="isInvitationModalOpen = true"
-                    class="cursor-pointer font-semibold text-indigo-400 transition-colors hover:text-indigo-300 hover:underline dark:text-indigo-400 dark:hover:text-indigo-300"
-                >
+                <span class="font-semibold text-foreground/80">
                     Silakan hubungi Admin
-                </button>
+                </span>
             </p>
         </div>
     </Form>
 
-    <InvitationCodeModal v-model:open="isInvitationModalOpen" />
+    <VerifyToken v-model:open="isVerifyOpen" />
 </template>

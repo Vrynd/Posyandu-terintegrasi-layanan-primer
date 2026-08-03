@@ -45,7 +45,9 @@ class HandleInertiaRequests extends Middleware
                 'success' => fn () => $request->session()->get('success'),
                 'error' => fn () => $request->session()->get('error'),
                 'temp_password' => fn () => $request->session()->get('temp_password'),
-                'success_invitation' => fn () => $request->session()->get('success_invitation'),
+                'requires_token' => fn () => $request->session()->get('requires_token'),
+                'pending_email' => fn () => $request->session()->get('pending_email'),
+                'generated_token' => fn () => $request->session()->get('generated_token'),
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
         ];

@@ -30,7 +30,7 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->configureDefaults();
 
-        Gate::define('manage-invitations', function (User $user) {
+        Gate::define('manage-tokens', function (User $user) {
             return $user->role === UserRole::Administrator;
         });
 

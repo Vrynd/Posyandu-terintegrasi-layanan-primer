@@ -11,7 +11,7 @@ withDefaults(defineProps<Props>(), {
 </script>
 
 <template>
-    <header :class="variant === 'small' ? '' : 'mb-8 space-y-0.5'">
+    <header :class="variant === 'small' ? '' : 'mb-6 space-y-0.5 sm:mb-8'">
         <h2
             :class="[
                 'font-display tracking-tight',

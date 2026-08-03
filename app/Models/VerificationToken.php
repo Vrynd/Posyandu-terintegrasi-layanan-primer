@@ -2,35 +2,26 @@
 
 namespace App\Models;
 
-use Database\Factories\InvitationCodeFactory;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
 
 /**
  * @property int $id
- * @property int|null $user_id
- * @property string|null $recipient_name
- * @property string|null $recipient_email
- * @property string $code_hash
+ * @property int $user_id
+ * @property string $token_hash
  * @property bool $is_used
  * @property Carbon|null $used_at
  * @property Carbon $expires_at
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
- * @property User|null $user
+ * @property User $user
  */
-class InvitationCode extends Model
+class VerificationToken extends Model
 {
-    /** @use HasFactory<InvitationCodeFactory> */
-    use HasFactory;
-
     protected $fillable = [
         'user_id',
-        'recipient_name',
-        'recipient_email',
-        'code_hash',
+        'token_hash',
         'is_used',
         'used_at',
         'expires_at',
@@ -46,7 +37,7 @@ class InvitationCode extends Model
     }
 
     /**
-     * Get the cadre user associated with the invitation code.
+     * Get the user that owns the verification token.
      *
      * @return BelongsTo<User, $this>
      */
@@ -56,15 +47,15 @@ class InvitationCode extends Model
     }
 
     /**
-     * Compute SHA-256 hash for a given 16-character invitation code.
+     * Compute SHA-256 hash for a given 6-digit token.
      */
-    public static function hash(string $code): string
+    public static function hash(string $token): string
     {
-        return hash('sha256', trim($code));
+        return hash('sha256', trim($token));
     }
 
     /**
-     * Determine if the invitation code is still valid (not used and not expired).
+     * Determine if the token is still valid (not used and not expired).
      */
     public function isValid(): bool
     {
@@ -72,7 +63,7 @@ class InvitationCode extends Model
     }
 
     /**
-     * Mark the invitation code as used.
+     * Mark the token as used and verify the owning user's email.
      */
     public function markAsUsed(): void
     {
@@ -80,5 +71,7 @@ class InvitationCode extends Model
             'is_used' => true,
             'used_at' => now(),
         ]);
+
+        $this->user->forceFill(['email_verified_at' => now()])->save();
     }
 }

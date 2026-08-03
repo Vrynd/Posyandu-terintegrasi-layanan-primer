@@ -94,8 +94,8 @@ const navGroups = computed<NavGroup[]>(() => {
                     icon: Users,
                 },
                 {
-                    title: 'Kode Undangan',
-                    href: '/invitations',
+                    title: 'Kelola Token',
+                    href: '/tokens',
                     icon: KeyRound,
                 },
                 {

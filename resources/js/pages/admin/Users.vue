@@ -8,15 +8,23 @@ import {
     Users,
     UserX,
     Ticket,
+    UserPlus,
 } from '@lucide/vue';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import ConfirmDialog from '@/components/ConfirmDialog.vue';
 import Heading from '@/components/Heading.vue';
 import Metric from '@/components/Metric.vue';
 import Pagination from '@/components/Pagination.vue';
 import StatusBadge from '@/components/StatusBadge.vue';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import {
+    Card,
+    CardContent,
+    CardHeader,
+    CardTitle,
+    CardFooter,
+    CardDescription,
+} from '@/components/ui/card';
 import {
     Table,
     TableBody,
@@ -29,6 +37,7 @@ import UserAvatar from '@/components/UserAvatar.vue';
 import { useTableSort } from '@/composables/useTableSort';
 import { useToggleStatus } from '@/composables/useToggleStatus';
 import { dashboard } from '@/routes';
+import { create } from '@/routes/users';
 import type { UserItem, UserMetrics } from '@/types';
 
 defineOptions({
@@ -62,18 +71,20 @@ const props = defineProps<Props>();
 const rawUsers = computed(() => props.users?.data ?? []);
 const metricList = computed(() => [
     {
-        title: 'Total Pengguna',
+        title: 'Total Kader Terdaftar',
         description: 'Keseluruhan akun terdaftar',
         value: props.metrics?.totalCount ?? 0,
         icon: Users,
         variant: 'emerald' as const,
+        targetId: null,
     },
     {
-        title: 'Undangan Belum Diklaim',
-        description: 'Kode undangan belum dipakai',
-        value: props.metrics?.pendingInvitationCount ?? 0,
+        title: 'Menunggu Verifikasi',
+        description: 'Kader belum verifikasi token',
+        value: props.metrics?.pendingVerificationCount ?? 0,
         icon: Ticket,
         variant: 'indigo' as const,
+        targetId: 'kolom-verifikasi',
     },
     {
         title: 'Akun Nonaktif',
@@ -81,6 +92,7 @@ const metricList = computed(() => [
         value: props.metrics?.suspendedCount ?? 0,
         icon: UserX,
         variant: 'rose' as const,
+        targetId: 'kolom-nonaktif',
     },
     {
         title: 'Profil Belum Lengkap',
@@ -88,6 +100,7 @@ const metricList = computed(() => [
         value: props.metrics?.verifiedProfileCount ?? 0,
         icon: BadgeCheck,
         variant: 'amber' as const,
+        targetId: 'kolom-profil',
     },
 ]);
 
@@ -115,17 +128,29 @@ const goToDetail = (userId: string, event: MouseEvent) => {
 
     router.visit(`/users/${userId}/edit`);
 };
+
+const highlightedSection = ref<string | null>(null);
+const scrollToSection = (id: string) => {
+    const element = document.getElementById(id);
+
+    if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+        highlightedSection.value = id;
+        setTimeout(() => {
+            highlightedSection.value = null;
+        }, 1500);
+    }
+};
 </script>
 
 <template>
-    <Head title="Manajemen Pengguna" />
+    <Head title="Manajemen Kader" />
 
     <div class="flex h-full flex-1 flex-col p-4 sm:p-5">
         <Heading
-            title="Manajemen Pengguna"
+            title="Manajemen Kader"
             description="Kelola akun, peran, dan status akun pengguna"
-            variant="small"
-            class="mb-6 sm:mb-8"
         />
 
         <div class="grid grid-cols-2 gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -136,13 +161,39 @@ const goToDetail = (userId: string, event: MouseEvent) => {
                 :value="metric.value"
                 :icon="metric.icon"
                 :variant="metric.variant"
+                :class="[
+                    metric.targetId
+                        ? 'cursor-pointer transition-transform duration-200 hover:-translate-y-1'
+                        : '',
+                ]"
+                @click="metric.targetId && scrollToSection(metric.targetId)"
             />
         </div>
 
         <Card
-            class="mt-6 gap-0 overflow-hidden border-border/60 bg-card/80 py-0 shadow-xs"
+            class="mt-6 flex flex-col gap-5 overflow-hidden border-border/60 bg-card p-4 shadow-xs sm:gap-6 sm:p-5"
         >
-            <CardContent class="p-5">
+            <CardHeader class="flex flex-row items-center justify-between p-0">
+                <div class="space-y-0.5 sm:space-y-0">
+                    <CardTitle
+                        class="font-display text-sm font-medium tracking-tight text-foreground/90 sm:text-base"
+                    >
+                        Daftar Kader Posyandu
+                    </CardTitle>
+                    <CardDescription>
+                        Kelola akun, peran, dan status akses kader
+                    </CardDescription>
+                </div>
+                <Button
+                    variant="metalic"
+                    class="h-9 gap-2"
+                    @click="router.visit(create())"
+                >
+                    <UserPlus class="h-4 w-4" />
+                    <span class="hidden sm:inline">Tambah Kader</span>
+                </Button>
+            </CardHeader>
+            <CardContent class="p-0">
                 <Table>
                     <TableHeader>
                         <TableRow>
@@ -193,7 +244,7 @@ const goToDetail = (userId: string, event: MouseEvent) => {
                         <TableRow
                             v-for="user in sortedUsers"
                             :key="user.id"
-                            class="transition-colors hover:bg-muted/50"
+                            class="transition-colors hover:bg-muted/30"
                             @click="goToDetail(user.id, $event)"
                         >
                             <TableCell>
@@ -284,16 +335,123 @@ const goToDetail = (userId: string, event: MouseEvent) => {
                     </TableBody>
                 </Table>
             </CardContent>
+            <CardFooter v-if="props.users" class="p-0">
+                <Pagination
+                    :links="props.users.links"
+                    :current-count="sortedUsers.length"
+                    :total="props.users.total"
+                    :last-page="props.users.last_page"
+                    class="w-full"
+                />
+            </CardFooter>
         </Card>
+        <div class="mt-6 space-y-4 sm:mt-8">
+            <Heading
+                title="Perlu Tindakan"
+                description="Daftar akun dan undangan yang memerlukan perhatian khusus dari admin."
+                variant="small"
+            />
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                <div
+                    id="kolom-verifikasi"
+                    :class="[
+                        'flex flex-col gap-2 rounded-xl transition-all duration-300',
+                        highlightedSection === 'kolom-verifikasi'
+                            ? 'scale-[1.02] ring-2 ring-indigo-500/80'
+                            : '',
+                    ]"
+                >
+                    <div
+                        class="flex items-center justify-between rounded-xl border border-border/60 bg-card/80 px-4 py-2.5 shadow-xs"
+                    >
+                        <div class="flex items-center gap-2.5">
+                            <Ticket class="h-4 w-4 text-indigo-500" />
+                            <span class="text-sm font-medium text-foreground/90"
+                                >Menunggu Verifikasi</span
+                            >
+                        </div>
+                        <Badge
+                            variant="outline"
+                            class="rounded-full border-border/60 bg-secondary/50 text-xs font-semibold"
+                        >
+                            {{ props.metrics?.pendingVerificationCount ?? 0 }}
+                        </Badge>
+                    </div>
+                    <Card
+                        class="border-border/60 bg-card/80 p-4 shadow-xs sm:p-5"
+                    >
+                        <CardContent class="p-0">
+                            <div
+                                class="flex h-36 items-center justify-center rounded-lg border border-dashed border-border/60 text-xs text-muted-foreground"
+                            >
+                                Placeholder List Undangan
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
 
-        <Pagination
-            v-if="props.users"
-            :links="props.users.links"
-            :current-count="sortedUsers.length"
-            :total="props.users.total"
-            :last-page="props.users.last_page"
-            class="mt-6"
-        />
+                <div class="flex flex-col gap-2">
+                    <div
+                        class="flex items-center justify-between rounded-xl border border-border/60 bg-card/80 px-4 py-2.5 shadow-xs"
+                    >
+                        <div class="flex items-center gap-2.5">
+                            <BadgeCheck class="h-4 w-4 text-amber-500" />
+                            <span class="text-sm font-medium text-foreground/90"
+                                >Profil Belum Lengkap</span
+                            >
+                        </div>
+                        <Badge
+                            variant="outline"
+                            class="rounded-full border-border/60 bg-secondary/50 text-xs font-semibold"
+                        >
+                            {{ props.metrics?.verifiedProfileCount ?? 0 }}
+                        </Badge>
+                    </div>
+                    <!-- Body Content Card -->
+                    <Card
+                        class="border-border/60 bg-card/80 p-4 shadow-xs sm:p-5"
+                    >
+                        <CardContent class="p-0">
+                            <div
+                                class="flex h-36 items-center justify-center rounded-lg border border-dashed border-border/60 text-xs text-muted-foreground"
+                            >
+                                Placeholder List Profil Pending
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
+
+                <div class="flex flex-col gap-2">
+                    <div
+                        class="flex items-center justify-between rounded-xl border border-border/60 bg-card/80 px-4 py-2.5 shadow-xs"
+                    >
+                        <div class="flex items-center gap-2.5">
+                            <UserX class="h-4 w-4 text-rose-500" />
+                            <span class="text-sm font-medium text-foreground/90"
+                                >Akun Nonaktif</span
+                            >
+                        </div>
+                        <Badge
+                            variant="outline"
+                            class="rounded-full border-border/60 bg-secondary/50 text-xs font-semibold"
+                        >
+                            {{ props.metrics?.suspendedCount ?? 0 }}
+                        </Badge>
+                    </div>
+                    <Card
+                        class="border-border/60 bg-card/80 p-4 shadow-xs sm:p-5"
+                    >
+                        <CardContent class="p-0">
+                            <div
+                                class="flex h-36 items-center justify-center rounded-lg border border-dashed border-border/60 text-xs text-muted-foreground"
+                            >
+                                Placeholder List Akun Nonaktif
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
+            </div>
+        </div>
     </div>
 
     <ConfirmDialog

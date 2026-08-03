@@ -15,5 +15,5 @@ export interface UserMetrics {
     totalCount: number;
     suspendedCount: number;
     verifiedProfileCount: number;
-    pendingInvitationCount?: number;
+    pendingVerificationCount: number;
 }

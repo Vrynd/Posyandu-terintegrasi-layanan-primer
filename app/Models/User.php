@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Carbon;
@@ -18,19 +19,21 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
 /**
  * @property int $id
  * @property string $ulid
+ * @property string|null $nik
+ * @property string|null $nik_hash
  * @property string $name
  * @property string $email
- * @property string|null $nik
  * @property UserRole $role
+ * @property bool $is_active
+ * @property Carbon|null $email_verified_at
+ * @property string $password
  * @property int $failed_login_attempts
  * @property Carbon|null $locked_until
- * @property Carbon|null $email_verified_at
- * @property Carbon|null $last_login_at
- * @property string $password
  * @property string|null $two_factor_secret
  * @property string|null $two_factor_recovery_codes
  * @property Carbon|null $two_factor_confirmed_at
  * @property string|null $remember_token
+ * @property Carbon|null $last_login_at
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
@@ -40,6 +43,15 @@ class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, HasUlids, Notifiable, TwoFactorAuthenticatable;
+
+    protected static function booted(): void
+    {
+        static::saving(function (User $user) {
+            if ($user->isDirty('nik')) {
+                $user->nik_hash = $user->nik ? hash('sha256', $user->nik) : null;
+            }
+        });
+    }
 
     /**
      * Get the attributes that should be cast.
@@ -59,6 +71,16 @@ class User extends Authenticatable
             'nik' => 'encrypted',
             'last_login_at' => 'datetime',
         ];
+    }
+
+    /**
+     * Get the verification tokens for the user.
+     *
+     * @return HasMany<VerificationToken, $this>
+     */
+    public function verificationTokens(): HasMany
+    {
+        return $this->hasMany(VerificationToken::class);
     }
 
     /**
@@ -95,11 +117,13 @@ class User extends Authenticatable
         return ['ulid'];
     }
 
+    /** Gunakan kolom ulid sebagai route key binding selain primary key id. */
     public function getRouteKeyName(): string
     {
         return 'ulid';
     }
 
+    /** Cek apakah profil kader sudah lengkap (nama, email, dan NIK terisi). */
     public function isProfileComplete(): bool
     {
         return ! empty($this->name)
@@ -118,5 +142,17 @@ class User extends Authenticatable
         return $query->whereNotNull('name')->where('name', '!=', '')
             ->whereNotNull('email')->where('email', '!=', '')
             ->whereNotNull('nik')->where('nik', '!=', '');
+    }
+
+    public function issueVerificationToken(): string
+    {
+        $rawToken = str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+
+        $this->verificationTokens()->create([
+            'token_hash' => VerificationToken::hash($rawToken),
+            'expires_at' => now()->addMinutes(30),
+        ]);
+
+        return $rawToken;
     }
 }
