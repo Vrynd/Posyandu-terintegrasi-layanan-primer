@@ -14,22 +14,26 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
+        $adminNik = '3512345678900001';
         User::updateOrCreate(
             ['email' => 'admin@posyandu.id'],
             [
                 'name' => 'Administrator Posyandu',
-                'nik' => '3512345678900001',
+                'nik' => $adminNik,
+                'nik_hash' => hash('sha256', $adminNik),
                 'role' => UserRole::Administrator,
                 'password' => Hash::make('Admin@Posyandu2026!'),
                 'email_verified_at' => now(),
             ]
         );
 
+        $kaderNik = '3512345678900002';
         User::updateOrCreate(
             ['email' => 'kader@posyandu.id'],
             [
                 'name' => 'Kader Posyandu',
-                'nik' => '3512345678900002',
+                'nik' => $kaderNik,
+                'nik_hash' => hash('sha256', $kaderNik),
                 'role' => UserRole::Kader,
                 'password' => Hash::make('Kader@Posyandu2026!'),
                 'email_verified_at' => now(),
