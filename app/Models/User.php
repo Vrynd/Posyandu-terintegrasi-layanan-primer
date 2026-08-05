@@ -147,11 +147,15 @@ class User extends Authenticatable
     public function issueVerificationToken(): string
     {
         $rawToken = str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
-
-        $this->verificationTokens()->create([
-            'token_hash' => VerificationToken::hash($rawToken),
-            'expires_at' => now()->addMinutes(30),
-        ]);
+        $this->verificationTokens()->updateOrCreate(
+            ['user_id' => $this->id],
+            [
+                'token_hash' => VerificationToken::hash($rawToken),
+                'expires_at' => now()->addMinutes(30),
+                'is_used' => false,
+                'used_at' => null,
+            ]
+        );
 
         return $rawToken;
     }

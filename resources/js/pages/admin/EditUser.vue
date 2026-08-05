@@ -303,7 +303,7 @@ const submitSucces = () => {
                                                 : 'text-muted-foreground/90'
                                         "
                                     >
-                                        Peran Pengguna
+                                        Peran
                                     </Label>
 
                                     <Select

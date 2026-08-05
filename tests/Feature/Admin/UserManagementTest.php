@@ -39,14 +39,16 @@ test('admin can create new cadre account with encrypted NIK and auto nik_hash', 
 
     $rawNik = '3512014807960001';
 
-    $response = $this->actingAs($admin)->post(route('users.store'), [
-        'name' => 'Budi Santoso',
-        'email' => 'budi.santoso@posyandu.test',
-        'nik' => $rawNik,
-        'password' => 'Posyandu#12345',
-        'password_confirmation' => 'Posyandu#12345',
-        'role' => 'kader',
-    ]);
+    $response = $this->actingAs($admin)
+        ->from(route('users.index'))
+        ->post(route('users.store'), [
+            'name' => 'Budi Santoso',
+            'email' => 'budi.santoso@posyandu.test',
+            'nik' => $rawNik,
+            'password' => 'Posyandu#12345',
+            'password_confirmation' => 'Posyandu#12345',
+            'role' => 'kader',
+        ]);
 
     $response->assertRedirect(route('users.index'));
 
@@ -171,7 +173,8 @@ test('admin can reset cadre password to strong temporary password', function () 
     $response->assertSessionHas('temp_password');
 
     $tempPassword = session('temp_password');
-    expect($tempPassword)->toContain('Posyandu#')
+    expect($tempPassword)->toBeString()
+        ->and(strlen($tempPassword))->toBe(8)
         ->and(Hash::check($tempPassword, $kader->fresh()->password))->toBeTrue();
 });
 

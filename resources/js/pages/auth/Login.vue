@@ -122,7 +122,6 @@ watchEffect(() => {
                 type="submit"
                 variant="default"
                 size="lg"
-                class="shadow-lg shadow-indigo-500/20 transition-all duration-300 hover:opacity-90 disabled:opacity-50"
                 :tabindex="4"
                 :disabled="processing"
                 data-test="login-button"

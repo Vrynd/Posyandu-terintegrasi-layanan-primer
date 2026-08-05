@@ -46,13 +46,23 @@ class TokenController extends Controller
         ]);
 
         $user = User::where('email', $validated['email'])->firstOrFail();
-        $token = $user->issueVerificationToken();
+        $rawToken = str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+
+        VerificationToken::updateOrCreate(
+            ['user_id' => $user->id],
+            [
+                'token_hash' => VerificationToken::hash($rawToken),
+                'expires_at' => now()->addMinutes(5),
+                'is_used' => false,
+                'used_at' => null,
+            ]
+        );
 
         return back()->with('generated_token', [
             'name' => $user->name,
             'email' => $user->email,
-            'token' => $token,
-            'expires_in_minutes' => 30,
+            'token' => $rawToken,
+            'expires_in_minutes' => 5,
         ]);
     }
 }

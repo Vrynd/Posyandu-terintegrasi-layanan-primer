@@ -22,17 +22,19 @@ class UserController extends Controller
     {
         /** @var object{total_count: int, suspended_count: int, incomplete_profile_count: int, pending_verification_count: int} $stats */
         $stats = User::where('role', UserRole::Kader)
+            ->whereNotIn('email', ['admin@posyandu.id', 'kader@posyandu.id'])
             ->selectRaw('
             COUNT(*) as total_count,
             SUM(CASE WHEN is_active = false THEN 1 ELSE 0 END) as suspended_count,
             SUM(CASE WHEN nik_hash IS NULL OR nik_hash = "" THEN 1 ELSE 0 END) as incomplete_profile_count,
-            SUM(CASE WHEN email_verified_at IS NULL THEN 1 ELSE 0 END) as pending_verification_count
+            SUM(CASE WHEN is_active = true AND email_verified_at IS NULL THEN 1 ELSE 0 END) as pending_verification_count
         ')
             ->toBase()
             ->first();
 
         $users = User::where('role', UserRole::Kader)
-            ->select(['id', 'ulid', 'name', 'nik', 'email', 'role', 'is_active', 'created_at'])
+            ->whereNotIn('email', ['admin@posyandu.id', 'kader@posyandu.id'])
+            ->select(['id', 'ulid', 'name', 'nik', 'email', 'role', 'is_active', 'email_verified_at', 'created_at'])
             ->latest('created_at')
             ->paginate(5)
             ->through(fn (User $user) => [
@@ -43,6 +45,7 @@ class UserController extends Controller
                 'role' => $user->role->value,
                 'is_profile_complete' => $user->isProfileComplete(),
                 'is_active' => (bool) $user->is_active,
+                'is_verified' => $user->hasVerifiedEmail(),
                 'created_at' => $user->created_at->format('d M Y'),
             ]);
 
@@ -208,7 +211,7 @@ class UserController extends Controller
     // Generate kata sandi acak sementara dan simpan ke akun kader yang dituju.
     public function resetPassword(User $user): RedirectResponse
     {
-        $tempPassword = $this->generateStrongPassword(8);
+        $tempPassword = $this->generatePassword(8);
 
         $user->update(['password' => Hash::make($tempPassword)]);
 
@@ -218,7 +221,7 @@ class UserController extends Controller
     }
 
     // Buat string kata sandi acak yang mengandung huruf besar, kecil, angka, dan simbol.
-    private function generateStrongPassword(int $length = 10): string
+    private function generatePassword(int $length = 16): string
     {
         $uppercase = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
         $lowercase = 'abcdefghijkmnpqrstuvwxyz';
@@ -240,6 +243,6 @@ class UserController extends Controller
 
         shuffle($pass);
 
-        return 'Posyandu#'.implode('', $pass);
+        return implode('', $pass);
     }
 }

@@ -5,6 +5,7 @@ export interface UserItem {
     nik?: string | null;
     role: string;
     is_active: boolean;
+    is_verified?: boolean;
     created_at: string;
     is_profile_complete?: boolean;
     last_login_at?: string | null;
@@ -14,6 +15,6 @@ export interface UserItem {
 export interface UserMetrics {
     totalCount: number;
     suspendedCount: number;
-    verifiedProfileCount: number;
+    incompleteProfileCount: number;
     pendingVerificationCount: number;
 }

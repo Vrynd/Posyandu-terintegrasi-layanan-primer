@@ -21,7 +21,7 @@ export function useGeneratePassword() {
             numbers[Math.floor(Math.random() * numbers.length)] +
             symbols[Math.floor(Math.random() * symbols.length)] +
             Array.from(
-                { length: 6 },
+                { length: 12 },
                 () => all[Math.floor(Math.random() * all.length)],
             ).join('');
 
@@ -30,7 +30,7 @@ export function useGeneratePassword() {
             .sort(() => Math.random() - 0.5)
             .join('');
 
-        generatedPassword.value = 'Posyandu#' + shuffled;
+        generatedPassword.value = shuffled;
 
         fillInputById('password', generatedPassword.value);
         fillInputById('password_confirmation', generatedPassword.value);

@@ -95,7 +95,7 @@ defineProps<{
                     class="group flex min-w-0 items-center gap-2.5 transition-transform duration-300 hover:scale-105 sm:gap-3"
                 >
                     <div
-                        class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-linear-to-br from-indigo-400 to-pink-400 text-white shadow-lg shadow-indigo-500/20 sm:h-10 sm:w-10"
+                        class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-linear-to-br from-indigo-700 via-purple-700 to-pink-600 text-white shadow-lg shadow-indigo-700/20 sm:h-10 sm:w-10"
                     >
                         <HeartPulse class="h-4.5 w-4.5 sm:h-5 sm:w-5" />
                     </div>
@@ -115,7 +115,7 @@ defineProps<{
                 </Link>
 
                 <div
-                    class="flex shrink-0 items-center gap-1.5 rounded-full border border-border bg-card/80 px-2.5 py-1 whitespace-nowrap shadow-xs backdrop-blur-md sm:gap-2 sm:px-3 sm:py-1.5"
+                    class="flex shrink-0 items-center gap-1.5 rounded-full border border-border bg-card px-2.5 py-1 whitespace-nowrap shadow-xs backdrop-blur-md sm:gap-2 sm:px-3 sm:py-1.5"
                 >
                     <span class="relative flex h-1.5 w-1.5 sm:h-2 sm:w-2">
                         <span

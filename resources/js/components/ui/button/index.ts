@@ -9,9 +9,11 @@ export const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "bg-linear-to-r from-indigo-500 to-pink-500 text-primary-foreground hover:bg-primary/90",
+          "bg-linear-to-r from-indigo-700 via-purple-700 to-pink-600 hover:from-indigo-600 hover:via-purple-600 hover:to-pink-500 text-white shadow-[inset_0_0_0_1px_rgba(255,255,255,0.12)]",
         metalic:
           "border border-zinc-700 bg-linear-to-b from-zinc-800 to-zinc-900 text-zinc-100 hover:from-zinc-700 hover:to-zinc-800",
+        graphite:
+          "bg-linear-to-b from-zinc-700 to-zinc-900 hover:from-zinc-600 hover:to-zinc-800 text-zinc-100 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)]",
         destructive:
           "bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
         outline:

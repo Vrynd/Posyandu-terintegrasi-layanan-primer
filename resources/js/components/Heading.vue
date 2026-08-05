@@ -17,7 +17,7 @@ withDefaults(defineProps<Props>(), {
                 'font-display tracking-tight',
                 variant === 'small'
                     ? 'mb-0.5 text-base font-medium'
-                    : 'text-xl font-semibold tracking-tight',
+                    : 'text-lg font-semibold tracking-tight sm:text-xl',
             ]"
         >
             {{ title }}

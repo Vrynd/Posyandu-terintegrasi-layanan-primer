@@ -90,5 +90,5 @@ test('admin can reissue new token when previous token is expired', function () {
 
     // Memastikan token baru berbeda dengan token lama & total token kader menjadi 2 (1 expired, 1 aktif)
     expect($newFlashData['token'])->not->toBe('111111')
-        ->and(VerificationToken::where('user_id', $kader->id)->count())->toBe(2);
+        ->and(VerificationToken::where('user_id', $kader->id)->count())->toBe(1);
 });

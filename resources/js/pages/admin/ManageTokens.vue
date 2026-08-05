@@ -83,7 +83,7 @@ const {
 
         <Card class="gap-0 border-border/80 bg-card py-0 shadow-xs">
             <CardHeader
-                class="gap-0 border-b border-border px-4 py-5 sm:px-5 [.border-b]:pb-4"
+                class="gap-0 border-b border-border p-4 sm:p-5 [.border-b]:pb-4"
             >
                 <CardTitle
                     class="font-display text-sm font-medium tracking-tight text-foreground/90 sm:text-base"
@@ -114,62 +114,82 @@ const {
                             {{ errors.email }}
                         </AlertDescription>
                     </Alert>
-                    <div class="flex flex-col gap-3 sm:flex-row sm:items-end">
-                        <div class="min-w-0 flex-1 space-y-2">
-                            <Label
-                                for="email"
-                                class="text-xs font-medium text-foreground/90"
-                            >
-                                Alamat Email Kader
-                            </Label>
-                            <div class="relative flex items-center">
-                                <Input
-                                    id="email"
-                                    name="email"
-                                    type="email"
-                                    v-model="selectedEmail"
-                                    required
-                                    placeholder="masukkan.email@kader.test"
-                                    class="h-10 pr-12 text-sm sm:h-9.5"
-                                />
-                                <Button
-                                    v-if="selectedEmail"
-                                    type="button"
-                                    variant="ghost"
-                                    size="sm"
-                                    class="absolute right-1 h-7 w-7 rounded-full p-0 text-muted-foreground hover:text-foreground dark:hover:bg-muted/60"
-                                    title="Bersihkan Email"
-                                    @click="clearEmail"
-                                >
-                                    <X class="h-3.5 w-3.5" />
-                                </Button>
-                            </div>
-                        </div>
 
-                        <div class="w-full shrink-0 space-y-1.5 sm:w-64">
-                            <Label
-                                for="generated-token"
-                                class="text-xs font-medium text-foreground/90"
-                            >
-                                Hasil Token (6 Digit)
-                            </Label>
-                            <div class="relative flex items-center">
-                                <Input
+                    <fieldset class="m-0 border-0 p-0">
+                        <legend class="sr-only">
+                            Formulir penerbitan token verifikasi kader
+                        </legend>
+
+                        <div
+                            class="flex flex-col gap-6 sm:flex-row sm:items-end sm:gap-3"
+                        >
+                            <div class="min-w-0 flex-1 space-y-2">
+                                <Label
+                                    for="email"
+                                    class="text-xs font-medium text-foreground/90"
+                                >
+                                    Alamat Email Kader
+                                </Label>
+                                <div class="relative flex items-center">
+                                    <Input
+                                        id="email"
+                                        name="email"
+                                        type="email"
+                                        v-model="selectedEmail"
+                                        required
+                                        placeholder="masukkan.email@kader.test"
+                                        class="h-10 pr-10 text-sm sm:h-9.5"
+                                    />
+                                    <Button
+                                        v-if="selectedEmail"
+                                        type="button"
+                                        variant="ghost"
+                                        size="sm"
+                                        class="absolute right-2 h-6 w-6 rounded-full p-0 text-muted-foreground hover:text-foreground dark:hover:bg-muted/60"
+                                        title="Bersihkan Email"
+                                        @click="clearEmail"
+                                    >
+                                        <X class="h-3.5 w-3.5" />
+                                    </Button>
+                                </div>
+                            </div>
+
+                            <div class="min-w-0 flex-1 space-y-2">
+                                <Label
+                                    for="generated-token"
+                                    class="text-xs font-medium text-foreground/90"
+                                >
+                                    Token (6 Digit)
+                                </Label>
+                                <output
                                     id="generated-token"
-                                    type="text"
-                                    readonly
-                                    :value="generatedTokenData?.token ?? ''"
-                                    placeholder="------"
-                                    class="h-10 bg-secondary/30 pr-10 text-center font-mono text-base font-bold tracking-widest text-indigo-400 sm:h-9.5"
-                                />
+                                    for="email"
+                                    class="flex h-10 items-center justify-center rounded-md border text-center font-mono text-base font-bold tracking-widest sm:h-9.5"
+                                    :class="
+                                        generatedTokenData?.token
+                                            ? 'border-accent/40 bg-accent/10 text-accent'
+                                            : 'border-dashed border-border/80 bg-muted/20 text-muted-foreground'
+                                    "
+                                >
+                                    {{ generatedTokenData?.token ?? '------' }}
+                                </output>
+                            </div>
+
+                            <div
+                                class="flex w-full shrink-0 items-center gap-4 sm:w-auto sm:gap-3"
+                            >
                                 <Button
-                                    v-if="generatedTokenData?.token"
                                     type="button"
-                                    variant="ghost"
-                                    size="sm"
-                                    class="absolute right-1 h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
-                                    title="Salin Token"
+                                    variant="outline"
+                                    class="w-full flex-1 sm:w-auto sm:flex-initial"
+                                    :disabled="!generatedTokenData?.token"
+                                    :title="
+                                        copied
+                                            ? 'Berhasil Disalin'
+                                            : 'Salin Token'
+                                    "
                                     @click="
+                                        generatedTokenData?.token &&
                                         copyToClipboard(
                                             generatedTokenData.token,
                                         )
@@ -180,29 +200,38 @@ const {
                                         class="h-4 w-4 text-emerald-400"
                                     />
                                     <Copy v-else class="h-4 w-4" />
+                                    <span
+                                        :class="{
+                                            'font-semibold text-emerald-400':
+                                                copied,
+                                        }"
+                                    >
+                                        {{
+                                            copied ? 'Tersalin' : 'Salin Token'
+                                        }}
+                                    </span>
+                                </Button>
+                                <Button
+                                    type="submit"
+                                    variant="default"
+                                    class="w-full flex-1 sm:w-auto sm:flex-initial"
+                                    :disabled="processing"
+                                >
+                                    <Spinner
+                                        v-if="processing"
+                                        class="h-4 w-4"
+                                    />
+                                    <KeyRound v-else class="h-4 w-4" />
+                                    <span>Buat Token</span>
                                 </Button>
                             </div>
                         </div>
-
-                        <div class="w-full shrink-0 sm:w-auto">
-                            <Button
-                                type="submit"
-                                variant="metalic"
-                                class="gap-2"
-                                :disabled="processing"
-                            >
-                                <Spinner v-if="processing" class="h-4 w-4" />
-                                <KeyRound v-else class="h-4 w-4" />
-                                <span>Buat Token</span>
-                            </Button>
-                        </div>
-                    </div>
+                    </fieldset>
 
                     <InputError :message="errors.email" />
                 </Form>
             </CardContent>
         </Card>
-
         <Card
             class="mt-6 flex flex-col gap-5 overflow-hidden border-border bg-card p-4 shadow-xs sm:gap-6 sm:p-5"
         >
@@ -286,7 +315,7 @@ const {
                             "
                         >
                             <TableCell
-                                colspan="5"
+                                colspan="6"
                                 class="h-32 text-center text-muted-foreground"
                             >
                                 Belum ada riwayat token verifikasi yang
