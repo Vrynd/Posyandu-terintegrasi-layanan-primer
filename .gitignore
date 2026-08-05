@@ -13,6 +13,7 @@
 /vendor
 .DS_Store
 .env
+.schema_final.sql
 .env.backup
 .env.production
 .phpactor.json

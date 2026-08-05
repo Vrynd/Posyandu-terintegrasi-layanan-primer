@@ -56,7 +56,7 @@ const navGroups = computed<NavGroup[]>(() => {
             items: [
                 {
                     title: 'Pendaftaran',
-                    href: '#',
+                    href: '/participants',
                     icon: UserPlus,
                 },
                 {
