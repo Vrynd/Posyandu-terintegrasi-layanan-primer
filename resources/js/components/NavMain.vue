@@ -44,7 +44,10 @@ const { isCurrentUrl } = useCurrentUrl();
                                 : '',
                         ]"
                     >
-                        <Link :href="item.isLocked ? '#' : item.href">
+                        <Link
+                            :href="item.isLocked ? '#' : item.href"
+                            :prefetch="!item.isLocked"
+                        >
                             <component :is="item.icon" />
                             <span>{{ item.title }}</span>
                             <Clock
@@ -78,7 +81,10 @@ const { isCurrentUrl } = useCurrentUrl();
                                 : '',
                         ]"
                     >
-                        <Link :href="item.isLocked ? '#' : item.href">
+                        <Link
+                            :href="item.isLocked ? '#' : item.href"
+                            :prefetch="!item.isLocked"
+                        >
                             <component :is="item.icon" />
                             <span>{{ item.title }}</span>
                             <Clock

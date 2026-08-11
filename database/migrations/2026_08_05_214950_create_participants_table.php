@@ -25,12 +25,15 @@ return new class extends Migration
             $table->string('rw', 5)->nullable();
             $table->string('phone')->nullable();
             $table->boolean('has_bpjs')->default(false);
-            $table->string('bpjs_number', 20)->nullable();
+            $table->text('bpjs_number')->nullable();
+            $table->boolean('is_active')->default(true);
             $table->timestamps();
 
             // Index performa query
+            $table->index('name');
             $table->index('category');
             $table->index('nik_hash');
+            $table->index('is_active');
         });
     }
 
