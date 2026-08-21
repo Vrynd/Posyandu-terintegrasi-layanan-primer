@@ -17,9 +17,9 @@ return new class extends Migration
             $table->string('nik')->nullable();
             $table->string('nik_hash', 64)->unique()->nullable();
             $table->string('name');
-            $table->enum('category', ['balita', 'bumil', 'remaja', 'produktif', 'lansia']);
+            $table->enum('category', ['toddler', 'pregnant_mother', 'teenager', 'productive', 'adult']);
             $table->date('birth_date');
-            $table->enum('gender', ['Laki-Laki', 'Perempuan']);
+            $table->enum('gender', ['male', 'female']);
             $table->text('address')->nullable();
             $table->string('rt', 5)->nullable();
             $table->string('rw', 5)->nullable();

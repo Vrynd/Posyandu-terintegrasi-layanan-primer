@@ -47,7 +47,7 @@ class ParticipantRequest extends FormRequest
                 'farmer', 'farm_laborer', 'civil_servant', 'private_employee', 'entrepreneur',
                 'fisherman', 'housewife', 'unemployed_new', 'unemployed', 'other',
             ])],
-            'employment_other' => ['nullable', 'required_if:occupation,other', 'string', 'max:100'],
+            'employment_other' => ['nullable', 'required_if:employment,other', 'string', 'max:100'],
             'marital_status' => ['nullable', Rule::in(['single', 'married', 'divorced', 'widowed'])],
         ];
     }

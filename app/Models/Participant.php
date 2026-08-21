@@ -37,7 +37,7 @@ class Participant extends Model
         return [
             'birth_date' => 'date',
             'has_bpjs' => 'boolean',
-            'is_actice' => 'boolean',
+            'is_active' => 'boolean',
             'nik' => 'encrypted',
             'bpjs_number' => 'encrypted',
         ];

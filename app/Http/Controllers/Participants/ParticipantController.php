@@ -17,14 +17,19 @@ class ParticipantController extends Controller
     private const CATEGORY_OPTIONS = [
         ['label' => 'Ibu Hamil', 'value' => 'pregnant_mother'],
         ['label' => 'Balita', 'value' => 'toddler'],
-        ['label' => 'Remaja', 'value' => 'teenager'],
+        ['label' => 'Anak Remaja', 'value' => 'teenager'],
         ['label' => 'Usia Produktif', 'value' => 'productive'],
-        ['label' => 'Lansia', 'value' => 'adult'],
+        ['label' => 'Usia Lansia', 'value' => 'adult'],
     ];
 
     private const GENDER_OPTIONS = [
         ['label' => 'Laki-Laki', 'value' => 'male'],
         ['label' => 'Perempuan', 'value' => 'female'],
+    ];
+
+    private const BPJS_OPTIONS = [
+        ['label' => 'Ya', 'value' => '1'],
+        ['label' => 'Tidak', 'value' => '0'],
     ];
 
     private const MARITAL_STATUS_OPTIONS = [
@@ -58,6 +63,7 @@ class ParticipantController extends Controller
         return Inertia::render('participants/CreateParticipant', [
             'category' => self::CATEGORY_OPTIONS,
             'gender' => self::GENDER_OPTIONS,
+            'membershipBpjs' => self::BPJS_OPTIONS,
             'employment' => self::EMPLOYMENT_OPTIONS,
             'martialStatus' => self::MARITAL_STATUS_OPTIONS,
         ]);
