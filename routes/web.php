@@ -23,7 +23,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/participants', [ParticipantController::class, 'index'])->name('participants.index');
     Route::get('/participants/create', [ParticipantController::class, 'create'])->name('participants.create');
-    Route::post('/participants', [ParticipantController::class, 'store'])->name('participants.store');
+    Route::post('/participants', [ParticipantController::class, 'store'])
+        ->middleware('throttle:30,1')
+        ->name('participants.store');
 
     Route::middleware('can:manage-tokens')->group(function () {
         Route::get('users', [UserController::class, 'index'])->name('users.index');

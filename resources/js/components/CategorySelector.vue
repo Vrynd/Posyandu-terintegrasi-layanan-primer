@@ -2,9 +2,9 @@
 import {
     Baby,
     Briefcase,
-    Check,
     GraduationCap,
     HeartPulse,
+    HeartHandshake,
     PersonStanding,
 } from '@lucide/vue';
 import { computed } from 'vue';
@@ -29,7 +29,7 @@ const categoryMetadata: Record<
         defaultColor: string;
         activeColor: string;
         activeCardColor: string;
-        badgeColor: string;
+
         description: string;
     }
 > = {
@@ -39,7 +39,6 @@ const categoryMetadata: Record<
         activeColor: 'bg-pink-500 text-white shadow-xs',
         activeCardColor:
             'border-solid border-pink-500 bg-pink-500/10 shadow-xs',
-        badgeColor: 'bg-pink-500 text-white',
         description: 'Pemantauan kehamilan & HPHT',
     },
     toddler: {
@@ -48,7 +47,6 @@ const categoryMetadata: Record<
         activeColor: 'bg-amber-500 text-white shadow-xs',
         activeCardColor:
             'border-solid border-amber-500 bg-amber-500/10 shadow-xs',
-        badgeColor: 'bg-amber-500 text-white',
         description: 'Tumbuh kembang anak (0–5 thn)',
     },
     teenager: {
@@ -58,7 +56,6 @@ const categoryMetadata: Record<
         activeColor: 'bg-emerald-500 text-white shadow-xs',
         activeCardColor:
             'border-solid border-emerald-500 bg-emerald-500/10 shadow-xs',
-        badgeColor: 'bg-emerald-500 text-white',
         description: 'Skrining remaja (10–18 thn)',
     },
     productive: {
@@ -67,17 +64,15 @@ const categoryMetadata: Record<
         activeColor: 'bg-blue-500 text-white shadow-xs',
         activeCardColor:
             'border-solid border-blue-500 bg-blue-500/10 shadow-xs',
-        badgeColor: 'bg-blue-500 text-white',
         description: 'Skrining usia kerja (19–59 thn)',
     },
     adult: {
-        icon: PersonStanding,
+        icon: HeartHandshake,
         defaultColor:
             'bg-violet-500/10 text-violet-500 ring-1 ring-violet-500/20',
         activeColor: 'bg-violet-500 text-white shadow-xs',
         activeCardColor:
             'border-solid border-violet-500 bg-violet-500/10 shadow-xs',
-        badgeColor: 'bg-violet-500 text-white',
         description: 'Kesehatan lansia (60+ thn)',
     },
 };
@@ -102,7 +97,6 @@ const categories = computed(() => {
             defaultColor: meta.defaultColor,
             activeColor: meta.activeColor,
             activeCardColor: meta.activeCardColor,
-            badgeColor: meta.badgeColor,
         };
     });
 });
@@ -122,17 +116,6 @@ const categories = computed(() => {
                     : 'border-dashed border-border bg-card hover:border-muted-foreground/40 hover:bg-muted/30',
             ]"
         >
-            <!-- Badge Checklist Aktif Menyesuaikan Warna Kategori -->
-            <div
-                v-if="modelValue === item.id"
-                :class="[
-                    'absolute top-2.5 right-2.5 flex size-5 animate-in items-center justify-center rounded-full shadow-xs duration-150 zoom-in-75 fade-in',
-                    item.badgeColor,
-                ]"
-            >
-                <Check class="size-3 stroke-[3]" />
-            </div>
-
             <!-- Box Ikon -->
             <div
                 :class="[
@@ -160,7 +143,10 @@ const categories = computed(() => {
     </div>
 
     <!-- Error Message -->
-    <span v-if="error" class="mt-3 block text-xs font-medium text-destructive">
+    <span
+        v-if="error"
+        class="mt-3 block text-xs font-medium text-red-500 italic"
+    >
         {{ error }}
     </span>
 </template>
