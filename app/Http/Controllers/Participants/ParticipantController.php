@@ -7,6 +7,7 @@ use App\Http\Requests\ParticipantRequest;
 use App\Models\Participant;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -52,9 +53,31 @@ class ParticipantController extends Controller
         ['label' => 'Lainnya', 'value' => 'other'],
     ];
 
-    public function index(): Response
+    public function index(Request $request): Response
     {
-        return Inertia::render('participants/Index');
+        $search = $request->input('search');
+        $query = Participant::query();
+
+        if (is_string($search) && $search !== '') {
+            $query->where(function ($q) use ($search) {
+                if (ctype_digit($search) && strlen($search) === 16) {
+                    $q->where('nik_hash', hash('sha256', $search));
+                } else {
+                    $q->where('name', 'like', "%{$search}%")
+                        ->orWhere('phone', 'like', "%{$search}%")
+                        ->orWhere('address', 'like', "%{$search}%");
+                }
+            });
+        }
+
+        $participants = $query->latest('id')->paginate(10)->withQueryString();
+
+        return Inertia::render('participants/Index', [
+            'participants' => $participants,
+            'filters' => [
+                'search' => is_string($search) ? $search : null,
+            ],
+        ]);
     }
 
     // Method untuk halaman pendaftaran peserta
@@ -129,8 +152,11 @@ class ParticipantController extends Controller
             throw $e;
         }
 
-        return redirect()
-            ->route('participants.index')
-            ->with('success', 'Peserta berhasil didaftarkan.');
+        Inertia::flash('toast', [
+            'type' => 'success',
+            'message' => 'Data peserta posyandu berhasil didaftarkan.',
+        ]);
+
+        return redirect()->route('participants.index');
     }
 }
