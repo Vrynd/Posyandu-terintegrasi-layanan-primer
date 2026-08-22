@@ -83,8 +83,8 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('pregnancies');
-        Schema::dropIfExists('participant_adults');
+        Schema::dropIfExists('participant_toddlers');
         Schema::dropIfExists('participant_teens');
-        Schema::dropIfExists('participant_infants');
+        Schema::dropIfExists('participant_adults');
     }
 };

@@ -2,19 +2,21 @@
 
 namespace App\Models;
 
+use App\Enums\Gender;
+use App\Enums\ParticipantCategory;
 use Database\Factories\ParticipantFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Participant extends Model
 {
     /** @use HasFactory<ParticipantFactory> */
     use HasFactory, HasUlids;
-
-    protected $table = 'participants';
 
     protected $fillable = [
         'nik',
@@ -36,6 +38,8 @@ class Participant extends Model
     {
         return [
             'birth_date' => 'date',
+            'category' => ParticipantCategory::class,
+            'gender' => Gender::class,
             'has_bpjs' => 'boolean',
             'is_active' => 'boolean',
             'nik' => 'encrypted',
@@ -88,9 +92,17 @@ class Participant extends Model
     }
 
     /**
+     * @return HasMany<Pregnancy, $this>
+     */
+    public function pregnancies(): HasMany
+    {
+        return $this->hasMany(Pregnancy::class);
+    }
+
+    /**
      * @return HasOne<Pregnancy, $this>
      */
-    public function pregnancy(): HasOne
+    public function latestPregnancy(): HasOne
     {
         return $this->hasOne(Pregnancy::class)->latestOfMany();
     }
@@ -109,5 +121,61 @@ class Participant extends Model
     public function adult(): HasOne
     {
         return $this->hasOne(ParticipantAdult::class);
+    }
+
+    /**
+     * Scope untuk pencarian berdasarkan NIK (hash), Nama, No Telepon, atau Alamat.
+     *
+     * @param  Builder<Participant>  $query
+     * @return Builder<Participant>
+     */
+    public function scopeSearch(Builder $query, ?string $term): Builder
+    {
+        if (blank($term)) {
+            return $query;
+        }
+
+        return $query->where(function (Builder $q) use ($term) {
+            if (ctype_digit($term) && strlen($term) === 16) {
+                $q->where('nik_hash', hash('sha256', $term));
+            } else {
+                $q->where('name', 'like', "%{$term}%")
+                    ->orWhere('phone', 'like', "%{$term}%")
+                    ->orWhere('address', 'like', "%{$term}%");
+            }
+        });
+    }
+
+    /**
+     * Scope untuk filter berdasarkan kategori sasaran posyandu.
+     *
+     * @param  Builder<Participant>  $query
+     * @return Builder<Participant>
+     */
+    public function scopeOfCategory(Builder $query, ParticipantCategory|string|null $category): Builder
+    {
+        if (blank($category) || $category === 'all') {
+            return $query;
+        }
+
+        $value = $category instanceof ParticipantCategory ? $category->value : $category;
+
+        return $query->where('category', $value);
+    }
+
+    /**
+     * Scope untuk pengurutan data tabel peserta.
+     *
+     * @param  Builder<Participant>  $query
+     * @return Builder<Participant>
+     */
+    public function scopeSorted(Builder $query, ?string $sort): Builder
+    {
+        return match ($sort) {
+            'oldest' => $query->oldest('id'),
+            'name_asc' => $query->orderBy('name', 'asc'),
+            'name_desc' => $query->orderBy('name', 'desc'),
+            default => $query->latest('id'),
+        };
     }
 }

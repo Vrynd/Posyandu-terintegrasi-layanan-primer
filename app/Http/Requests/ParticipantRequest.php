@@ -2,6 +2,10 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\EmploymentStatus;
+use App\Enums\Gender;
+use App\Enums\MaritalStatus;
+use App\Enums\ParticipantCategory;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -69,8 +73,8 @@ class ParticipantRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
             'nik' => ['nullable', 'digits:16'],
             'birth_date' => ['required', 'date', 'before_or_equal:today'],
-            'gender' => ['required', Rule::in(['male', 'female'])],
-            'category' => ['required', Rule::in(['pregnant_mother', 'toddler', 'teenager', 'productive', 'adult'])],
+            'gender' => ['required', Rule::enum(Gender::class)],
+            'category' => ['required', Rule::enum(ParticipantCategory::class)],
 
             // Kontak dan Domisili
             'address' => ['nullable', 'string', 'max:500'],
@@ -85,12 +89,9 @@ class ParticipantRequest extends FormRequest
             // Kategori Peserta
             'parent_name' => ['nullable', 'required_if:category,toddler', 'required_if:category,teenager', 'string', 'max:255'],
             'husband_name' => ['nullable', 'required_if:category,pregnant_mother', 'string', 'max:255'],
-            'employment' => ['nullable', Rule::in([
-                'farmer', 'farm_laborer', 'civil_servant', 'private_employee', 'entrepreneur',
-                'fisherman', 'housewife', 'unemployed_new', 'unemployed', 'other',
-            ])],
+            'employment' => ['nullable', Rule::enum(EmploymentStatus::class)],
             'employment_other' => ['nullable', 'required_if:employment,other', 'string', 'max:100'],
-            'marital_status' => ['nullable', Rule::in(['single', 'married', 'divorced', 'widowed'])],
+            'marital_status' => ['nullable', Rule::enum(MaritalStatus::class)],
         ];
     }
 

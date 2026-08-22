@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { HTMLAttributes } from 'vue';
-import { ChevronDown } from '@lucide/vue';
+import { ChevronsDownUp } from '@lucide/vue';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -33,7 +33,7 @@ const emit = defineEmits<{
         :aria-expanded="props.open"
         @click="emit('click')"
     >
-        <ChevronDown
+        <ChevronsDownUp
             class="h-4 w-4 transition-transform duration-200"
             :class="{ 'rotate-180': props.open }"
         />

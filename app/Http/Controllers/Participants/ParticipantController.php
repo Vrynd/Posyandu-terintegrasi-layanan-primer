@@ -2,6 +2,10 @@
 
 namespace App\Http\Controllers\Participants;
 
+use App\Enums\EmploymentStatus;
+use App\Enums\Gender;
+use App\Enums\MaritalStatus;
+use App\Enums\ParticipantCategory;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ParticipantRequest;
 use App\Models\Participant;
@@ -14,68 +18,32 @@ use Inertia\Response;
 
 class ParticipantController extends Controller
 {
-    // Const
-    private const CATEGORY_OPTIONS = [
-        ['label' => 'Ibu Hamil', 'value' => 'pregnant_mother'],
-        ['label' => 'Balita', 'value' => 'toddler'],
-        ['label' => 'Anak Remaja', 'value' => 'teenager'],
-        ['label' => 'Usia Produktif', 'value' => 'productive'],
-        ['label' => 'Usia Lansia', 'value' => 'adult'],
-    ];
-
-    private const GENDER_OPTIONS = [
-        ['label' => 'Laki-Laki', 'value' => 'male'],
-        ['label' => 'Perempuan', 'value' => 'female'],
-    ];
-
+    // Constant untuk opsi membership bpjs
     private const BPJS_OPTIONS = [
         ['label' => 'Ya', 'value' => '1'],
         ['label' => 'Tidak', 'value' => '0'],
     ];
 
-    private const MARITAL_STATUS_OPTIONS = [
-        ['label' => 'Belum Menikah', 'value' => 'single'],
-        ['label' => 'Menikah', 'value' => 'married'],
-        ['label' => 'Cerai Hidup', 'value' => 'divorced'],
-        ['label' => 'Cerai Mati', 'value' => 'widowed'],
-    ];
-
-    private const EMPLOYMENT_OPTIONS = [
-        ['label' => 'Petani', 'value' => 'farmer'],
-        ['label' => 'Buruh Tani', 'value' => 'farm_laborer'],
-        ['label' => 'PNS', 'value' => 'civil_servant'],
-        ['label' => 'Karyawan Swasta', 'value' => 'private_employee'],
-        ['label' => 'Wiraswasta', 'value' => 'entrepreneur'],
-        ['label' => 'Nelayan', 'value' => 'fisherman'],
-        ['label' => 'Ibu Rumah Tangga', 'value' => 'housewife'],
-        ['label' => 'Belum Bekerja', 'value' => 'unemployed_new'],
-        ['label' => 'Tidak Bekerja', 'value' => 'unemployed'],
-        ['label' => 'Lainnya', 'value' => 'other'],
-    ];
-
+    // Method untuk halaman daftar peserta
     public function index(Request $request): Response
     {
-        $search = $request->input('search');
-        $query = Participant::query();
-
-        if (is_string($search) && $search !== '') {
-            $query->where(function ($q) use ($search) {
-                if (ctype_digit($search) && strlen($search) === 16) {
-                    $q->where('nik_hash', hash('sha256', $search));
-                } else {
-                    $q->where('name', 'like', "%{$search}%")
-                        ->orWhere('phone', 'like', "%{$search}%")
-                        ->orWhere('address', 'like', "%{$search}%");
-                }
-            });
-        }
-
-        $participants = $query->latest('id')->paginate(10)->withQueryString();
+        $search = $request->filled('search') ? (string) $request->input('search') : null;
+        $category = $request->filled('category') ? (string) $request->input('category') : null;
+        $sort = $request->filled('sort') ? (string) $request->input('sort') : null;
+        $participants = Participant::query()
+            ->search($search)
+            ->ofCategory($category)
+            ->sorted($sort)
+            ->paginate(6)
+            ->withQueryString();
 
         return Inertia::render('participants/Index', [
             'participants' => $participants,
+            'categories' => ParticipantCategory::toOptions(),
             'filters' => [
-                'search' => is_string($search) ? $search : null,
+                'search' => $search,
+                'category' => $category,
+                'sort' => $sort,
             ],
         ]);
     }
@@ -84,11 +52,11 @@ class ParticipantController extends Controller
     public function create(): Response
     {
         return Inertia::render('participants/CreateParticipant', [
-            'category' => self::CATEGORY_OPTIONS,
-            'gender' => self::GENDER_OPTIONS,
+            'category' => ParticipantCategory::toOptions(),
+            'gender' => Gender::toOptions(),
             'membershipBpjs' => self::BPJS_OPTIONS,
-            'employment' => self::EMPLOYMENT_OPTIONS,
-            'martialStatus' => self::MARITAL_STATUS_OPTIONS,
+            'employment' => EmploymentStatus::toOptions(),
+            'martialStatus' => MaritalStatus::toOptions(),
         ]);
     }
 
@@ -127,7 +95,7 @@ class ParticipantController extends Controller
                     'toddler' => $participant->toddler()->create([
                         'parent_name' => $validated['parent_name'] ?? null,
                     ]),
-                    'pregnant_mother' => $participant->pregnancy()->create([
+                    'pregnant_mother' => $participant->pregnancies()->create([
                         'husband_name' => $validated['husband_name'] ?? null,
                     ]),
                     'teenager' => $participant->teen()->create([

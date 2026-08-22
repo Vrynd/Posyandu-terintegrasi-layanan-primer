@@ -291,7 +291,7 @@ const submit = () => {
                 <Button
                     type="submit"
                     :disabled="form.processing || !form.category"
-                    class="min-w-[140px] cursor-pointer font-medium"
+                    class="min-w-35 cursor-pointer font-medium"
                 >
                     <span v-if="form.processing">Menyimpan...</span>
                     <span v-else>Simpan Peserta</span>
