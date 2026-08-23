@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Participant;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -76,4 +77,105 @@ test('can register a pregnant mother participant', function () {
     $this->assertDatabaseHas('pregnancies', [
         'husband_name' => 'Budi Utomo',
     ]);
+});
+
+test('authenticated user can access edit participant page', function () {
+    $user = User::factory()->create();
+    $this->actingAs($user);
+
+    $participant = Participant::create([
+        'name' => 'Muhammad Rayyan',
+        'nik' => '3512345678900010',
+        'birth_date' => '2023-01-01',
+        'gender' => 'male',
+        'category' => 'toddler',
+        'has_bpjs' => false,
+    ]);
+
+    $response = $this->get("/participants/{$participant->ulid}/edit");
+    $response->assertOk();
+});
+
+test('authenticated user can update participant and category details', function () {
+    $user = User::factory()->create();
+    $this->actingAs($user);
+
+    $participant = Participant::create([
+        'name' => 'Muhammad Rayyan',
+        'nik' => '3512345678900011',
+        'birth_date' => '2023-01-01',
+        'gender' => 'male',
+        'category' => 'toddler',
+        'has_bpjs' => false,
+    ]);
+
+    $participant->toddler()->create([
+        'parent_name' => 'Ayah Rayyan',
+    ]);
+
+    $updateData = [
+        'name' => 'Muhammad Rayyan Pratama',
+        'nik' => '3512345678900011',
+        'birth_date' => '2023-01-01',
+        'gender' => 'male',
+        'has_bpjs' => true,
+        'bpjs_number' => '0001234567899',
+        'address' => 'Jl. Kenanga No. 10',
+        'rt' => '03',
+        'rw' => '05',
+        'phone' => '+6281234567899',
+        'parent_name' => 'Budi Pratama',
+    ];
+
+    $response = $this->put("/participants/{$participant->ulid}", $updateData);
+
+    $response->assertRedirect(route('participants.edit', $participant));
+    $this->assertDatabaseHas('participants', [
+        'id' => $participant->id,
+        'name' => 'Muhammad Rayyan Pratama',
+        'has_bpjs' => true,
+        'rt' => '03',
+        'rw' => '05',
+    ]);
+
+    $this->assertDatabaseHas('participant_toddlers', [
+        'participant_id' => $participant->id,
+        'parent_name' => 'Budi Pratama',
+    ]);
+});
+
+test('cannot update participant with duplicate nik of another participant', function () {
+    $user = User::factory()->create();
+    $this->actingAs($user);
+
+    Participant::create([
+        'name' => 'Peserta Satu',
+        'nik' => '3512345678900099',
+        'birth_date' => '2020-01-01',
+        'gender' => 'male',
+        'category' => 'toddler',
+        'has_bpjs' => false,
+    ]);
+
+    $participant2 = Participant::create([
+        'name' => 'Peserta Dua',
+        'nik' => '3512345678900088',
+        'birth_date' => '2020-01-01',
+        'gender' => 'male',
+        'category' => 'toddler',
+        'has_bpjs' => false,
+    ]);
+
+    $updateData = [
+        'name' => 'Peserta Dua Edit',
+        'nik' => '3512345678900099', // Duplicate NIK
+        'birth_date' => '2020-01-01',
+        'gender' => 'male',
+        'has_bpjs' => false,
+        'parent_name' => 'Orang Tua',
+    ];
+
+    $response = $this->put("/participants/{$participant2->ulid}", $updateData);
+
+    $response->assertSessionHasErrors('nik');
 });

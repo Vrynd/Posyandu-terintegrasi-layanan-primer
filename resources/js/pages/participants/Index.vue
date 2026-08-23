@@ -30,7 +30,11 @@ import {
     getCategoryLabel,
 } from '@/lib/formatters';
 import { dashboard } from '@/routes';
-import { create, index as participantsIndex } from '@/routes/participants';
+import {
+    create,
+    edit,
+    index as participantsIndex,
+} from '@/routes/participants';
 import type {
     FilterOption,
     PaginatedData,
@@ -219,8 +223,17 @@ watch(
                             v-for="participant in props.participants.data"
                             :key="participant.ulid"
                         >
-                            <TableCell class="font-medium text-foreground">
-                                {{ participant.name }}
+                            <TableCell class="font-medium">
+                                <Link
+                                    :href="
+                                        edit({
+                                            participant: participant.ulid,
+                                        })
+                                    "
+                                    class="text-foreground transition-colors hover:text-accent"
+                                >
+                                    {{ participant.name }}
+                                </Link>
                             </TableCell>
                             <TableCell class="font-mono tracking-wide">
                                 {{ participant.nik_masked ?? '—' }}
@@ -268,7 +281,13 @@ watch(
                                     class="h-7 px-2 text-xs"
                                     as-child
                                 >
-                                    <Link :href="participant.ulid">
+                                    <Link
+                                        :href="
+                                            edit({
+                                                participant: participant.ulid,
+                                            })
+                                        "
+                                    >
                                         Detail
                                     </Link>
                                 </Button>

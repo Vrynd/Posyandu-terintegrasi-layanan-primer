@@ -26,6 +26,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/participants', [ParticipantController::class, 'store'])
         ->middleware('throttle:30,1')
         ->name('participants.store');
+    Route::get('/participants/{participant}/edit', [ParticipantController::class, 'edit'])
+        ->name('participants.edit');
+    Route::put('/participants/{participant}', [ParticipantController::class, 'update'])
+        ->name('participants.update');
 
     Route::middleware('can:manage-tokens')->group(function () {
         Route::get('users', [UserController::class, 'index'])->name('users.index');

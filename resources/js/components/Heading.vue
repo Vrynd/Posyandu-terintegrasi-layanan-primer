@@ -16,7 +16,7 @@ withDefaults(defineProps<Props>(), {
             :class="[
                 'font-display tracking-tight',
                 variant === 'small'
-                    ? 'font-display text-base font-medium sm:font-semibold'
+                    ? 'mb-0.5 font-display text-base font-medium sm:font-semibold'
                     : 'text-lg font-semibold tracking-tight sm:text-xl',
             ]"
         >

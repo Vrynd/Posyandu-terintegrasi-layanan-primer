@@ -12,7 +12,32 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Carbon;
 
+/**
+ * @property int $id
+ * @property string $ulid
+ * @property string|null $nik
+ * @property string|null $nik_hash
+ * @property string $name
+ * @property ParticipantCategory $category
+ * @property Carbon $birth_date
+ * @property Gender $gender
+ * @property string|null $address
+ * @property string|null $rt
+ * @property string|null $rw
+ * @property string|null $phone
+ * @property bool $has_bpjs
+ * @property string|null $bpjs_number
+ * @property bool $is_active
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property-read string|null $nik_masked
+ * @property-read ParticipantToddler|null $toddler
+ * @property-read Pregnancy|null $latestPregnancy
+ * @property-read ParticipantTeen|null $teen
+ * @property-read ParticipantAdult|null $adult
+ */
 class Participant extends Model
 {
     /** @use HasFactory<ParticipantFactory> */

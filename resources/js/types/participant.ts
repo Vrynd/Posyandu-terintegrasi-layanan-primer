@@ -1,3 +1,27 @@
+export interface ToddlerDetail {
+    parent_name?: string | null;
+}
+
+export interface PregnancyDetail {
+    husband_name?: string | null;
+    pregnancy_number?: number | null;
+    birth_spacing_years?: number | null;
+    weight_before_pregnancy?: number | null;
+    height?: number | null;
+    last_menstrual_period?: string | null;
+    status?: string;
+}
+
+export interface TeenDetail {
+    parent_name?: string | null;
+}
+
+export interface AdultDetail {
+    employment?: string | null;
+    employment_other?: string | null;
+    marital_status?: string | null;
+}
+
 /**
  * Data entitas peserta posyandu.
  */
@@ -25,6 +49,10 @@ export interface ParticipantItem {
     is_active: boolean;
     created_at?: string;
     updated_at?: string;
+    toddler?: ToddlerDetail | null;
+    latest_pregnancy?: PregnancyDetail | null;
+    teen?: TeenDetail | null;
+    adult?: AdultDetail | null;
 }
 
 /**

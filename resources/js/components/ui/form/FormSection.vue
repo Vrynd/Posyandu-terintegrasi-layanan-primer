@@ -7,6 +7,7 @@ defineProps<{
     title: string;
     completed?: boolean;
     disabled?: boolean;
+    locked?: boolean;
 }>();
 </script>
 
@@ -15,6 +16,7 @@ defineProps<{
         class="gap-0 border-border/80 bg-card py-0 shadow-xs transition-all duration-300"
         :class="{
             'pointer-events-none select-none opacity-40': disabled,
+            'border-border/60 bg-card/60': locked,
         }"
     >
         <CardHeader
@@ -30,7 +32,7 @@ defineProps<{
                     </div>
 
                     <div
-                        v-else-if="disabled"
+                        v-else-if="disabled || locked"
                         class="flex size-7 shrink-0 items-center justify-center rounded-full bg-muted/60 text-muted-foreground ring-1 ring-border"
                     >
                         <Lock class="size-3.5 stroke-[2]" />
