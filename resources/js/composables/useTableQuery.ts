@@ -1,12 +1,9 @@
 import { router } from '@inertiajs/vue3';
-import { useDebounceFn } from '@vueuse/core';
+import { onUnmounted, ref } from 'vue';
 
 export interface UseTableQueryOptions {
-    /** URL route tujuan request Inertia */
     routeUrl: string;
-    /** Props Inertia yang dimuat ulang (partial reload) */
     only?: string[];
-    /** Durasi debounce dalam milidetik (default: 350ms) */
     debounceMs?: number;
 }
 
@@ -15,10 +12,20 @@ export function useTableQuery({
     only = [],
     debounceMs = 350,
 }: UseTableQueryOptions) {
+    const isLoading = ref(false);
+
+    const stopOnStart = router.on('start', () => {
+        isLoading.value = true;
+    });
+
+    const stopOnFinish = router.on('finish', () => {
+        isLoading.value = false;
+    });
+
     /**
      * Eksekusi request GET Inertia langsung ke server.
      */
-    const navigate = (params: Record<string, any> = {}) => {
+    const performNavigate = (params: Record<string, any> = {}) => {
         router.cancelAll();
 
         router.get(routeUrl, params, {
@@ -32,10 +39,39 @@ export function useTableQuery({
     /**
      * Eksekusi request dengan debounce (berguna untuk input teks pencarian).
      */
-    const debouncedNavigate = useDebounceFn(navigate, debounceMs);
+    let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+    const debouncedNavigate = (params: Record<string, any> = {}) => {
+        if (debounceTimer) {
+            clearTimeout(debounceTimer);
+        }
+
+        debounceTimer = setTimeout(() => {
+            debounceTimer = null;
+            performNavigate(params);
+        }, debounceMs);
+    };
+
+    debouncedNavigate.cancel = () => {
+        if (debounceTimer) {
+            clearTimeout(debounceTimer);
+            debounceTimer = null;
+        }
+    };
+
+    const navigate = (params: Record<string, any> = {}) => {
+        debouncedNavigate.cancel();
+        performNavigate(params);
+    };
+
+    onUnmounted(() => {
+        stopOnStart();
+        stopOnFinish();
+        debouncedNavigate.cancel();
+    });
 
     return {
         navigate,
         debouncedNavigate,
+        isLoading,
     };
 }

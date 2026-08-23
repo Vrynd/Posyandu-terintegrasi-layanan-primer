@@ -1,19 +1,34 @@
 <script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3';
-import { ArrowUpDown, Filter, Plus } from '@lucide/vue';
-import { computed, ref, watch } from 'vue';
+import { ArrowUpDown, Filter, Plus, Users } from '@lucide/vue';
+import { computed, watch } from 'vue';
+import EmptyState from '@/components/EmptyState.vue';
 import Heading from '@/components/Heading.vue';
+import Pagination from '@/components/Pagination.vue';
+import StatusBadge from '@/components/StatusBadge.vue';
 import { Button } from '@/components/ui/button';
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from '@/components/ui/table';
 import {
     Toolbar,
     ToolbarContent,
     ToolbarDropdown,
     ToolbarSearch,
-    ToolbarToggle,
 } from '@/components/ui/toolbar';
-import type { ActiveFilterItem } from '@/components/ui/toolbar/ToolbarContent.vue';
 import { useTableFilter } from '@/composables/useTableFilter';
 import { useTableQuery } from '@/composables/useTableQuery';
+import {
+    GENDER_LABELS,
+    formatDate,
+    getCategoryColor,
+    getCategoryLabel,
+} from '@/lib/formatters';
 import { dashboard } from '@/routes';
 import { create, index as participantsIndex } from '@/routes/participants';
 import type {
@@ -23,7 +38,6 @@ import type {
     ParticipantItem,
 } from '@/types';
 
-// 1. Layout & breadcrumbs
 defineOptions({
     layout: {
         breadcrumbs: [
@@ -33,16 +47,33 @@ defineOptions({
     },
 });
 
-// 2. Component props
 interface Props {
     participants?: PaginatedData<ParticipantItem>;
     categories?: FilterOption[];
     filters?: ParticipantFilters;
 }
 
-const props = defineProps<Props>();
+const props = withDefaults(defineProps<Props>(), {
+    participants: () => ({
+        data: [],
+        total: 0,
+        current_page: 1,
+        last_page: 1,
+        per_page: 6,
+        from: null,
+        to: null,
+    }),
+    categories: () => [],
+});
 
-// 3. Opsi filter & pengurutan
+const CATEGORY_ALL = 'all';
+const SORT_DEFAULT = 'latest';
+
+const defaultFilters = {
+    category: CATEGORY_ALL,
+    sort: SORT_DEFAULT,
+};
+
 const sortOptions: FilterOption[] = [
     { label: 'Terbaru', value: 'latest' },
     { label: 'Terlama', value: 'oldest' },
@@ -51,32 +82,21 @@ const sortOptions: FilterOption[] = [
 ];
 
 const categoryOptions = computed<FilterOption[]>(() => [
-    { label: 'Semua Kategori', value: 'all' },
-    ...(props.categories ?? []),
+    { label: 'Semua Kategori', value: CATEGORY_ALL },
+    ...props.categories,
 ]);
 
-// 4. State pencarian & filter tabel
-const {
-    search,
-    filters,
-    hasActiveFilters,
-    toQueryParams,
-    resetSearch,
-    resetAll,
-} = useTableFilter({
-    initialSearch: props.filters?.search,
-    initialFilters: {
-        category: props.filters?.category ?? 'all',
-        sort: props.filters?.sort ?? 'latest',
-    },
-    defaultFilters: {
-        category: 'all',
-        sort: 'latest',
-    },
-});
+const { search, filters, hasSearch, toQueryParams, resetSearch } =
+    useTableFilter({
+        initialSearch: props.filters?.search,
+        initialFilters: {
+            category: props.filters?.category ?? CATEGORY_ALL,
+            sort: props.filters?.sort ?? SORT_DEFAULT,
+        },
+        defaultFilters,
+    });
 
-// 5. Sinkronisasi data ke server via Inertia
-const { navigate, debouncedNavigate } = useTableQuery({
+const { navigate, debouncedNavigate, isLoading } = useTableQuery({
     routeUrl: participantsIndex.url(),
     only: ['participants', 'filters'],
 });
@@ -85,71 +105,13 @@ watch(search, () => {
     debouncedNavigate(toQueryParams());
 });
 
-watch(filters, () => {
-    navigate(toQueryParams());
-});
-
-// 6. State panel filter (accordion)
-const isExpanded = ref(hasActiveFilters.value);
-
-watch(hasActiveFilters, (active, wasActive) => {
-    if (active && !wasActive) {
-        isExpanded.value = true;
-    } else if (!active && wasActive) {
-        isExpanded.value = false;
-    }
-});
-
-// 7. Badge & label filter aktif
-const selectedCategoryLabel = computed(() => {
-    if (!filters.category || filters.category === 'all') {
-        return null;
-    }
-
-    return (
-        props.categories?.find((c) => c.value === filters.category)?.label ??
-        filters.category
-    );
-});
-
-const activeFilters = computed<ActiveFilterItem[]>(() => {
-    const items: ActiveFilterItem[] = [];
-
-    if (
-        filters.category &&
-        filters.category !== 'all' &&
-        selectedCategoryLabel.value
-    ) {
-        items.push({
-            id: 'category',
-            type: 'Kategori',
-            label: selectedCategoryLabel.value,
-        });
-    }
-
-    if (filters.sort && filters.sort !== 'latest') {
-        const sortLabel = sortOptions.find(
-            (o) => o.value === filters.sort,
-        )?.label;
-
-        items.push({
-            id: 'sort',
-            type: 'Urutan',
-            label: sortLabel ?? filters.sort,
-        });
-    }
-
-    return items;
-});
-
-// 8. Handler aksi
-function removeFilter(filterId: string): void {
-    if (filterId === 'category') {
-        filters.category = 'all';
-    } else if (filterId === 'sort') {
-        filters.sort = 'latest';
-    }
-}
+watch(
+    filters,
+    () => {
+        navigate(toQueryParams());
+    },
+    { deep: true },
+);
 </script>
 
 <template>
@@ -187,39 +149,143 @@ function removeFilter(filterId: string): void {
                         :options="categoryOptions"
                         :icon="Filter"
                         title="Pilih Kategori"
-                        default-value="all"
-                        class="flex-1 sm:w-auto"
+                        :default-value="CATEGORY_ALL"
+                        class="flex-1 sm:w-48 sm:flex-none"
                     />
                     <ToolbarDropdown
                         v-model="filters.sort"
                         :options="sortOptions"
                         :icon="ArrowUpDown"
                         title="Urutkan Data"
-                        default-value="latest"
-                        class="flex-1 sm:w-auto"
-                    />
-                    <ToolbarToggle
-                        :open="isExpanded"
-                        class="shrink-0"
-                        @click="isExpanded = !isExpanded"
+                        :default-value="SORT_DEFAULT"
+                        class="flex-1 sm:w-36 sm:flex-none"
                     />
                 </div>
             </div>
             <ToolbarContent
-                :open="isExpanded"
-                :total-count="props.participants?.total ?? 0"
+                :open="hasSearch"
+                :total-count="props.participants.total"
                 :search="search"
-                :filters="activeFilters"
-                :has-active-filters="hasActiveFilters"
-                @reset="resetAll"
                 @clear-search="resetSearch"
-                @remove-filter="removeFilter"
             />
         </Toolbar>
 
         <!-- 3. Tabel Peserta -->
         <section
-            class="mt-4 flex-1 rounded-xl border border-dashed border-border p-6"
-        ></section>
+            class="mt-4 flex-1 transition-opacity"
+            :class="{ 'pointer-events-none opacity-60': isLoading }"
+        >
+            <!-- Empty State -->
+            <EmptyState
+                v-if="props.participants.data.length === 0"
+                :icon="Users"
+                title="Belum ada peserta"
+                :description="
+                    hasSearch
+                        ? 'Tidak ada peserta yang sesuai dengan pencarian.'
+                        : 'Mulai dengan mendaftarkan peserta posyandu pertama.'
+                "
+            >
+                <Button
+                    v-if="!hasSearch"
+                    variant="outline"
+                    size="sm"
+                    class="h-8 text-xs"
+                    as-child
+                >
+                    <Link :href="create()">
+                        <Plus class="h-3.5 w-3.5" />
+                        Tambah Peserta
+                    </Link>
+                </Button>
+            </EmptyState>
+
+            <!-- Tabel Data -->
+            <template v-else>
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>Nama</TableHead>
+                            <TableHead>NIK</TableHead>
+                            <TableHead>Kategori</TableHead>
+                            <TableHead>Jenis Kelamin</TableHead>
+                            <TableHead>Tanggal Lahir</TableHead>
+                            <TableHead>Kepesertaan BPJS</TableHead>
+                            <TableHead class="text-right">Aksi</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        <TableRow
+                            v-for="participant in props.participants.data"
+                            :key="participant.ulid"
+                        >
+                            <TableCell class="font-medium text-foreground">
+                                {{ participant.name }}
+                            </TableCell>
+                            <TableCell class="font-mono tracking-wide">
+                                {{ participant.nik_masked ?? '—' }}
+                            </TableCell>
+                            <TableCell>
+                                <StatusBadge
+                                    :text="
+                                        getCategoryLabel(
+                                            participant.category,
+                                            props.categories,
+                                        )
+                                    "
+                                    :color="
+                                        getCategoryColor(participant.category)
+                                    "
+                                />
+                            </TableCell>
+                            <TableCell>
+                                {{
+                                    GENDER_LABELS[participant.gender] ??
+                                    participant.gender
+                                }}
+                            </TableCell>
+                            <TableCell>
+                                {{ formatDate(participant.birth_date) }}
+                            </TableCell>
+                            <TableCell>
+                                <StatusBadge
+                                    :text="
+                                        participant.has_bpjs
+                                            ? 'Peserta'
+                                            : 'Bukan Peserta'
+                                    "
+                                    :color="
+                                        participant.has_bpjs
+                                            ? 'emerald'
+                                            : 'rose'
+                                    "
+                                />
+                            </TableCell>
+                            <TableCell class="text-right">
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    class="h-7 px-2 text-xs"
+                                    as-child
+                                >
+                                    <Link :href="participant.ulid">
+                                        Detail
+                                    </Link>
+                                </Button>
+                            </TableCell>
+                        </TableRow>
+                    </TableBody>
+                </Table>
+                <div class="mt-4">
+                    <Pagination
+                        v-if="props.participants.links"
+                        :links="props.participants.links"
+                        :current-count="props.participants.data.length"
+                        :total="props.participants.total"
+                        :last-page="props.participants.last_page"
+                    />
+                </div>
+            </template>
+        </section>
     </div>
 </template>

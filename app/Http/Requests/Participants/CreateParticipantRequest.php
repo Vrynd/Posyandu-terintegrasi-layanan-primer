@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Participants;
 
 use App\Enums\EmploymentStatus;
 use App\Enums\Gender;
@@ -9,7 +9,7 @@ use App\Enums\ParticipantCategory;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class ParticipantRequest extends FormRequest
+class CreateParticipantRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,41 +24,49 @@ class ParticipantRequest extends FormRequest
      */
     protected function prepareForValidation(): void
     {
-        $sanitized = [];
+        $sanitized = $this->sanitizeTextFields([
+            'name', 'address', 'parent_name', 'husband_name', 'employment_other',
+        ]);
 
-        // Sanitasi teks dari tag HTML (XSS Defense) & spasi berlebih
-        if ($this->has('name') && is_string($this->name)) {
-            $sanitized['name'] = strip_tags(trim($this->name));
-        }
-        if ($this->has('address') && is_string($this->address)) {
-            $sanitized['address'] = strip_tags(trim($this->address));
-        }
-        if ($this->has('parent_name') && is_string($this->parent_name)) {
-            $sanitized['parent_name'] = strip_tags(trim($this->parent_name));
-        }
-        if ($this->has('husband_name') && is_string($this->husband_name)) {
-            $sanitized['husband_name'] = strip_tags(trim($this->husband_name));
-        }
-        if ($this->has('employment_other') && is_string($this->employment_other)) {
-            $sanitized['employment_other'] = strip_tags(trim($this->employment_other));
+        if ($this->filled('phone')) {
+            $sanitized['phone'] = $this->normalizePhoneNumber((string) $this->phone);
         }
 
-        // Sanitasi & standardisasi nomor HP (+62)
-        if ($this->has('phone') && ! empty($this->phone)) {
-            $phone = preg_replace('/[^\d+]/', '', (string) $this->phone);
-            if (str_starts_with($phone, '08')) {
-                $phone = '+62'.substr($phone, 1);
-            } elseif (str_starts_with($phone, '8')) {
-                $phone = '+62'.$phone;
-            } elseif (str_starts_with($phone, '628')) {
-                $phone = '+'.$phone;
-            }
-            $sanitized['phone'] = $phone;
-        }
-
-        if (! empty($sanitized)) {
+        if ($sanitized !== []) {
             $this->merge($sanitized);
         }
+    }
+
+    /**
+     * @param  list<string>  $fields
+     * @return array<string, string>
+     */
+    private function sanitizeTextFields(array $fields): array
+    {
+        $sanitized = [];
+
+        foreach ($fields as $field) {
+            if ($this->has($field) && is_string($this->input($field))) {
+                $sanitized[$field] = strip_tags(trim($this->input($field)));
+            }
+        }
+
+        return $sanitized;
+    }
+
+    /**
+     * Standardisasi nomor HP ke format +62.
+     */
+    private function normalizePhoneNumber(string $phone): string
+    {
+        $phone = preg_replace('/[^\d+]/', '', $phone);
+
+        return match (true) {
+            str_starts_with($phone, '08') => '+62'.substr($phone, 1),
+            str_starts_with($phone, '8') => '+62'.$phone,
+            str_starts_with($phone, '628') => '+'.$phone,
+            default => $phone,
+        };
     }
 
     /**

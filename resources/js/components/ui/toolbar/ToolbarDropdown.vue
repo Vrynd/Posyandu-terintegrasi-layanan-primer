@@ -48,7 +48,7 @@ const isActive = computed(() => {
                 size="sm"
                 :class="
                     cn(
-                        'h-9 justify-between gap-2 rounded-lg border-border/80 bg-background/50 px-3 text-xs font-normal transition-colors hover:bg-accent/40',
+                        'h-9.5 justify-between gap-2 rounded-lg border-border/80 bg-background/50 px-3 text-xs font-normal transition-colors hover:bg-accent/40',
                         isActive &&
                             'border-primary/50 bg-primary/5 font-medium text-foreground',
                         props.class,

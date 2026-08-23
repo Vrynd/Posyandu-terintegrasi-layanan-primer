@@ -34,6 +34,15 @@ class Participant extends Model
         'is_active',
     ];
 
+    protected $hidden = [
+        'nik',
+        'bpjs_number',
+    ];
+
+    protected $appends = [
+        'nik_masked',
+    ];
+
     protected function casts(): array
     {
         return [
@@ -138,11 +147,11 @@ class Participant extends Model
         return $query->where(function (Builder $q) use ($term) {
             if (ctype_digit($term) && strlen($term) === 16) {
                 $q->where('nik_hash', hash('sha256', $term));
-            } else {
-                $q->where('name', 'like', "%{$term}%")
-                    ->orWhere('phone', 'like', "%{$term}%")
-                    ->orWhere('address', 'like', "%{$term}%");
             }
+
+            $q->orWhere('name', 'like', "%{$term}%")
+                ->orWhere('phone', 'like', "%{$term}%")
+                ->orWhere('address', 'like', "%{$term}%");
         });
     }
 

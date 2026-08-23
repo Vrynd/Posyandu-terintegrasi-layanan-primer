@@ -27,7 +27,7 @@ defineProps<{
     gender: Array<{ label: string; value: string }>;
     membershipBpjs: Array<{ label: string; value: string }>;
     employment: Array<{ label: string; value: string }>;
-    martialStatus: Array<{ label: string; value: string }>;
+    maritalStatus: Array<{ label: string; value: string }>;
 }>();
 
 const form = useForm({
@@ -204,7 +204,7 @@ const submit = () => {
                         v-model="form.marital_status"
                         label="Status Perkawinan"
                         placeholder="Pilih status perkawinan"
-                        :options="martialStatus"
+                        :options="maritalStatus"
                         :error="form.errors.marital_status"
                     />
                     <FormSelect

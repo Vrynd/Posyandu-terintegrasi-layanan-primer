@@ -24,7 +24,7 @@ const hasSearch = computed(() => Boolean(search.value?.trim()));
         <Input
             v-model="search"
             :placeholder="props.placeholder"
-            class="h-9 sm:h-9.5 w-full pl-9 pr-8 text-sm"
+            class="h-9.5 w-full pl-9 pr-8 text-sm rounded-lg"
         />
         <button
             v-if="hasSearch"
