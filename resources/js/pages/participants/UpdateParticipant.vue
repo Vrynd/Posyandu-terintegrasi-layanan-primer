@@ -1,18 +1,21 @@
 <script setup lang="ts">
-import { Head, Link, useForm } from '@inertiajs/vue3';
+import { Head, router, useForm } from '@inertiajs/vue3';
 import { Pencil, Save, Trash, X } from '@lucide/vue';
-import { ref, watch } from 'vue';
+import { ref } from 'vue';
+import ConfirmDialog from '@/components/ConfirmDialog.vue';
 import Heading from '@/components/Heading.vue';
 import { Button } from '@/components/ui/button';
-import {
-    FormInput,
-    FormSection,
-    FormSelect,
-    FormTextarea,
-} from '@/components/ui/form';
+import { FormSection } from '@/components/ui/form';
+import { useAutoClearErrors } from '@/composables/useAutoClear';
 import { dashboard } from '@/routes';
-import { index as participantsIndex, update } from '@/routes/participants';
+import {
+    destroy,
+    index as participantsIndex,
+    update,
+} from '@/routes/participants';
 import type { FilterOption, ParticipantItem } from '@/types';
+import ContactFields from './partials/ContactFields.vue';
+import IdentityFields from './partials/IdentityFields.vue';
 
 defineOptions({
     layout: {
@@ -57,33 +60,31 @@ const form = useForm({
     marital_status: props.participant.adult?.marital_status ?? '',
 });
 
-// Auto-clear error saat field yang bermasalah diedit
-watch(
-    () => ({ ...form }),
-    (newVal, oldVal) => {
-        for (const key in form.errors) {
-            const field = key as keyof typeof form.errors;
-
-            if (
-                form.errors[field] &&
-                (newVal as Record<string, any>)[field] !==
-                    (oldVal as Record<string, any>)[field]
-            ) {
-                form.clearErrors(field);
-            }
-        }
-    },
-);
+useAutoClearErrors(form);
 
 const isEditing = ref(false);
-// 2. Fungsi toggle mode edit
 const toggleEdit = () => {
     isEditing.value = !isEditing.value;
 
     if (!isEditing.value) {
-        form.reset(); // Kembalikan data form ke data awal jika user klik batal
+        form.reset();
         form.clearErrors();
     }
+};
+
+const showDeleteDialog = ref(false);
+const isDeleting = ref(false);
+
+const tapToDelete = () => {
+    router.delete(destroy({ participant: props.participant.ulid }).url, {
+        onStart: () => {
+            isDeleting.value = true;
+        },
+        onFinish: () => {
+            isDeleting.value = false;
+            showDeleteDialog.value = false;
+        },
+    });
 };
 
 const submit = () => {
@@ -120,11 +121,14 @@ const submit = () => {
                         isEditing ? 'Batal' : 'Edit Profil'
                     }}</span>
                 </Button>
-                <Button variant="destructive" as-child>
-                    <Link>
-                        <Trash class="h-4 w-4" />
-                        <span class="hidden sm:inline">Hapus</span>
-                    </Link>
+                <Button
+                    type="button"
+                    variant="destructive"
+                    class="cursor-pointer"
+                    @click="showDeleteDialog = true"
+                >
+                    <Trash class="h-4 w-4" />
+                    <span class="hidden sm:inline">Hapus</span>
                 </Button>
             </div>
         </header>
@@ -142,119 +146,13 @@ const submit = () => {
                     title="Data Diri Peserta"
                     :locked="!isEditing"
                 >
-                    <div
-                        class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
-                        :class="{ '**:cursor-not-allowed': !isEditing }"
-                    >
-                        <FormInput
-                            id="name"
-                            v-model="form.name"
-                            label="Nama Lengkap"
-                            placeholder="Nama lengkap peserta"
-                            :error="form.errors.name"
-                        />
-                        <FormInput
-                            id="nik"
-                            v-model="form.nik"
-                            label="Nomor Induk Kependudukan (NIK)"
-                            placeholder="16 digit nomor induk kependudukan"
-                            inputmode="numeric"
-                            maxlength="16"
-                            :only-numeric="true"
-                            :error="form.errors.nik"
-                        />
-                        <FormInput
-                            id="birth_date"
-                            v-model="form.birth_date"
-                            label="Tanggal Lahir"
-                            type="date"
-                            :max="new Date().toISOString().split('T')[0]"
-                            :error="form.errors.birth_date"
-                        />
-                        <FormSelect
-                            id="gender"
-                            v-model="form.gender"
-                            label="Jenis Kelamin"
-                            placeholder="Pilih jenis kelamin"
-                            :options="props.gender ?? []"
-                            :disabled="form.category === 'pregnant_mother'"
-                            :error="form.errors.gender"
-                        />
-                        <FormSelect
-                            id="has_bpjs"
-                            v-model="form.has_bpjs"
-                            label="Kepesertaan BPJS"
-                            placeholder="Pilih status BPJS"
-                            :options="props.membershipBpjs ?? []"
-                            :error="form.errors.has_bpjs"
-                        />
-                        <FormInput
-                            v-if="form.has_bpjs === '1'"
-                            id="bpjs_number"
-                            v-model="form.bpjs_number"
-                            label="Nomor BPJS Kesehatan"
-                            placeholder="13 digit nomor kartu BPJS"
-                            inputmode="numeric"
-                            maxlength="13"
-                            :only-numeric="true"
-                            :error="form.errors.bpjs_number"
-                        />
-                        <FormInput
-                            v-if="
-                                form.category === 'toddler' ||
-                                form.category === 'teenager'
-                            "
-                            id="parent_name"
-                            v-model="form.parent_name"
-                            label="Nama Orang Tua / Wali"
-                            placeholder="Nama ayah / ibu / wali"
-                            :error="form.errors.parent_name"
-                        />
-                        <FormInput
-                            v-if="form.category === 'pregnant_mother'"
-                            id="husband_name"
-                            v-model="form.husband_name"
-                            label="Nama Suami"
-                            placeholder="Nama suami"
-                            :error="form.errors.husband_name"
-                        />
-                        <FormSelect
-                            v-if="
-                                form.category === 'productive' ||
-                                form.category === 'adult'
-                            "
-                            id="marital_status"
-                            v-model="form.marital_status"
-                            label="Status Perkawinan"
-                            placeholder="Pilih status perkawinan"
-                            :options="props.maritalStatus ?? []"
-                            :error="form.errors.marital_status"
-                        />
-                        <FormSelect
-                            v-if="
-                                form.category === 'productive' ||
-                                form.category === 'adult'
-                            "
-                            id="employment"
-                            v-model="form.employment"
-                            label="Pekerjaan"
-                            placeholder="Pilih jenis pekerjaan"
-                            :options="props.employment ?? []"
-                            :error="form.errors.employment"
-                        />
-                        <FormInput
-                            v-if="
-                                (form.category === 'productive' ||
-                                    form.category === 'adult') &&
-                                form.employment === 'other'
-                            "
-                            id="employment_other"
-                            v-model="form.employment_other"
-                            label="Sebutkan Pekerjaan"
-                            placeholder="Contoh: Seniman, Penjahit, dll."
-                            :error="form.errors.employment_other"
-                        />
-                    </div>
+                    <IdentityFields
+                        v-model:form="form"
+                        :gender="props.gender"
+                        :membership-bpjs="props.membershipBpjs"
+                        :employment="props.employment"
+                        :marital-status="props.maritalStatus"
+                    />
                 </FormSection>
 
                 <!-- 02. Kontak dan Alamat -->
@@ -263,50 +161,7 @@ const submit = () => {
                     title="Kontak dan Alamat"
                     :locked="!isEditing"
                 >
-                    <div
-                        class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
-                        :class="{ '**:cursor-not-allowed': !isEditing }"
-                    >
-                        <FormInput
-                            id="phone"
-                            v-model="form.phone"
-                            label="Nomor HP / WhatsApp"
-                            type="tel"
-                            inputmode="tel"
-                            maxlength="15"
-                            placeholder="Contoh: 081234567890"
-                            :error="form.errors.phone"
-                        />
-                        <FormInput
-                            id="rt"
-                            v-model="form.rt"
-                            label="RT"
-                            placeholder="Contoh: 01"
-                            maxlength="5"
-                            inputmode="numeric"
-                            :only-numeric="true"
-                            :error="form.errors.rt"
-                        />
-                        <FormInput
-                            id="rw"
-                            v-model="form.rw"
-                            label="RW"
-                            placeholder="Contoh: 02"
-                            maxlength="5"
-                            inputmode="numeric"
-                            :only-numeric="true"
-                            :error="form.errors.rw"
-                        />
-                        <div class="sm:col-span-2 lg:col-span-3">
-                            <FormTextarea
-                                id="address"
-                                v-model="form.address"
-                                label="Alamat Lengkap"
-                                placeholder="Nama jalan, nomor rumah, dusun, atau patokan tempat tinggal"
-                                :error="form.errors.address"
-                            />
-                        </div>
-                    </div>
+                    <ContactFields v-model:form="form" />
                 </FormSection>
             </fieldset>
 
@@ -328,5 +183,19 @@ const submit = () => {
                 </Button>
             </div>
         </form>
+
+        <!-- Dialog Konfirmasi Hapus Data Peserta -->
+        <ConfirmDialog
+            :open="showDeleteDialog"
+            title="Hapus Data Peserta"
+            :description="`Apakah Anda yakin ingin menghapus data peserta ${props.participant.name}? Seluruh data profil dan riwayat pemeriksaan peserta ini akan dihapus secara permanen.`"
+            confirm-text="Hapus Data"
+            cancel-text="Batal"
+            variant="destructive"
+            :processing="isDeleting"
+            @update:open="(val) => (showDeleteDialog = val)"
+            @confirm="tapToDelete"
+            @cancel="showDeleteDialog = false"
+        />
     </main>
 </template>

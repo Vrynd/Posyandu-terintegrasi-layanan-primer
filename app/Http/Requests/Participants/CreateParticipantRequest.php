@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Participants;
 
+use App\Concerns\SanitizesInput;
 use App\Enums\EmploymentStatus;
 use App\Enums\Gender;
 use App\Enums\MaritalStatus;
@@ -11,6 +12,8 @@ use Illuminate\Validation\Rule;
 
 class CreateParticipantRequest extends FormRequest
 {
+    use SanitizesInput;
+
     /**
      * Determine if the user is authorized to make this request.
      */
@@ -35,38 +38,6 @@ class CreateParticipantRequest extends FormRequest
         if ($sanitized !== []) {
             $this->merge($sanitized);
         }
-    }
-
-    /**
-     * @param  list<string>  $fields
-     * @return array<string, string>
-     */
-    private function sanitizeTextFields(array $fields): array
-    {
-        $sanitized = [];
-
-        foreach ($fields as $field) {
-            if ($this->has($field) && is_string($this->input($field))) {
-                $sanitized[$field] = strip_tags(trim($this->input($field)));
-            }
-        }
-
-        return $sanitized;
-    }
-
-    /**
-     * Standardisasi nomor HP ke format +62.
-     */
-    private function normalizePhoneNumber(string $phone): string
-    {
-        $phone = preg_replace('/[^\d+]/', '', $phone);
-
-        return match (true) {
-            str_starts_with($phone, '08') => '+62'.substr($phone, 1),
-            str_starts_with($phone, '8') => '+62'.$phone,
-            str_starts_with($phone, '628') => '+'.$phone,
-            default => $phone,
-        };
     }
 
     /**
@@ -108,13 +79,13 @@ class CreateParticipantRequest extends FormRequest
         return [
             // Data Dasar & Kategori
             'category.required' => 'Kategori peserta wajib dipilih.',
-            'category.in' => 'Pilihan kategori peserta tidak valid.',
+            'category.enum' => 'Pilihan kategori peserta tidak valid.',
             'name.required' => 'Nama lengkap peserta wajib diisi.',
             'name.max' => 'Nama lengkap maksimal 255 karakter.',
             'birth_date.required' => 'Tanggal lahir wajib diisi.',
             'birth_date.before_or_equal' => 'Tanggal lahir tidak boleh melebihi hari ini.',
             'gender.required' => 'Jenis kelamin wajib dipilih.',
-            'gender.in' => 'Pilihan jenis kelamin tidak valid.',
+            'gender.enum' => 'Pilihan jenis kelamin tidak valid.',
 
             // Kontak & Domisili
             'address.max' => 'Alamat maksimal 500 karakter.',

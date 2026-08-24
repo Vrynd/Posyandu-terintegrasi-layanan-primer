@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { Loader2 } from '@lucide/vue';
+import { AlertTriangle, HelpCircle, Loader2 } from '@lucide/vue';
+import type { Component } from 'vue';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -7,7 +8,6 @@ import {
     DialogContent,
     DialogDescription,
     DialogFooter,
-    DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
 
@@ -20,14 +20,15 @@ withDefaults(
         cancelText?: string;
         variant?: 'default' | 'destructive' | 'outline' | 'secondary';
         processing?: boolean;
-        borderStyle?: 'solid' | 'dashed';
+        icon?: Component;
+        align?: 'center' | 'left';
     }>(),
     {
         confirmText: 'Lanjutkan',
         cancelText: 'Batal',
         variant: 'default',
         processing: false,
-        borderStyle: 'solid',
+        align: 'center',
     },
 );
 
@@ -41,33 +42,64 @@ const emit = defineEmits<{
 <template>
     <Dialog :open="open" @update:open="(val) => emit('update:open', val)">
         <DialogContent
-            class="gap-0 overflow-hidden border-border/80 p-0 shadow-xl sm:max-w-md"
+            class="gap-0 overflow-hidden border-border/80 p-0 shadow-2xl sm:max-w-md"
         >
-            <DialogHeader
-                class="flex flex-row items-center justify-between border-b border-border px-4 py-3.5"
-                :class="{ 'border-dashed': borderStyle === 'dashed' }"
+            <!-- Konten Utama Dialog: Icon + Judul + Deskripsi -->
+            <div
+                class="space-y-3.5 p-6 sm:p-7"
+                :class="{
+                    'flex flex-col items-center text-center':
+                        align === 'center',
+                }"
             >
-                <DialogTitle class="text-base tracking-tight">
-                    {{ title }}
-                </DialogTitle>
-            </DialogHeader>
-            <div class="px-4 py-5">
-                <DialogDescription
-                    class="text-sm leading-relaxed whitespace-pre-line text-muted-foreground"
+                <!-- 1. Circle Icon dengan Ring Efek -->
+                <div
+                    v-if="variant === 'destructive'"
+                    class="flex size-12 items-center justify-center rounded-full bg-red-500/10 text-red-500 ring-8 ring-red-500/10 dark:bg-red-500/20 dark:text-red-400 dark:ring-red-500/10"
                 >
-                    {{ description }}
-                </DialogDescription>
+                    <component
+                        :is="icon ?? AlertTriangle"
+                        class="size-5.5 stroke-[2.2]"
+                    />
+                </div>
+                <div
+                    v-else
+                    class="flex size-12 items-center justify-center rounded-full bg-primary/10 text-primary ring-8 ring-primary/10 dark:bg-primary/20 dark:text-primary dark:ring-primary/10"
+                >
+                    <component
+                        :is="icon ?? HelpCircle"
+                        class="size-5.5 stroke-[2.2]"
+                    />
+                </div>
+
+                <!-- 2. Judul & Deskripsi -->
+                <div
+                    class="space-y-1.5"
+                    :class="{ 'max-w-sm': align === 'center' }"
+                >
+                    <DialogTitle
+                        class="text-base font-semibold tracking-tight text-foreground sm:text-lg"
+                    >
+                        {{ title }}
+                    </DialogTitle>
+                    <DialogDescription
+                        class="text-sm leading-relaxed whitespace-pre-line text-muted-foreground"
+                    >
+                        {{ description }}
+                    </DialogDescription>
+                </div>
             </div>
+
+            <!-- 3. Border Dashed Footer untuk Tombol Batal & Aksi -->
             <DialogFooter
-                class="flex flex-row justify-end gap-2.5 border-t border-border px-4 py-3.5"
-                :class="{ 'border-dashed': borderStyle === 'dashed' }"
+                class="flex flex-row items-center justify-end gap-2.5 border-t border-dashed border-border/80 bg-muted/15 px-6 py-4"
             >
                 <DialogClose as-child>
                     <Button
                         type="button"
                         variant="outline"
                         size="sm"
-                        class="h-8.5"
+                        class="h-8.5 cursor-pointer"
                         :disabled="processing"
                         @click="emit('cancel')"
                     >
@@ -78,13 +110,13 @@ const emit = defineEmits<{
                     type="button"
                     :variant="variant"
                     size="sm"
-                    class="h-8.5"
+                    class="h-8.5 cursor-pointer"
                     :disabled="processing"
                     @click="emit('confirm')"
                 >
                     <Loader2
                         v-if="processing"
-                        class="mr-2 h-4 w-4 animate-spin"
+                        class="mr-1.5 h-4 w-4 animate-spin"
                     />
                     {{ confirmText }}
                 </Button>

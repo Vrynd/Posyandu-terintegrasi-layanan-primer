@@ -30,6 +30,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('participants.edit');
     Route::put('/participants/{participant}', [ParticipantController::class, 'update'])
         ->name('participants.update');
+    Route::delete('/participants/{participant}', [ParticipantController::class, 'destroy'])
+        ->name('participants.destroy');
 
     Route::middleware('can:manage-tokens')->group(function () {
         Route::get('users', [UserController::class, 'index'])->name('users.index');

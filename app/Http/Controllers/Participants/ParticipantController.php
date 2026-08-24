@@ -124,6 +124,16 @@ class ParticipantController extends Controller
         return redirect()->route('participants.edit', $participant);
     }
 
+    public function destroy(Participant $participant): RedirectResponse
+    {
+        $name = $participant->name;
+        $participant->delete();
+
+        session()->flash('success', "Data peserta {$name} berhasil dihapus.");
+
+        return redirect()->route('participants.index');
+    }
+
     private function ensureUniqueNik(?string $nik, ?Participant $except = null): ?RedirectResponse
     {
         if (! $nik) {

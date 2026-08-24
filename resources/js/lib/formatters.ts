@@ -53,3 +53,15 @@ export function formatDate(
 
     return new Date(dateStr).toLocaleDateString('id-ID', options);
 }
+
+export function isChildOrTeen(category: string): boolean {
+    return category === 'toddler' || category === 'teenager';
+}
+
+export function isPregnantMother(category: string): boolean {
+    return category === 'pregnant_mother';
+}
+
+export function isProductiveOrAdult(category: string): boolean {
+    return category === 'productive' || category === 'adult';
+}

@@ -179,3 +179,31 @@ test('cannot update participant with duplicate nik of another participant', func
 
     $response->assertSessionHasErrors('nik');
 });
+
+test('authenticated user can delete participant', function () {
+    $user = User::factory()->create();
+    $this->actingAs($user);
+
+    $participant = Participant::create([
+        'name' => 'Peserta Hapus',
+        'nik' => '3512345678900077',
+        'birth_date' => '2022-01-01',
+        'gender' => 'female',
+        'category' => 'toddler',
+        'has_bpjs' => false,
+    ]);
+
+    $participant->toddler()->create([
+        'parent_name' => 'Orang Tua Hapus',
+    ]);
+
+    $response = $this->delete("/participants/{$participant->ulid}");
+
+    $response->assertRedirect(route('participants.index'));
+    $this->assertDatabaseMissing('participants', [
+        'id' => $participant->id,
+    ]);
+    $this->assertDatabaseMissing('participant_toddlers', [
+        'participant_id' => $participant->id,
+    ]);
+});
