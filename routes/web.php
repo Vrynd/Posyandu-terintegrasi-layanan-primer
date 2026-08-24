@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\TokenController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Auth\VerifyTokenController;
 use App\Http\Controllers\Participants\ParticipantController;
+use App\Http\Controllers\Schedules\ScheduleController;
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -21,6 +22,7 @@ Route::middleware('guest')->group(function () {
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::inertia('dashboard', 'Dashboard')->name('dashboard');
 
+    // Route pendaftaran peserta
     Route::get('/participants', [ParticipantController::class, 'index'])->name('participants.index');
     Route::get('/participants/create', [ParticipantController::class, 'create'])->name('participants.create');
     Route::post('/participants', [ParticipantController::class, 'store'])
@@ -32,6 +34,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('participants.update');
     Route::delete('/participants/{participant}', [ParticipantController::class, 'destroy'])
         ->name('participants.destroy');
+
+    // Route jadwal kegiatan
+    Route::get('/schedules', [ScheduleController::class, 'index'])->name('schedules.index');
 
     Route::middleware('can:manage-tokens')->group(function () {
         Route::get('users', [UserController::class, 'index'])->name('users.index');

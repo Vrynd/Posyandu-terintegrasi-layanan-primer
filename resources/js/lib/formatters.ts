@@ -65,3 +65,17 @@ export function isPregnantMother(category: string): boolean {
 export function isProductiveOrAdult(category: string): boolean {
     return category === 'productive' || category === 'adult';
 }
+
+export function formatTimeRange(
+    start?: string | null,
+    end?: string | null,
+): string {
+    if (!start && !end) {
+        return 'Waktu belum diatur';
+    }
+
+    const s = start ? start.substring(0, 5) : '??:??';
+    const e = end ? end.substring(0, 5) : 'Selesai';
+
+    return `${s} - ${e} WIB`;
+}

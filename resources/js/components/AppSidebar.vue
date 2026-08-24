@@ -29,6 +29,7 @@ import {
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
+import schedules from '@/routes/schedules';
 import type { NavGroup } from '@/types';
 
 const page = usePage();
@@ -72,7 +73,7 @@ const navGroups = computed<NavGroup[]>(() => {
                 },
                 {
                     title: 'Jadwal Kegiatan',
-                    href: '#',
+                    href: schedules.index(),
                     icon: Calendar,
                 },
                 {
