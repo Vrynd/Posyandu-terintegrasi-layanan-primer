@@ -20,6 +20,7 @@ class ScheduleSeeder extends Seeder
         $admin = User::where('role', UserRole::Administrator)->first() ?? User::first();
         $adminId = $admin?->id;
         $now = Carbon::now();
+        Schedule::query()->delete();
 
         $schedules = [
             [

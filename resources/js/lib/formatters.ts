@@ -79,3 +79,21 @@ export function formatTimeRange(
 
     return `${s} - ${e} WIB`;
 }
+
+export const SCHEDULE_STATUS_LABELS: Record<string, string> = {
+    scheduled: 'Terjadwal',
+    ongoing: 'Sedang Berlangsung',
+    completed: 'Selesai',
+    cancelled: 'Dibatalkan',
+};
+
+export function getScheduleStatusLabel(
+    status: string,
+    statuses: Array<{ label: string; value: string }> = [],
+): string {
+    return (
+        statuses.find((s) => s.value === status)?.label ??
+        SCHEDULE_STATUS_LABELS[status] ??
+        status
+    );
+}
