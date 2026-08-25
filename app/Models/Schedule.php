@@ -164,4 +164,20 @@ class Schedule extends Model
             default => $query->latest('date'),
         };
     }
+
+    /**
+     * Otomatis menyinkronkan jadwal yang sudah lewat tanggalnya menjadi 'completed'.
+     */
+    public static function syncScheduleStatuses(): void
+    {
+        static::query()
+            ->whereDate('date', '<', Carbon::today())
+            ->whereIn('status', [
+                ScheduleStatus::Scheduled->value,
+                ScheduleStatus::Ongoing->value,
+            ])
+            ->update([
+                'status' => ScheduleStatus::Completed->value,
+            ]);
+    }
 }

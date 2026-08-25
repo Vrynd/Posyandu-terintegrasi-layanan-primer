@@ -1,24 +1,26 @@
 <script setup lang="ts">
-import { Link } from '@inertiajs/vue3';
+import { Link, router } from '@inertiajs/vue3';
 import {
     Activity,
     ArrowRight,
     Calendar,
+    Check,
     ChevronLeft,
     ChevronRight,
     Clock,
     MapPin,
     Plus,
 } from '@lucide/vue';
+import { ref } from 'vue';
 import EmptyState from '@/components/EmptyState.vue';
 import { Button } from '@/components/ui/button';
 import { TileGroup, TileItem } from '@/components/ui/tile';
-import UserAvatar from '@/components/UserAvatar.vue';
 import {
     formatDate,
     formatTimeRange,
     getScheduleStatusLabel,
 } from '@/lib/formatters';
+import { updateStatus } from '@/routes/schedules';
 import type { ScheduleItem } from '@/types';
 
 defineProps<{
@@ -32,6 +34,23 @@ const emit = defineEmits<{
     (e: 'next-day'): void;
     (e: 'go-today'): void;
 }>();
+
+const processingUlid = ref<string | null>(null);
+
+const complete = (schedule: ScheduleItem) => {
+    processingUlid.value = schedule.ulid;
+
+    router.patch(
+        updateStatus.url(schedule.ulid),
+        { status: 'completed' },
+        {
+            preserveScroll: true,
+            onFinish: () => {
+                processingUlid.value = null;
+            },
+        },
+    );
+};
 </script>
 
 <template>
@@ -88,13 +107,14 @@ const emit = defineEmits<{
         <!-- 2. Daftar Kartu Agenda di Tanggal Ini -->
         <div
             v-if="schedules.length > 0"
-            class="flex max-h-130 flex-1 flex-col gap-3 overflow-y-auto pr-1"
+            class="flex flex-1 flex-col gap-3 overflow-y-auto pr-1"
         >
             <div
                 v-for="schedule in schedules"
                 :key="schedule.ulid"
-                class="group relative flex flex-col gap-3.5 overflow-hidden rounded-xl border border-border/80 bg-muted p-4 dark:bg-muted/30"
+                class="group relative flex shrink-0 flex-col gap-3.5 rounded-xl border border-border/80 bg-muted p-4 dark:bg-muted/30"
             >
+                <!-- Blok 1: Judul & Deskripsi -->
                 <div class="flex flex-col gap-1">
                     <h4
                         class="line-clamp-2 font-display text-sm font-bold text-foreground"
@@ -109,9 +129,11 @@ const emit = defineEmits<{
                     </p>
                 </div>
 
+                <!-- Blok 2: Metadata Tiles (Waktu, Lokasi, Status) -->
                 <TileGroup
                     class="border-border/40 bg-background text-xs dark:bg-zinc-900/40"
                 >
+                    <!-- 1. Waktu -->
                     <TileItem
                         :icon="Clock"
                         label="Waktu"
@@ -124,6 +146,8 @@ const emit = defineEmits<{
                         class="px-3 py-2 text-xs"
                         icon-class="h-3.5 w-3.5 text-muted-foreground"
                     />
+
+                    <!-- 2. Lokasi -->
                     <TileItem
                         :icon="MapPin"
                         label="Lokasi"
@@ -131,19 +155,22 @@ const emit = defineEmits<{
                         class="px-3 py-2 text-xs"
                         icon-class="h-3.5 w-3.5 text-muted-foreground"
                     />
+
+                    <!-- 3. Status -->
                     <TileItem
                         :icon="Activity"
                         label="Status"
+                        :value="getScheduleStatusLabel(schedule.status)"
                         class="px-3 py-2 text-xs"
                         icon-class="h-3.5 w-3.5 text-muted-foreground"
                     >
                         <span
                             class="font-semibold"
                             :class="{
-                                'text-blue-500 dark:text-blue-400':
-                                    schedule.status === 'scheduled',
                                 'text-amber-500 dark:text-amber-400':
                                     schedule.status === 'ongoing',
+                                'text-blue-500 dark:text-blue-400':
+                                    schedule.status === 'scheduled',
                                 'text-emerald-500 dark:text-emerald-400':
                                     schedule.status === 'completed',
                                 'text-rose-500 dark:text-rose-400':
@@ -155,22 +182,39 @@ const emit = defineEmits<{
                     </TileItem>
                 </TileGroup>
 
-                <!-- 5. Footer: Inisial Kader Bertugas & Aksi Arrow Detail -->
+                <!-- Blok 3: Footer Aksi & Tandai Selesai -->
                 <div
                     class="flex items-center justify-between border-t border-border/40 pt-2.5"
                 >
-                    <div class="flex min-w-0 items-center gap-2">
-                        <UserAvatar
-                            :name="schedule.creator?.name ?? 'Kader Posyandu'"
+                    <!-- Sisi Kiri: Tombol Tandai Selesai / Label Status -->
+                    <div class="flex items-center">
+                        <Button
+                            v-if="
+                                schedule.status !== 'completed' &&
+                                schedule.status !== 'cancelled'
+                            "
+                            variant="outline"
                             size="sm"
-                            class="h-6 w-6 text-xs"
-                        />
-                        <span
-                            class="max-w-32 truncate text-xs font-medium text-muted-foreground"
+                            class="h-7 border-emerald-500/30 px-2.5 text-xs font-medium text-emerald-600 hover:bg-emerald-500/10 dark:border-emerald-500/30 dark:text-emerald-400"
+                            :disabled="processingUlid === schedule.ulid"
+                            @click.stop="complete(schedule)"
                         >
-                            {{ schedule.creator?.name ?? 'Kader Bertugas' }}
+                            <Check class="mr-1.5 h-3.5 w-3.5" />
+                            Tandai Selesai
+                        </Button>
+                        <span
+                            v-else-if="schedule.status === 'completed'"
+                            class="flex items-center gap-1.5 text-xs font-medium text-emerald-600 dark:text-emerald-400"
+                        >
+                            <Check class="h-3.5 w-3.5" />
+                            Kegiatan Telah Selesai
+                        </span>
+                        <span v-else class="text-xs font-medium text-rose-500">
+                            Kegiatan Dibatalkan
                         </span>
                     </div>
+
+                    <!-- Sisi Kanan: Tombol Arrow Aksi Detail -->
                     <Button
                         variant="ghost"
                         size="icon"

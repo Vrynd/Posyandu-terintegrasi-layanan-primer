@@ -23,6 +23,29 @@ class ScheduleSeeder extends Seeder
         Schedule::query()->delete();
 
         $schedules = [
+            // --- HARI INI (2 KEGIATAN) ---
+            [
+                'title' => 'Posyandu Lansia & Skrining PTM Hari Ini',
+                'activity_type' => 'Posyandu Lansia & PTM',
+                'date' => $now->toDateString(), // Hari ini
+                'start_time' => '08:30',
+                'end_time' => '11:30',
+                'location' => 'Balai Pertemuan RW 03',
+                'description' => 'Pemeriksaan tensi darah, cek gula darah sewaktu, asam urat, kolesterol, dan senam lansia bersama.',
+                'status' => ScheduleStatus::Ongoing,
+            ],
+            [
+                'title' => 'Kelas Edukasi PMT Balita Gizi Kurang',
+                'activity_type' => 'Pemberian Makanan Tambahan',
+                'date' => $now->toDateString(), // Hari ini
+                'start_time' => '13:00',
+                'end_time' => '15:00',
+                'location' => 'Posyandu Mawar RW 03',
+                'description' => 'Demo masak MPASI bergizi seimbang dan pembagian paket PMT lokal untuk balita berat badan kurang.',
+                'status' => ScheduleStatus::Scheduled,
+            ],
+
+            // --- 3 HARI LAGI (2 KEGIATAN) ---
             [
                 'title' => 'Posyandu Integrasi Layanan Primer (ILP) Balai RW 01',
                 'activity_type' => 'Posyandu Siklus Hidup (ILP)',
@@ -34,6 +57,18 @@ class ScheduleSeeder extends Seeder
                 'status' => ScheduleStatus::Scheduled,
             ],
             [
+                'title' => 'Kunjungan Rumah Balita Risiko Stunting',
+                'activity_type' => 'Sweeping & Kunjungan Rumah',
+                'date' => $now->copy()->addDays(3)->toDateString(),
+                'start_time' => '13:30',
+                'end_time' => '15:30',
+                'location' => 'Rumah Warga RW 01',
+                'description' => 'Monitoring kepatuhan konsumsi vitamin dan pengukuran antropometri ulang bagi balita tidak hadir posyandu.',
+                'status' => ScheduleStatus::Scheduled,
+            ],
+
+            // --- 7 HARI LAGI ---
+            [
                 'title' => 'Posyandu Balita & Pemberian Vitamin A',
                 'activity_type' => 'Bulan Timbang & Vitamin A',
                 'date' => $now->copy()->addDays(7)->toDateString(),
@@ -43,16 +78,8 @@ class ScheduleSeeder extends Seeder
                 'description' => 'Penimbangan berat badan, pengukuran tinggi badan balita, dan distribusi kapsul vitamin A biru/merah.',
                 'status' => ScheduleStatus::Scheduled,
             ],
-            [
-                'title' => 'Posyandu Lansia & Skrining PTM Hari Ini',
-                'activity_type' => 'Posyandu Lansia & PTM',
-                'date' => $now->toDateString(), // Hari ini
-                'start_time' => '08:30',
-                'end_time' => '12:00',
-                'location' => 'Balai Pertemuan RW 03',
-                'description' => 'Pemeriksaan tensi darah, cek gula darah sewaktu, asam urat, kolesterol, dan senam lansia bersama.',
-                'status' => ScheduleStatus::Ongoing,
-            ],
+
+            // --- KEGIATAN SELESAI (MASA LALU) ---
             [
                 'title' => 'Posyandu Remaja & Edukasi Gizi Anemia',
                 'activity_type' => 'Posyandu Remaja',

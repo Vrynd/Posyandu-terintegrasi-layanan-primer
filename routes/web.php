@@ -37,6 +37,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Route jadwal kegiatan
     Route::get('/schedules', [ScheduleController::class, 'index'])->name('schedules.index');
+    Route::patch('/schedules/{schedule}/status', [ScheduleController::class, 'updateStatus'])->name('schedules.update-status');
 
     Route::middleware('can:manage-tokens')->group(function () {
         Route::get('users', [UserController::class, 'index'])->name('users.index');
