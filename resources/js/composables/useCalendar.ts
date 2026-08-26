@@ -1,73 +1,79 @@
-import { computed, ref } from 'vue';
+import { computed, onMounted, onUnmounted, ref } from 'vue';
 import type { Ref } from 'vue';
 import type { ScheduleItem } from '@/types';
 
 export interface CalendarDay {
-    dateString: string; // Format 'YYYY-MM-DD'
+    dateString: string;
     dayNumber: number;
     isCurrentMonth: boolean;
     isToday: boolean;
-    isSelected: boolean;
     schedules: ScheduleItem[];
 }
 
-export const MONTH_NAMES_ID = [
-    'Januari',
-    'Februari',
-    'Maret',
-    'April',
-    'Mei',
-    'Juni',
-    'Juli',
-    'Agustus',
-    'September',
-    'Oktober',
-    'November',
-    'Desember',
-];
-
-export const DAY_NAMES_ID = [
-    'Minggu',
-    'Senin',
-    'Selasa',
-    'Rabu',
-    'Kamis',
-    'Jumat',
-    'Sabtu',
-];
-
-export function useCalendar(schedules: Ref<ScheduleItem[]>) {
-    const now = new Date();
-    const currentYear = ref(now.getFullYear());
-    const currentMonth = ref(now.getMonth()); // 0 = Januari, 11 = Desember
-
-    // Format tanggal awal ke YYYY-MM-DD
+export function useCalendar(
+    schedules: Ref<ScheduleItem[]>,
+    initialYear?: number,
+    initialMonth?: number,
+) {
     const pad = (n: number) => String(n).padStart(2, '0');
-    const todayString = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+
+    const getTodayString = () => {
+        const d = new Date();
+
+        return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+    };
+
+    const now = new Date();
+    const todayString = ref(getTodayString());
+    const currentYear = ref(initialYear ?? now.getFullYear());
+    const currentMonth = ref(initialMonth ?? now.getMonth());
 
     // State tanggal yang sedang diklik kader (default: hari ini)
-    const selectedDate = ref<string>(todayString);
+    const selectedDate = ref<string>(todayString.value);
 
-    // Label Bulan & Tahun (misal: "September 2026")
-    const monthYearLabel = computed(() => {
-        return `${MONTH_NAMES_ID[currentMonth.value]} ${currentYear.value}`;
+    let dayChangeInterval: ReturnType<typeof setInterval> | null = null;
+
+    onMounted(() => {
+        dayChangeInterval = setInterval(() => {
+            const latestToday = getTodayString();
+
+            if (latestToday !== todayString.value) {
+                todayString.value = latestToday;
+            }
+        }, 60_000);
     });
 
-    // Menghasilkan Grid Kotak-Kotak Tanggal (35 atau 42 kotak)
+    onUnmounted(() => {
+        if (dayChangeInterval) {
+            clearInterval(dayChangeInterval);
+        }
+    });
+
+    // 1. Indexing O(N) sekali saja saat `schedules` berubah
+    const schedulesByDate = computed<Record<string, ScheduleItem[]>>(() => {
+        const map: Record<string, ScheduleItem[]> = {};
+
+        for (const schedule of schedules.value) {
+            (map[schedule.date] ??= []).push(schedule);
+        }
+
+        return map;
+    });
+
+    // 2. Menghasilkan Grid Kotak-Kotak Tanggal
     const calendarGrid = computed<CalendarDay[]>(() => {
         const year = currentYear.value;
         const month = currentMonth.value;
+        const today = todayString.value;
+        const scheduleMap = schedulesByDate.value;
 
-        // Hari pertama bulan ini (0 = Minggu, 1 = Senin, dst)
         const firstDayIndex = new Date(year, month, 1).getDay();
-        // Total hari dalam bulan ini
         const daysInMonth = new Date(year, month + 1, 0).getDate();
-        // Total hari dalam bulan sebelumnya
         const daysInPrevMonth = new Date(year, month, 0).getDate();
 
         const days: CalendarDay[] = [];
 
-        // 1. Kotak sisa dari bulan sebelumnya
+        // 2.1 Kotak sisa dari bulan sebelumnya
         for (let i = firstDayIndex - 1; i >= 0; i--) {
             const dayNumber = daysInPrevMonth - i;
             const prevMonthDate = new Date(year, month - 1, dayNumber);
@@ -77,13 +83,12 @@ export function useCalendar(schedules: Ref<ScheduleItem[]>) {
                 dateString,
                 dayNumber,
                 isCurrentMonth: false,
-                isToday: dateString === todayString,
-                isSelected: dateString === selectedDate.value,
-                schedules: schedules.value.filter((s) => s.date === dateString),
+                isToday: dateString === today,
+                schedules: scheduleMap[dateString] ?? [],
             });
         }
 
-        // 2. Kotak hari-hari di bulan aktif
+        // 2.2 Kotak hari-hari di bulan aktif
         for (let i = 1; i <= daysInMonth; i++) {
             const dateString = `${year}-${pad(month + 1)}-${pad(i)}`;
 
@@ -91,9 +96,8 @@ export function useCalendar(schedules: Ref<ScheduleItem[]>) {
                 dateString,
                 dayNumber: i,
                 isCurrentMonth: true,
-                isToday: dateString === todayString,
-                isSelected: dateString === selectedDate.value,
-                schedules: schedules.value.filter((s) => s.date === dateString),
+                isToday: dateString === today,
+                schedules: scheduleMap[dateString] ?? [],
             });
         }
 
@@ -108,16 +112,14 @@ export function useCalendar(schedules: Ref<ScheduleItem[]>) {
                 dateString,
                 dayNumber: i,
                 isCurrentMonth: false,
-                isToday: dateString === todayString,
-                isSelected: dateString === selectedDate.value,
-                schedules: schedules.value.filter((s) => s.date === dateString),
+                isToday: dateString === today,
+                schedules: scheduleMap[dateString] ?? [],
             });
         }
 
         return days;
     });
 
-    // Navigasi Bulan
     const prevMonth = () => {
         if (currentMonth.value === 0) {
             currentMonth.value = 11;
@@ -125,6 +127,8 @@ export function useCalendar(schedules: Ref<ScheduleItem[]>) {
         } else {
             currentMonth.value -= 1;
         }
+
+        selectedDate.value = `${currentYear.value}-${pad(currentMonth.value + 1)}-01`;
     };
 
     const nextMonth = () => {
@@ -134,21 +138,26 @@ export function useCalendar(schedules: Ref<ScheduleItem[]>) {
         } else {
             currentMonth.value += 1;
         }
+
+        selectedDate.value = `${currentYear.value}-${pad(currentMonth.value + 1)}-01`;
     };
 
     const goToToday = () => {
-        currentYear.value = now.getFullYear();
-        currentMonth.value = now.getMonth();
-        selectedDate.value = todayString;
+        todayString.value = getTodayString();
+        const d = new Date();
+        currentYear.value = d.getFullYear();
+        currentMonth.value = d.getMonth();
+        selectedDate.value = todayString.value;
     };
 
-    // Lompat langsung ke bulan tertentu (0 = Januari, 11 = Desember)
     const jumpToMonth = (month: number) => {
         currentMonth.value = month;
+        selectedDate.value = `${currentYear.value}-${pad(month + 1)}-01`;
     };
-    // Lompat langsung ke tahun tertentu
+
     const jumpToYear = (year: number) => {
         currentYear.value = year;
+        selectedDate.value = `${year}-${pad(currentMonth.value + 1)}-01`;
     };
 
     const selectDate = (dateString: string) => {
@@ -171,16 +180,15 @@ export function useCalendar(schedules: Ref<ScheduleItem[]>) {
         currentMonth.value = next.getMonth();
     };
 
-    // Daftar kegiatan khusus untuk tanggal yang sedang diklik
+    // Daftar kegiatan khusus untuk tanggal yang sedang diklik (O(1))
     const selectedDateSchedules = computed(() => {
-        return schedules.value.filter((s) => s.date === selectedDate.value);
+        return schedulesByDate.value[selectedDate.value] ?? [];
     });
 
     return {
         currentYear,
         currentMonth,
         selectedDate,
-        monthYearLabel,
         calendarGrid,
         selectedDateSchedules,
         prevMonth,

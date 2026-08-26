@@ -10,12 +10,19 @@ export interface ScheduleItem {
     location: string;
     description?: string | null;
     status: 'scheduled' | 'ongoing' | 'completed' | 'cancelled';
+    effective_status: 'scheduled' | 'ongoing' | 'completed' | 'cancelled';
     created_at?: string;
     updated_at?: string;
     creator?: {
         id: number;
         name: string;
     } | null;
+}
+
+export interface StatusOption {
+    label: string;
+    value: string;
+    color: string;
 }
 
 export interface ScheduleFilters {

@@ -12,12 +12,8 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
-import {
-    GENDER_LABELS,
-    formatDate,
-    getCategoryColor,
-    getCategoryLabel,
-} from '@/lib/formatters';
+import { formatDate } from '@/lib/date';
+import { badgeColor, formatCategory, genderMap } from '@/lib/participant';
 import { create, edit } from '@/routes/participants';
 import type { FilterOption, ParticipantItem } from '@/types';
 
@@ -85,16 +81,12 @@ defineProps<{
                 </TableCell>
                 <TableCell>
                     <StatusBadge
-                        :text="
-                            getCategoryLabel(participant.category, categories)
-                        "
-                        :color="getCategoryColor(participant.category)"
+                        :text="formatCategory(participant.category, categories)"
+                        :color="badgeColor(participant.category)"
                     />
                 </TableCell>
                 <TableCell>
-                    {{
-                        GENDER_LABELS[participant.gender] ?? participant.gender
-                    }}
+                    {{ genderMap[participant.gender] ?? participant.gender }}
                 </TableCell>
                 <TableCell>
                     {{ formatDate(participant.birth_date) }}

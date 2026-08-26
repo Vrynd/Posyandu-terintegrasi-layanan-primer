@@ -15,18 +15,16 @@ import { ref } from 'vue';
 import EmptyState from '@/components/EmptyState.vue';
 import { Button } from '@/components/ui/button';
 import { TileGroup, TileItem } from '@/components/ui/tile';
-import {
-    formatDate,
-    formatTimeRange,
-    getScheduleStatusLabel,
-} from '@/lib/formatters';
+import { formatDate, formatTime } from '@/lib/date';
+import { formatStatus, statusText } from '@/lib/schedule';
 import { updateStatus } from '@/routes/schedules';
-import type { ScheduleItem } from '@/types';
+import type { ScheduleItem, StatusOption } from '@/types';
 
 defineProps<{
     selectedDate: string;
     schedules: ScheduleItem[];
     isAdmin?: boolean;
+    statuses?: StatusOption[];
 }>();
 
 const emit = defineEmits<{
@@ -55,8 +53,7 @@ const complete = (schedule: ScheduleItem) => {
 
 <template>
     <div class="flex h-full flex-col">
-        <!-- 1. Header Agenda Harian -->
-        <div class="mb-5 flex items-center justify-between">
+        <div class="mb-5 flex shrink-0 items-center justify-between">
             <div>
                 <h3
                     class="mb-0.5 font-display text-sm font-semibold text-foreground"
@@ -75,7 +72,6 @@ const complete = (schedule: ScheduleItem) => {
                 </p>
             </div>
 
-            <!-- Navigasi Hari -->
             <div class="flex items-center gap-1">
                 <Button
                     variant="ghost"
@@ -104,17 +100,15 @@ const complete = (schedule: ScheduleItem) => {
             </div>
         </div>
 
-        <!-- 2. Daftar Kartu Agenda di Tanggal Ini -->
         <div
             v-if="schedules.length > 0"
-            class="flex flex-1 flex-col gap-3 overflow-y-auto pr-1"
+            class="flex max-h-143 flex-1 flex-col gap-3 overflow-y-auto pr-1.5"
         >
             <div
                 v-for="schedule in schedules"
                 :key="schedule.ulid"
                 class="group relative flex shrink-0 flex-col gap-3.5 rounded-xl border border-border/80 bg-muted p-4 dark:bg-muted/30"
             >
-                <!-- Blok 1: Judul & Deskripsi -->
                 <div class="flex flex-col gap-1">
                     <h4
                         class="line-clamp-2 font-display text-sm font-bold text-foreground"
@@ -129,25 +123,19 @@ const complete = (schedule: ScheduleItem) => {
                     </p>
                 </div>
 
-                <!-- Blok 2: Metadata Tiles (Waktu, Lokasi, Status) -->
                 <TileGroup
                     class="border-border/40 bg-background text-xs dark:bg-zinc-900/40"
                 >
-                    <!-- 1. Waktu -->
                     <TileItem
                         :icon="Clock"
                         label="Waktu"
                         :value="
-                            formatTimeRange(
-                                schedule.start_time,
-                                schedule.end_time,
-                            )
+                            formatTime(schedule.start_time, schedule.end_time)
                         "
                         class="px-3 py-2 text-xs"
                         icon-class="h-3.5 w-3.5 text-muted-foreground"
                     />
 
-                    <!-- 2. Lokasi -->
                     <TileItem
                         :icon="MapPin"
                         label="Lokasi"
@@ -156,42 +144,40 @@ const complete = (schedule: ScheduleItem) => {
                         icon-class="h-3.5 w-3.5 text-muted-foreground"
                     />
 
-                    <!-- 3. Status -->
                     <TileItem
                         :icon="Activity"
                         label="Status"
-                        :value="getScheduleStatusLabel(schedule.status)"
+                        :value="
+                            formatStatus(schedule.effective_status, statuses)
+                        "
                         class="px-3 py-2 text-xs"
                         icon-class="h-3.5 w-3.5 text-muted-foreground"
                     >
                         <span
                             class="font-semibold"
-                            :class="{
-                                'text-amber-500 dark:text-amber-400':
-                                    schedule.status === 'ongoing',
-                                'text-blue-500 dark:text-blue-400':
-                                    schedule.status === 'scheduled',
-                                'text-emerald-500 dark:text-emerald-400':
-                                    schedule.status === 'completed',
-                                'text-rose-500 dark:text-rose-400':
-                                    schedule.status === 'cancelled',
-                            }"
+                            :class="
+                                statusText(schedule.effective_status, statuses)
+                            "
                         >
-                            {{ getScheduleStatusLabel(schedule.status) }}
+                            {{
+                                formatStatus(
+                                    schedule.effective_status,
+                                    statuses,
+                                )
+                            }}
                         </span>
                     </TileItem>
                 </TileGroup>
 
-                <!-- Blok 3: Footer Aksi & Tandai Selesai -->
                 <div
                     class="flex items-center justify-between border-t border-border/40 pt-2.5"
                 >
-                    <!-- Sisi Kiri: Tombol Tandai Selesai / Label Status -->
                     <div class="flex items-center">
                         <Button
                             v-if="
                                 schedule.status !== 'completed' &&
-                                schedule.status !== 'cancelled'
+                                schedule.status !== 'cancelled' &&
+                                schedule.effective_status !== 'completed'
                             "
                             variant="outline"
                             size="sm"
@@ -203,7 +189,10 @@ const complete = (schedule: ScheduleItem) => {
                             Tandai Selesai
                         </Button>
                         <span
-                            v-else-if="schedule.status === 'completed'"
+                            v-else-if="
+                                schedule.status === 'completed' ||
+                                schedule.effective_status === 'completed'
+                            "
                             class="flex items-center gap-1.5 text-xs font-medium text-emerald-600 dark:text-emerald-400"
                         >
                             <Check class="h-3.5 w-3.5" />
@@ -214,7 +203,6 @@ const complete = (schedule: ScheduleItem) => {
                         </span>
                     </div>
 
-                    <!-- Sisi Kanan: Tombol Arrow Aksi Detail -->
                     <Button
                         variant="ghost"
                         size="icon"
@@ -229,7 +217,6 @@ const complete = (schedule: ScheduleItem) => {
             </div>
         </div>
 
-        <!-- 6. Empty State jika tanggal kosong -->
         <EmptyState
             v-else
             :icon="Calendar"

@@ -1,10 +1,6 @@
 <script setup lang="ts">
 import { FormInput, FormSelect } from '@/components/ui/form';
-import {
-    isChildOrTeen,
-    isPregnantMother,
-    isProductiveOrAdult,
-} from '@/lib/formatters';
+import { isAdult, isChild, isPregnant } from '@/lib/participant';
 import type { FilterOption } from '@/types';
 
 const form = defineModel<Record<string, any>>('form', { required: true });
@@ -60,7 +56,7 @@ defineProps<{
             placeholder="Pilih jenis kelamin"
             required
             :options="gender ?? []"
-            :disabled="isPregnantMother(form.category)"
+            :disabled="isPregnant(form.category)"
             :error="form.errors.gender"
         />
 
@@ -91,7 +87,7 @@ defineProps<{
             :error="form.errors.bpjs_number"
         />
         <FormInput
-            v-if="isChildOrTeen(form.category)"
+            v-if="isChild(form.category)"
             id="parent_name"
             v-model="form.parent_name"
             label="Nama Orang Tua / Wali"
@@ -100,7 +96,7 @@ defineProps<{
         />
 
         <FormInput
-            v-if="isPregnantMother(form.category)"
+            v-if="isPregnant(form.category)"
             id="husband_name"
             v-model="form.husband_name"
             label="Nama Suami"
@@ -108,7 +104,7 @@ defineProps<{
             :error="form.errors.husband_name"
         />
         <FormSelect
-            v-if="isProductiveOrAdult(form.category)"
+            v-if="isAdult(form.category)"
             id="marital_status"
             v-model="form.marital_status"
             label="Status Perkawinan"
@@ -117,7 +113,7 @@ defineProps<{
             :error="form.errors.marital_status"
         />
         <FormSelect
-            v-if="isProductiveOrAdult(form.category)"
+            v-if="isAdult(form.category)"
             id="employment"
             v-model="form.employment"
             label="Pekerjaan"
@@ -126,10 +122,7 @@ defineProps<{
             :error="form.errors.employment"
         />
         <FormInput
-            v-if="
-                isProductiveOrAdult(form.category) &&
-                form.employment === 'other'
-            "
+            v-if="isAdult(form.category) && form.employment === 'other'"
             id="employment_other"
             v-model="form.employment_other"
             label="Sebutkan Pekerjaan"

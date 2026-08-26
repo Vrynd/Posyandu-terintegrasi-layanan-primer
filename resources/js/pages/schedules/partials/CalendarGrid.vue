@@ -8,15 +8,17 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { DAY_NAMES_ID, MONTH_NAMES_ID } from '@/composables/useCalendar';
 import type { CalendarDay } from '@/composables/useCalendar';
+import { dayNames, monthNames } from '@/lib/date';
+import { statusBg } from '@/lib/schedule';
+import type { StatusOption } from '@/types';
 
 defineProps<{
-    monthYearLabel: string;
     currentMonth: number;
     currentYear: number;
     calendarGrid: CalendarDay[];
     selectedDate: string;
+    statuses?: StatusOption[];
 }>();
 
 const emit = defineEmits<{
@@ -27,20 +29,6 @@ const emit = defineEmits<{
     (e: 'jump-to-month', month: number): void;
     (e: 'jump-to-year', year: number): void;
 }>();
-
-// Helper warna strip kecil di dalam tanggal
-const getScheduleColor = (status: string) => {
-    switch (status) {
-        case 'ongoing':
-            return 'bg-amber-500';
-        case 'completed':
-            return 'bg-emerald-500';
-        case 'cancelled':
-            return 'bg-rose-500';
-        default:
-            return 'bg-blue-500';
-    }
-};
 
 const yearOptions = computed(() => {
     const now = new Date().getFullYear();
@@ -56,18 +44,15 @@ const yearOptions = computed(() => {
 
 <template>
     <div class="flex h-full flex-col">
-        <!-- 1. Header Kalender: Bulan & Navigasi -->
         <div class="mb-5 flex items-center justify-between">
-            <!-- Kiri: Dropdown Bulan & Tahun -->
             <div class="flex items-center gap-2">
-                <!-- Dropdown Bulan -->
                 <DropdownMenu>
                     <DropdownMenuTrigger as-child>
                         <Button
                             variant="outline"
                             class="0 h-auto py-1.5 font-display text-sm font-semibold tracking-tight text-foreground"
                         >
-                            {{ MONTH_NAMES_ID[currentMonth] }}
+                            {{ monthNames[currentMonth] }}
                             <ChevronDown
                                 class="ml-1 h-4 w-4 text-muted-foreground"
                             />
@@ -78,7 +63,7 @@ const yearOptions = computed(() => {
                         class="max-h-72 overflow-y-auto"
                     >
                         <DropdownMenuItem
-                            v-for="(name, index) in MONTH_NAMES_ID"
+                            v-for="(name, index) in monthNames"
                             :key="index"
                             :class="{
                                 'bg-accent font-semibold':
@@ -90,7 +75,7 @@ const yearOptions = computed(() => {
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
-                <!-- Dropdown Tahun -->
+
                 <DropdownMenu>
                     <DropdownMenuTrigger as-child>
                         <Button
@@ -120,7 +105,7 @@ const yearOptions = computed(() => {
                     </DropdownMenuContent>
                 </DropdownMenu>
             </div>
-            <!-- Kanan: Tombol Navigasi Circular Terpisah -->
+
             <div class="flex items-center gap-1">
                 <Button
                     variant="outline"
@@ -141,20 +126,17 @@ const yearOptions = computed(() => {
             </div>
         </div>
 
-        <!-- 2. Header Nama Hari (Min - Sab) -->
         <div class="mb-2 grid grid-cols-7 text-center sm:text-left">
             <div
-                v-for="day in DAY_NAMES_ID"
+                v-for="day in dayNames"
                 :key="day"
                 class="py-1 text-xs font-medium tracking-wider text-muted-foreground"
             >
-                <!-- Mobile (< sm): Tampilkan 3 huruf (Min, Sen, Sel...) -->
                 <span class="sm:hidden">{{ day.slice(0, 3) }}</span>
-                <!-- Desktop (sm+): Tampilkan nama lengkap (Minggu, Senin...) -->
                 <span class="hidden sm:inline">{{ day }}</span>
             </div>
         </div>
-        <!-- 3. Grid Kotak-Kotak Tanggal -->
+
         <div class="grid grid-cols-7 gap-1 sm:gap-2">
             <button
                 v-for="cell in calendarGrid"
@@ -163,28 +145,29 @@ const yearOptions = computed(() => {
                 @click="emit('select-date', cell.dateString)"
                 :class="[
                     'group relative flex min-h-16 cursor-pointer flex-col rounded-xl border p-1 text-left transition-all sm:min-h-20 sm:p-2',
-                    // Tanggal aktif dipilih (Selected)
-                    cell.isSelected
+                    cell.dateString === selectedDate
                         ? 'border border-dashed border-primary bg-blue-500/10 dark:bg-blue-950/40'
                         : cell.isCurrentMonth
                           ? 'border-border bg-muted/40 hover:border-border hover:bg-muted/50'
                           : 'bg-transparant border-border',
-                    // Highlight tanggal hari ini
-                    cell.isToday && !cell.isSelected
+                    cell.isToday && cell.dateString !== selectedDate
                         ? 'border border-blue-400/60 bg-muted/20 dark:bg-muted/40'
                         : '',
                 ]"
             >
-                <!-- Angka Tanggal -->
                 <div
-                    v-if="cell.schedules.some((s) => s.status === 'completed')"
+                    v-if="
+                        cell.schedules.some(
+                            (s) => s.effective_status === 'completed',
+                        )
+                    "
                     class="pointer-events-none absolute inset-0 rounded-xl bg-radial from-emerald-500/15 to-transparent"
                 />
                 <div class="flex items-center justify-between">
                     <span
                         :class="[
                             'inline-flex h-5.5 w-5.5 items-center justify-center rounded-full font-mono text-[11px] font-bold transition-colors sm:h-6.5 sm:w-6.5 sm:text-xs',
-                            cell.isSelected
+                            cell.dateString === selectedDate
                                 ? 'border border-white/15 bg-white/10 text-white'
                                 : cell.isToday
                                   ? 'border border-white/10 bg-white/10 text-white'
@@ -195,26 +178,24 @@ const yearOptions = computed(() => {
                     </span>
                 </div>
 
-                <!-- Mini Daftar Jadwal di dalam kotak tanggal -->
                 <div class="mt-auto flex flex-col gap-1 overflow-hidden pt-1">
                     <div
                         v-for="schedule in cell.schedules.slice(0, 2)"
                         :key="schedule.ulid"
                         class="flex items-center gap-1.5 overflow-hidden"
                     >
-                        <!-- Indikator Garis Vertikal (Vertical Bar) -->
                         <span
                             class="h-2.5 w-0.5 shrink-0 rounded-full"
-                            :class="getScheduleColor(schedule.status)"
+                            :class="
+                                statusBg(schedule.effective_status, statuses)
+                            "
                         />
-                        <!-- Judul Kegiatan Terpotong -->
                         <span
                             class="truncate text-[10px] font-medium text-muted-foreground/90 group-hover:text-foreground"
                         >
                             {{ schedule.title }}
                         </span>
                     </div>
-                    <!-- Indikator jika ada lebih dari 2 kegiatan -->
                     <span
                         v-if="cell.schedules.length > 2"
                         class="text-[9px] font-medium text-muted-foreground/70"

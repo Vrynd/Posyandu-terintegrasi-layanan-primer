@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Schedules;
 
 use App\Enums\ScheduleStatus;
+use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Models\Schedule;
 use Illuminate\Http\RedirectResponse;
@@ -14,18 +15,22 @@ use Inertia\Response;
 class ScheduleController extends Controller
 {
     /**
-     * Menampilkan papan kanban jadwal kegiatan posyandu.
+     * Menampilkan papan kalender jadwal kegiatan posyandu.
      */
-    public function index(): Response
+    public function index(Request $request): Response
     {
-        Schedule::syncScheduleStatuses();
+        $year = $request->integer('year', now()->year);
+
         $schedules = Schedule::query()
             ->with('creator:id,name')
+            ->inYear($year)
             ->sorted('oldest')
             ->get();
 
         return Inertia::render('schedules/Index', [
             'schedules' => $schedules,
+            'currentYear' => $year,
+            'statuses' => ScheduleStatus::toOptions(),
         ]);
     }
 
@@ -34,15 +39,30 @@ class ScheduleController extends Controller
      */
     public function updateStatus(Request $request, Schedule $schedule): RedirectResponse
     {
+        $user = $request->user();
+
+        $allowedStatuses = $user->role === UserRole::Administrator
+            ? ScheduleStatus::cases()
+            : [ScheduleStatus::Completed];
+
         $validated = $request->validate([
-            'status' => ['required', Rule::enum(ScheduleStatus::class)],
+            'status' => ['required', Rule::in(array_column($allowedStatuses, 'value'))],
         ]);
 
         $schedule->update([
             'status' => $validated['status'],
         ]);
 
-        session()->flash('success', "Kegiatan \"{$schedule->title}\" berhasil ditandai selesai.");
+        $status = ScheduleStatus::from($validated['status']);
+
+        $message = match ($status) {
+            ScheduleStatus::Completed => "Kegiatan \"{$schedule->title}\" berhasil ditandai selesai.",
+            ScheduleStatus::Cancelled => "Kegiatan \"{$schedule->title}\" berhasil dibatalkan.",
+            ScheduleStatus::Ongoing => "Kegiatan \"{$schedule->title}\" ditandai sedang berlangsung.",
+            ScheduleStatus::Scheduled => "Kegiatan \"{$schedule->title}\" dikembalikan ke status terjadwal.",
+        };
+
+        session()->flash('success', $message);
 
         return back();
     }

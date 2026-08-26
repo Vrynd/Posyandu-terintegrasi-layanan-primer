@@ -23,7 +23,7 @@ class ScheduleSeeder extends Seeder
         Schedule::query()->delete();
 
         $schedules = [
-            // --- HARI INI (2 KEGIATAN) ---
+            // --- HARI INI (3 KEGIATAN) ---
             [
                 'title' => 'Posyandu Lansia & Skrining PTM Hari Ini',
                 'activity_type' => 'Posyandu Lansia & PTM',
@@ -42,6 +42,16 @@ class ScheduleSeeder extends Seeder
                 'end_time' => '15:00',
                 'location' => 'Posyandu Mawar RW 03',
                 'description' => 'Demo masak MPASI bergizi seimbang dan pembagian paket PMT lokal untuk balita berat badan kurang.',
+                'status' => ScheduleStatus::Scheduled,
+            ],
+            [
+                'title' => 'Pemeriksaan Tumbuh Kembang & Imunisasi Lanjutan',
+                'activity_type' => 'Imunisasi & Tumbuh Kembang',
+                'date' => $now->toDateString(), // Hari ini
+                'start_time' => '15:30',
+                'end_time' => '17:00',
+                'location' => 'Puskesmas Pembantu (Pustu)',
+                'description' => 'Layanan imunisasi DPT-HB-Hib lanjutan dan konsultasi gizi balita usia 18-24 bulan.',
                 'status' => ScheduleStatus::Scheduled,
             ],
 

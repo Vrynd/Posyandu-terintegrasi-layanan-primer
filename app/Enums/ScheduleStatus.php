@@ -29,7 +29,7 @@ enum ScheduleStatus: string
     {
         return match ($this) {
             self::Scheduled => 'blue',
-            self::Ongoing => 'orange',
+            self::Ongoing => 'amber',
             self::Completed => 'emerald',
             self::Cancelled => 'rose',
         };
@@ -44,6 +44,7 @@ enum ScheduleStatus: string
             fn (self $case) => [
                 'label' => $case->label(),
                 'value' => $case->value,
+                'color' => $case->badgeColor(),
             ],
             self::cases(),
         );

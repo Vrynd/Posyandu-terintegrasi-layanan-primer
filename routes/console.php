@@ -3,12 +3,12 @@
 use App\Models\Schedule;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
-use Illuminate\Support\Facades\Schedule as ScheduleTask;
+use Illuminate\Support\Facades\Schedule as CronSchedule;
 
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
-ScheduleTask::call(function () {
+CronSchedule::call(function () {
     Schedule::syncScheduleStatuses();
-})->daily();
+})->dailyAt('00:01')->name('sync-expired-schedules');

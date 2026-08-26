@@ -24,7 +24,7 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->enum('status', array_column(ScheduleStatus::cases(), 'value'))
                 ->default(ScheduleStatus::Scheduled->value);
-            $table->foreignId('created_by')
+            $table->foreignId('user_id')
                 ->constrained('users')
                 ->restrictOnDelete();
             $table->timestamps();

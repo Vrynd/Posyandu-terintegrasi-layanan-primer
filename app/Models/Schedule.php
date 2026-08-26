@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\ScheduleStatus;
 use Database\Factories\ScheduleFactory;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -44,6 +45,10 @@ class Schedule extends Model
         'location',
         'description',
         'status',
+    ];
+
+    protected $appends = [
+        'effective_status',
     ];
 
     protected function casts(): array
@@ -171,7 +176,7 @@ class Schedule extends Model
     public static function syncScheduleStatuses(): void
     {
         static::query()
-            ->whereDate('date', '<', Carbon::today())
+            ->where('date', '<', Carbon::today()->toDateString())
             ->whereIn('status', [
                 ScheduleStatus::Scheduled->value,
                 ScheduleStatus::Ongoing->value,
@@ -179,5 +184,33 @@ class Schedule extends Model
             ->update([
                 'status' => ScheduleStatus::Completed->value,
             ]);
+    }
+
+    /**
+     * Menghitung status 'ongoing' dan 'completed' secara otomatis berdasarkan
+     * tanggal dan rentang jam kegiatan tanpa memerlukan cron job per-menit.
+     *
+     * @return Attribute<ScheduleStatus, never>
+     */
+    protected function effectiveStatus(): Attribute
+    {
+        return Attribute::get(function (): ScheduleStatus {
+            if (in_array($this->status, [ScheduleStatus::Cancelled, ScheduleStatus::Completed], true)) {
+                return $this->status;
+            }
+
+            $isToday = $this->date->isToday();
+            $now = Carbon::now();
+            $startTime = $this->start_time ? Carbon::parse($this->start_time) : null;
+            $endTime = $this->end_time ? Carbon::parse($this->end_time) : null;
+
+            return match (true) {
+                $this->date->isPast() && ! $isToday => ScheduleStatus::Completed,
+                $isToday && $endTime && $now->greaterThanOrEqualTo($endTime) => ScheduleStatus::Completed,
+                $isToday && $startTime && $now->greaterThanOrEqualTo($startTime) => ScheduleStatus::Ongoing,
+                $isToday && ! $startTime && ! $endTime => ScheduleStatus::Ongoing,
+                default => $this->status,
+            };
+        });
     }
 }
