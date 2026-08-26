@@ -34,6 +34,11 @@ class ScheduleController extends Controller
         ]);
     }
 
+    public function history(Request $request): Response
+    {
+        return Inertia::render('schedules/History');
+    }
+
     /**
      * Memperbarui status kegiatan posyandu oleh kader / admin.
      */

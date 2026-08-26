@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
-import { Plus } from '@lucide/vue';
+import { Plus, ClockFading } from '@lucide/vue';
 import { computed, ref, toRef, watch } from 'vue';
 import ScheduleController from '@/actions/App/Http/Controllers/Schedules/ScheduleController';
 import Heading from '@/components/Heading.vue';
 import { Button } from '@/components/ui/button';
 import { useCalendar } from '@/composables/useCalendar';
 import { dashboard } from '@/routes';
+import { history } from '@/routes/schedules';
 import type { ScheduleItem, StatusOption } from '@/types';
 import CalendarGrid from './partials/CalendarGrid.vue';
 import DailyTimeline from './partials/DailyTimeline.vue';
@@ -89,17 +90,31 @@ watch(currentYear, (newYear, oldYear) => {
                 description="Papan kalender agenda posyandu yang direncanakan"
                 variant="small"
             />
-            <Button
-                v-if="isAdmin"
-                variant="default"
-                class="h-9 w-fit bg-linear-to-br"
-                as-child
-            >
-                <Link href="#">
-                    <Plus class="h-4 w-4" />
-                    <span class="hidden sm:inline">Tambah Jadwal</span>
-                </Link>
-            </Button>
+            <div class="flex items-center gap-2">
+                <Button
+                    type="button"
+                    variant="outline"
+                    class="cursor-pointer"
+                    as-child
+                >
+                    <Link :href="history()">
+                        <ClockFading class="h-4 w-4" />
+                        <span class="hidden sm:inline">Riwayat Kegiatan</span>
+                    </Link>
+                </Button>
+                <Button
+                    v-if="isAdmin"
+                    type="button"
+                    variant="default"
+                    class="cursor-pointer"
+                    as-child
+                >
+                    <Link href="#">
+                        <Plus class="h-4 w-4" />
+                        <span class="hidden sm:inline">Tambah Jadwal</span>
+                    </Link>
+                </Button>
+            </div>
         </header>
 
         <div
