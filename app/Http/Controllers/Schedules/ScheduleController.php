@@ -2,24 +2,21 @@
 
 namespace App\Http\Controllers\Schedules;
 
+use App\Actions\Schedules\CreateSchedule;
 use App\Enums\ScheduleStatus;
 use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Schedules\IndexScheduleRequest;
+use App\Http\Requests\Schedules\StoreScheduleRequest;
 use App\Models\Schedule;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class ScheduleController extends Controller
 {
-    private const historySyncKey = 'schedules:last-synced';
-
-    private const historySyncInterval = 5;
-
     /**
      * Menampilkan papan kalender jadwal kegiatan posyandu.
      */
@@ -40,17 +37,23 @@ class ScheduleController extends Controller
         ]);
     }
 
+    public function create(): Response
+    {
+        return Inertia::render('schedules/CreateSchedule');
+    }
+
+    public function store(StoreScheduleRequest $request, CreateSchedule $action): RedirectResponse
+    {
+        $action->execute($request->validated());
+
+        session()->flash('success', 'Jadwal kegiatan berhasil dibuat.');
+
+        return redirect()->route('schedules.index');
+    }
+
     public function history(IndexScheduleRequest $request): Response
     {
-        Cache::remember(
-            self::historySyncKey,
-            now()->addMinutes(self::historySyncInterval),
-            function () {
-                Schedule::syncScheduleStatuses();
-
-                return true;
-            },
-        );
+        Schedule::syncScheduleStatuses();
 
         $filters = $request->toFilters();
         $month = $filters['month'];

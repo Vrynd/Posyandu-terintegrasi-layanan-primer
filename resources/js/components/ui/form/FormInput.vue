@@ -54,7 +54,7 @@ const handleInput = (e: Event) => {
             @input="handleInput"
             :class="[
                 'h-10 text-sm sm:h-9.5',
-                type === 'date'
+                type === 'date' || type === 'time'
                     ? [
                           !modelValue
                               ? 'text-muted-foreground'

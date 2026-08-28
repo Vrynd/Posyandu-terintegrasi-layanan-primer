@@ -17,7 +17,7 @@ import { Button } from '@/components/ui/button';
 import { TileGroup, TileItem } from '@/components/ui/tile';
 import { formatDate, formatTime } from '@/lib/date';
 import { formatStatus, statusText } from '@/lib/schedule';
-import { updateStatus } from '@/routes/schedules';
+import { create, updateStatus } from '@/routes/schedules';
 import type { ScheduleItem, StatusOption } from '@/types';
 
 defineProps<{
@@ -231,7 +231,7 @@ const complete = (schedule: ScheduleItem) => {
                 class="text-xs font-medium"
                 as-child
             >
-                <Link href="#">
+                <Link :href="create({ query: { date: selectedDate } })">
                     <Plus class="size-4" />
                     Tambah Jadwal
                 </Link>

@@ -7,7 +7,7 @@ import Heading from '@/components/Heading.vue';
 import { Button } from '@/components/ui/button';
 import { useCalendar } from '@/composables/useCalendar';
 import { dashboard } from '@/routes';
-import { history } from '@/routes/schedules';
+import { create, history } from '@/routes/schedules';
 import type { ScheduleItem, StatusOption } from '@/types';
 import CalendarGrid from './partials/CalendarGrid.vue';
 import DailyTimeline from './partials/DailyTimeline.vue';
@@ -109,9 +109,9 @@ watch(currentYear, (newYear, oldYear) => {
                     class="cursor-pointer"
                     as-child
                 >
-                    <Link href="#">
+                    <Link :href="create({ query: { date: selectedDate } })">
                         <Plus class="h-4 w-4" />
-                        <span class="hidden sm:inline">Tambah Jadwal</span>
+                        <span class="hidden sm:inline">Buat Jadwal</span>
                     </Link>
                 </Button>
             </div>
