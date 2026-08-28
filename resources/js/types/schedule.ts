@@ -26,6 +26,10 @@ export interface StatusOption {
 }
 
 export interface ScheduleFilters {
-    search?: string | null;
     sort?: string | null;
+}
+
+export interface HistoryFilters {
+    month?: number | null;
+    year?: number | null;
 }

@@ -83,26 +83,6 @@ class Schedule extends Model
     }
 
     /**
-     * Scope untuk pencarian berdasarkan judul, jenis kegiatan, atau lokasi.
-     *
-     * @param  Builder<Schedule>  $query
-     * @return Builder<Schedule>
-     */
-    public function scopeSearch(Builder $query, ?string $term): Builder
-    {
-        if (blank($term)) {
-            return $query;
-        }
-
-        return $query->where(function (Builder $q) use ($term) {
-            $q->where('title', 'like', "%{$term}%")
-                ->orWhere('activity_type', 'like', "%{$term}%")
-                ->orWhere('location', 'like', "%{$term}%")
-                ->orWhere('description', 'like', "%{$term}%");
-        });
-    }
-
-    /**
      * Scope untuk filter berdasarkan status jadwal.
      *
      * @param  Builder<Schedule>  $query
@@ -118,12 +98,6 @@ class Schedule extends Model
         return $query->where('status', $value);
     }
 
-    /**
-     * Scope untuk filter berdasarkan bulan dan tahun.
-     *
-     * @param  Builder<Schedule>  $query
-     * @return Builder<Schedule>
-     */
     /**
      * Scope untuk filter berdasarkan bulan tertentu (1-12).
      *
@@ -187,8 +161,7 @@ class Schedule extends Model
     }
 
     /**
-     * Menghitung status 'ongoing' dan 'completed' secara otomatis berdasarkan
-     * tanggal dan rentang jam kegiatan tanpa memerlukan cron job per-menit.
+     * Menghitung status 'ongoing' dan 'completed' secara otomatis
      *
      * @return Attribute<ScheduleStatus, never>
      */

@@ -5,15 +5,21 @@ namespace App\Http\Controllers\Schedules;
 use App\Enums\ScheduleStatus;
 use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Schedules\IndexScheduleRequest;
 use App\Models\Schedule;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class ScheduleController extends Controller
 {
+    private const historySyncKey = 'schedules:last-synced';
+
+    private const historySyncInterval = 5;
+
     /**
      * Menampilkan papan kalender jadwal kegiatan posyandu.
      */
@@ -34,9 +40,38 @@ class ScheduleController extends Controller
         ]);
     }
 
-    public function history(Request $request): Response
+    public function history(IndexScheduleRequest $request): Response
     {
-        return Inertia::render('schedules/History');
+        Cache::remember(
+            self::historySyncKey,
+            now()->addMinutes(self::historySyncInterval),
+            function () {
+                Schedule::syncScheduleStatuses();
+
+                return true;
+            },
+        );
+
+        $filters = $request->toFilters();
+        $month = $filters['month'];
+        $year = $filters['year'] ?? now()->year;
+
+        $baseQuery = fn (string $status) => Schedule::query()
+            ->with('creator:id,name')
+            ->ofStatus($status)
+            ->inMonth($month)
+            ->inYear($year)
+            ->sorted('latest');
+
+        return Inertia::render('schedules/History', [
+            'completedSchedules' => $baseQuery(ScheduleStatus::Completed->value)->get(),
+            'cancelledSchedules' => $baseQuery(ScheduleStatus::Cancelled->value)->get(),
+            'filters' => [
+                'month' => $month,
+                'year' => $year,
+
+            ],
+        ]);
     }
 
     /**
@@ -70,5 +105,30 @@ class ScheduleController extends Controller
         session()->flash('success', $message);
 
         return back();
+    }
+
+    public function destroy(Schedule $schedule): RedirectResponse
+    {
+        if (! in_array($schedule->status, [ScheduleStatus::Completed, ScheduleStatus::Cancelled], true)) {
+            abort(422, 'Hanya kegiatan yang sudah selesai atau dibatalkan yang bisa dihapus.');
+        }
+
+        $title = $schedule->title;
+        $schedule->delete();
+
+        session()->flash('success', "Riwayat kegiatan \"{$title}\" berhasil dihapus.");
+
+        return back();
+    }
+
+    public function clear(): RedirectResponse
+    {
+        Schedule::query()
+            ->whereIn('status', [ScheduleStatus::Completed->value, ScheduleStatus::Cancelled->value])
+            ->delete();
+
+        session()->flash('success', 'Seluruh riwayat kegiatan berhasil dihapus.');
+
+        return redirect()->route('schedules.history');
     }
 }

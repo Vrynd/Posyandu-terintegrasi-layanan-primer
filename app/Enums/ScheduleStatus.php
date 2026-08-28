@@ -9,6 +9,8 @@ enum ScheduleStatus: string
     case Completed = 'completed';
     case Cancelled = 'cancelled';
 
+    public const All = 'all';
+
     /**
      * Mengambil label bahasa Indonesia untuk status jadwal.
      */

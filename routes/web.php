@@ -40,6 +40,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/schedules/history', [ScheduleController::class, 'history'])->name('schedules.history');
     Route::patch('/schedules/{schedule}/status', [ScheduleController::class, 'updateStatus'])->name('schedules.update-status');
 
+    Route::middleware('can:manage-schedules')->group(function () {
+        Route::delete('/schedules/history', [ScheduleController::class, 'clear'])->name('schedules.history.clear');
+        Route::delete('/schedules/{schedule}', [ScheduleController::class, 'destroy'])->name('schedules.destroy');
+    });
+
     Route::middleware('can:manage-tokens')->group(function () {
         Route::get('users', [UserController::class, 'index'])->name('users.index');
         Route::get('users/create', [UserController::class, 'create'])->name('users.create');

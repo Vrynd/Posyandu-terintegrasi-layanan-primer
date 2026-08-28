@@ -34,6 +34,10 @@ class AppServiceProvider extends ServiceProvider
             return $user->role === UserRole::Administrator;
         });
 
+        Gate::define('manage-schedules', function (User $user) {
+            return $user->role === UserRole::Administrator;
+        });
+
         Event::listen(function (Login $event) {
             if ($event->user instanceof User) {
                 $event->user->forceFill([
