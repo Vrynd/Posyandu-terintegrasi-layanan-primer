@@ -22,6 +22,8 @@ import {
     ListItemMeta,
     ListItemTitle,
 } from '@/components/ui/list';
+import { formatDate } from '@/lib/date';
+import { formatLocation } from '@/lib/schedule';
 import type { ScheduleItem } from '@/types';
 
 const props = withDefaults(
@@ -42,20 +44,6 @@ const emit = defineEmits<{
     (e: 'delete', ulid: string): void;
     (e: 'reset'): void;
 }>();
-
-const formatDate = (dateStr: string) => {
-    if (!dateStr) {
-        return '-';
-    }
-
-    const date = new Date(dateStr);
-
-    return new Intl.DateTimeFormat('id-ID', {
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric',
-    }).format(date);
-};
 
 const formatTime = (timeStr?: string | null) => {
     if (!timeStr) {
@@ -92,7 +80,9 @@ const formatTime = (timeStr?: string | null) => {
                     </template>
                     <template v-if="item.location">
                         <span class="shrink-0">•</span>
-                        <span class="truncate">{{ item.location }}</span>
+                        <span class="truncate">{{
+                            formatLocation(item.location)
+                        }}</span>
                     </template>
                 </ListItemMeta>
             </div>
@@ -120,39 +110,37 @@ const formatTime = (timeStr?: string | null) => {
         </ListItem>
     </ListContent>
 
-    <!-- 2. Kondisi Kosong (Empty State Mandiri) -->
-    <EmptyState
-        v-else
-        :icon="props.isFilterApplied ? CalendarX2 : Inbox"
-        :title="
-            props.isFilterApplied
-                ? props.type === 'completed'
-                    ? 'Tidak Ada Kegiatan Selesai'
-                    : 'Tidak Ada Kegiatan Dibatalkan'
-                : props.type === 'completed'
-                  ? 'Belum Ada Kegiatan Selesai'
-                  : 'Tidak Ada Kegiatan Dibatalkan'
-        "
-        :description="
-            props.isFilterApplied
-                ? props.type === 'completed'
-                    ? 'Tidak ditemukan arsip kegiatan selesai pada periode filter ini.'
-                    : 'Tidak ada agenda kegiatan yang dibatalkan pada periode filter ini.'
-                : props.type === 'completed'
-                  ? 'Kegiatan posyandu yang telah selesai dilaksanakan akan otomatis terarsip di sini.'
-                  : 'Saat ini belum ada agenda kegiatan posyandu yang dibatalkan.'
-        "
-        class="min-h-56 border-border/70 p-6"
-    >
-        <Button
-            v-if="props.isFilterApplied"
-            variant="outline"
-            size="sm"
-            class="cursor-pointer gap-1.5 text-xs"
-            @click="emit('reset')"
+    <!-- 2. Kondisi Kosong (Empty State) -->
+    <div v-else class="flex flex-1 items-center justify-center p-4 sm:p-6">
+        <EmptyState
+            :icon="props.isFilterApplied ? CalendarX2 : Inbox"
+            :title="
+                props.isFilterApplied
+                    ? 'Tidak ada riwayat kegiatan ditemukan'
+                    : props.type === 'completed'
+                      ? 'Belum ada kegiatan yang selesai'
+                      : 'Belum ada kegiatan yang dibatalkan'
+            "
+            :description="
+                props.isFilterApplied
+                    ? 'Coba ubah periode bulan atau tahun pada filter di atas untuk melihat data riwayat lainnya.'
+                    : props.type === 'completed'
+                      ? 'Riwayat kegiatan yang telah selesai dilaksanakan akan diarsipkan secara otomatis di sini.'
+                      : 'Riwayat kegiatan yang dibatalkan akan diarsipkan di sini.'
+            "
+            class="min-h-56 max-w-md border-border/40 p-4 sm:p-6"
         >
-            <RotateCcw class="h-3 w-3" />
-            <span>Kembali ke Bulan Ini</span>
-        </Button>
-    </EmptyState>
+            <Button
+                v-if="props.isFilterApplied"
+                type="button"
+                variant="outline"
+                size="sm"
+                class="mt-1 cursor-pointer text-xs"
+                @click="emit('reset')"
+            >
+                <RotateCcw class="mr-1.5 h-3.5 w-3.5" />
+                <span>Reset Filter</span>
+            </Button>
+        </EmptyState>
+    </div>
 </template>

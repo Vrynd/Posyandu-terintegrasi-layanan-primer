@@ -35,12 +35,6 @@ class ScheduleController extends Controller
             'schedules' => $schedules,
             'currentYear' => $year,
             'statuses' => ScheduleStatus::toOptions(),
-        ]);
-    }
-
-    public function create(): Response
-    {
-        return Inertia::render('schedules/CreateSchedule', [
             'locations' => ScheduleLocation::toOptions(),
         ]);
     }

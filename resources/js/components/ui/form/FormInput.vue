@@ -19,6 +19,7 @@ const props = defineProps<{
         | 'email'
         | 'url';
     maxlength?: number | string;
+    min?: string;
     max?: string;
     onlyNumeric?: boolean;
 }>();
@@ -49,6 +50,7 @@ const handleInput = (e: Event) => {
             :type="type || 'text'"
             :inputmode="inputmode"
             :maxlength="maxlength"
+            :min="min"
             :max="max"
             :placeholder="placeholder"
             @input="handleInput"

@@ -24,6 +24,13 @@ export interface StatusOption {
     color: string;
 }
 
+export interface LocationOption {
+    value: string;
+    label: string;
+    description: string;
+    icon?: string;
+}
+
 export interface ScheduleFilters {
     sort?: string | null;
 }

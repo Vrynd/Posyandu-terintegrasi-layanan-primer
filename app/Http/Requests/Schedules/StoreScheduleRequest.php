@@ -25,9 +25,18 @@ class StoreScheduleRequest extends FormRequest
         $sanitized = $this->sanitizeTextFields([
             'title',
             'location',
+            'custom_location',
         ]);
+
         if ($sanitized !== []) {
             $this->merge($sanitized);
+        }
+
+        // Jika memilih lokasi 'other', gunakan nilai custom_location
+        if ($this->input('location') === 'other' && $this->filled('custom_location')) {
+            $this->merge([
+                'location' => $this->input('custom_location'),
+            ]);
         }
     }
 
@@ -41,6 +50,7 @@ class StoreScheduleRequest extends FormRequest
         return [
             'title' => ['required', 'string', 'max:255'],
             'location' => ['required', 'string', 'max:255'],
+            'custom_location' => ['nullable', 'string', 'max:255'],
             'start_date' => ['required', 'date_format:Y-m-d', 'after_or_equal:today'],
             'end_date' => ['nullable', 'date_format:Y-m-d', 'after_or_equal:start_date'],
             'start_time' => ['nullable', 'date_format:H:i'],
@@ -56,6 +66,7 @@ class StoreScheduleRequest extends FormRequest
         return [
             'title.required' => 'Judul kegiatan wajib diisi.',
             'location.required' => 'Lokasi kegiatan wajib diisi.',
+            'custom_location.required_if' => 'Nama lokasi khusus wajib diisi.',
             'start_date.required' => 'Tanggal pelaksanaan kegiatan wajib diisi.',
             'start_date.after_or_equal' => 'Tanggal kegiatan tidak boleh di masa lalu.',
             'end_date.after_or_equal' => 'Tanggal selesai tidak boleh sebelum tanggal mulai.',

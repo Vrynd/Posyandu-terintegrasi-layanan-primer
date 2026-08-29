@@ -1,4 +1,4 @@
-import type { StatusOption } from '@/types';
+import type { LocationOption, StatusOption } from '@/types';
 
 export const defaultLabels: Record<string, string> = {
     scheduled: 'Terjadwal',
@@ -12,6 +12,11 @@ export const defaultColors: Record<string, string> = {
     ongoing: 'amber',
     completed: 'emerald',
     cancelled: 'rose',
+};
+
+export const defaultLocations: Record<string, string> = {
+    village_hall: 'Balai Desa',
+    pustu: 'Puskesmas Pembantu',
 };
 
 const classMap: Record<string, { bg: string; text: string }> = {
@@ -38,6 +43,17 @@ export function formatStatus(
         statuses.find((s) => s.value === status)?.label ??
         defaultLabels[status] ??
         status
+    );
+}
+
+export function formatLocation(
+    location: string,
+    locations: LocationOption[] = [],
+): string {
+    return (
+        locations.find((l) => l.value === location)?.label ??
+        defaultLocations[location] ??
+        location
     );
 }
 

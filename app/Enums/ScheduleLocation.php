@@ -6,6 +6,7 @@ enum ScheduleLocation: string
 {
     case VillageHall = 'village_hall';
     case Pustu = 'pustu';
+    case Other = 'other';
 
     /**
      * Label nama lokasi utama.
@@ -15,6 +16,7 @@ enum ScheduleLocation: string
         return match ($this) {
             self::VillageHall => 'Balai Desa',
             self::Pustu => 'Puskesmas Pembantu',
+            self::Other => 'Lokasi Lainnya',
         };
     }
 
@@ -26,6 +28,7 @@ enum ScheduleLocation: string
         return match ($this) {
             self::VillageHall => 'Balai pertemuan utama desa',
             self::Pustu => 'Fasilitas kesehatan Pustu desa',
+            self::Other => 'Rumah kader / Balai RW / Tempat khusus',
         };
     }
 
@@ -37,6 +40,7 @@ enum ScheduleLocation: string
         return match ($this) {
             self::VillageHall => 'Building2',
             self::Pustu => 'Hospital',
+            self::Other => 'MapPin',
         };
     }
 

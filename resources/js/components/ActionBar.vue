@@ -14,20 +14,21 @@ const props = withDefaults(
 </script>
 
 <template>
-    <!-- Kontainer Luar: Sticky Bottom Sheet di Mobile, Normal Flow di Desktop -->
+    <!-- Kontainer Luar: Sticky Bottom Bar hanya di Layar Mobile (<sm), Normal Flow Bersih di Desktop (sm+) -->
     <div
         :class="
             cn(
-                'fixed inset-x-0 bottom-0 z-30 rounded-t-2xl border-t border-border/80 bg-card/95 p-3.5 shadow-lg backdrop-blur-md sm:static sm:inset-auto sm:z-auto sm:rounded-none sm:border-0 sm:bg-transparent sm:p-0 sm:pt-2 sm:shadow-none sm:backdrop-blur-none dark:bg-zinc-950/95',
+                'pt-2 sm:flex sm:items-center sm:justify-end',
+                'max-sm:fixed max-sm:inset-x-0 max-sm:bottom-0 max-sm:z-30 max-sm:rounded-t-2xl max-sm:border-t max-sm:border-border/80 max-sm:bg-card/95 max-sm:p-3.5 max-sm:shadow-lg max-sm:backdrop-blur-md dark:max-sm:bg-zinc-950/95',
                 props.class,
             )
         "
     >
-        <!-- Kontainer Dalam: Distribusi Tombol Otomatis (1 Tombol = 100%, 2 Tombol = 50:50, Desktop = Sesuai Align) -->
+        <!-- Kontainer Dalam: Distribusi Tombol Otomatis (1 Tombol = 100%, 2 Tombol = 50:50 di Mobile) -->
         <div
             :class="
                 cn(
-                    'flex w-full items-center gap-3 sm:w-auto [&>*]:flex-1 sm:[&>*]:flex-initial',
+                    'flex w-full items-center gap-3 sm:w-auto max-sm:[&>*]:flex-1',
                     align === 'right' && 'sm:justify-end',
                     align === 'left' && 'sm:justify-start',
                     align === 'center' && 'sm:justify-center',

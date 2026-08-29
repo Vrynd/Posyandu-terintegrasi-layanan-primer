@@ -27,7 +27,7 @@ export function formatDate(
     dateStr: string | null | undefined,
     options: Intl.DateTimeFormatOptions = {
         day: 'numeric',
-        month: 'short',
+        month: 'long',
         year: 'numeric',
     },
 ): string {

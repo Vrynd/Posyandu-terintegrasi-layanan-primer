@@ -137,24 +137,23 @@ const yearOptions = computed(() => {
             </div>
         </div>
 
-        <div class="grid grid-cols-7 gap-1 sm:gap-2">
+        <!-- Grid Kalender (Mengisi Penuh Tinggi Tanpa Ruang Sisa) -->
+        <div class="grid flex-1 grid-cols-7 grid-rows-6 gap-1 sm:gap-2">
             <button
                 v-for="cell in calendarGrid"
                 :key="cell.dateString"
                 type="button"
                 @click="emit('select-date', cell.dateString)"
                 :class="[
-                    'group relative flex min-h-16 cursor-pointer flex-col rounded-xl border p-1 text-left transition-all sm:min-h-20 sm:p-2',
+                    'group relative flex h-full min-h-14 cursor-pointer flex-col justify-between rounded-xl border border-border p-1 text-left transition-all sm:min-h-18 sm:p-2',
                     cell.dateString === selectedDate
-                        ? 'border border-dashed border-primary bg-blue-500/10 dark:bg-blue-950/40'
+                        ? 'bg-muted/70 shadow-inner dark:bg-muted/60'
                         : cell.isCurrentMonth
-                          ? 'border-border bg-muted/40 hover:border-border hover:bg-muted/50'
-                          : 'bg-transparant border-border',
-                    cell.isToday && cell.dateString !== selectedDate
-                        ? 'border border-blue-400/60 bg-muted/20 dark:bg-muted/40'
-                        : '',
+                          ? 'bg-muted/40 hover:bg-muted/50'
+                          : 'bg-transparent opacity-40 hover:opacity-70',
                 ]"
             >
+                <!-- Glow Hijau untuk Kegiatan Selesai -->
                 <div
                     v-if="
                         cell.schedules.some(
@@ -163,14 +162,26 @@ const yearOptions = computed(() => {
                     "
                     class="pointer-events-none absolute inset-0 rounded-xl bg-radial from-emerald-500/15 to-transparent"
                 />
+
+                <!-- Glow Merah/Rose untuk Kegiatan Dibatalkan -->
+                <div
+                    v-else-if="
+                        cell.schedules.some(
+                            (s) => s.effective_status === 'cancelled',
+                        )
+                    "
+                    class="pointer-events-none absolute inset-0 rounded-xl bg-radial from-rose-500/15 to-transparent"
+                />
+
+                <!-- Nomor Tanggal Asli -->
                 <div class="flex items-center justify-between">
                     <span
                         :class="[
                             'inline-flex h-5.5 w-5.5 items-center justify-center rounded-full font-mono text-[11px] font-bold transition-colors sm:h-6.5 sm:w-6.5 sm:text-xs',
                             cell.dateString === selectedDate
-                                ? 'border border-white/15 bg-white/10 text-white'
+                                ? 'border border-white/20 bg-white/20 text-white'
                                 : cell.isToday
-                                  ? 'border border-white/10 bg-white/10 text-white'
+                                  ? 'bg-primary font-bold text-primary-foreground shadow-xs'
                                   : 'text-foreground',
                         ]"
                     >
@@ -178,29 +189,22 @@ const yearOptions = computed(() => {
                     </span>
                 </div>
 
-                <div class="mt-auto flex flex-col gap-1 overflow-hidden pt-1">
-                    <div
-                        v-for="schedule in cell.schedules.slice(0, 2)"
-                        :key="schedule.ulid"
-                        class="flex items-center gap-1.5 overflow-hidden"
-                    >
-                        <span
-                            class="h-2.5 w-0.5 shrink-0 rounded-full"
-                            :class="
-                                statusBg(schedule.effective_status, statuses)
-                            "
-                        />
-                        <span
-                            class="truncate text-[10px] font-medium text-muted-foreground/90 group-hover:text-foreground"
-                        >
-                            {{ schedule.title }}
-                        </span>
-                    </div>
+                <!-- Indikator Titik (Dots) Sesuai Instruksi -->
+                <div
+                    v-if="cell.schedules.length > 0"
+                    class="mt-auto flex items-center gap-1.5 overflow-hidden pt-1"
+                >
                     <span
-                        v-if="cell.schedules.length > 2"
+                        v-for="schedule in cell.schedules.slice(0, 3)"
+                        :key="schedule.ulid"
+                        class="h-1.5 w-1.5 shrink-0 rounded-full sm:h-2 sm:w-2"
+                        :class="statusBg(schedule.effective_status, statuses)"
+                    />
+                    <span
+                        v-if="cell.schedules.length > 3"
                         class="text-[9px] font-medium text-muted-foreground/70"
                     >
-                        +{{ cell.schedules.length - 2 }} lainnya
+                        +{{ cell.schedules.length - 3 }} lainnya
                     </span>
                 </div>
             </button>
