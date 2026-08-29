@@ -4,7 +4,6 @@ import {
     Activity,
     BookOpen,
     Bug,
-    Calendar,
     Database,
     FileText,
     KeyRound,
@@ -29,7 +28,6 @@ import {
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
-import schedules from '@/routes/schedules';
 import type { NavGroup } from '@/types';
 
 const page = usePage();
@@ -70,11 +68,6 @@ const navGroups = computed<NavGroup[]>(() => {
                     href: '#',
                     icon: Ruler,
                     isLocked: true,
-                },
-                {
-                    title: 'Jadwal Kegiatan',
-                    href: schedules.index(),
-                    icon: Calendar,
                 },
                 {
                     title: 'Laporan',
