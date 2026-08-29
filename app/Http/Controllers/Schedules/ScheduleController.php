@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Schedules;
 
 use App\Actions\Schedules\CreateSchedule;
+use App\Enums\ScheduleLocation;
 use App\Enums\ScheduleStatus;
 use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
@@ -39,7 +40,9 @@ class ScheduleController extends Controller
 
     public function create(): Response
     {
-        return Inertia::render('schedules/CreateSchedule');
+        return Inertia::render('schedules/CreateSchedule', [
+            'locations' => ScheduleLocation::toOptions(),
+        ]);
     }
 
     public function store(StoreScheduleRequest $request, CreateSchedule $action): RedirectResponse

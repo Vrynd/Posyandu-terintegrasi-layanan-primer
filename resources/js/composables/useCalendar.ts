@@ -54,7 +54,17 @@ export function useCalendar(
         const map: Record<string, ScheduleItem[]> = {};
 
         for (const schedule of schedules.value) {
-            (map[schedule.date] ??= []).push(schedule);
+            const start = new Date(`${schedule.start_date}T00:00:00`);
+            const end = new Date(`${schedule.end_date}T00:00:00`);
+
+            for (
+                const d = new Date(start);
+                d <= end;
+                d.setDate(d.getDate() + 1)
+            ) {
+                const dateKey = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+                (map[dateKey] ??= []).push(schedule);
+            }
         }
 
         return map;

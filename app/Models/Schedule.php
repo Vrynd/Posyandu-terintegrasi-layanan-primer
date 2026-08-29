@@ -17,16 +17,16 @@ use Illuminate\Support\Carbon;
  * @property string $ulid
  * @property int|null $user_id
  * @property string $title
- * @property string|null $activity_type
- * @property Carbon $date
+ * @property Carbon $start_date
+ * @property Carbon $end_date
  * @property string|null $start_time
  * @property string|null $end_time
  * @property string $location
- * @property string|null $description
  * @property ScheduleStatus $status
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property-read User|null $creator
+ * @property-read ScheduleStatus $effective_status
  */
 class Schedule extends Model
 {
@@ -38,12 +38,11 @@ class Schedule extends Model
     protected $fillable = [
         'user_id',
         'title',
-        'activity_type',
-        'date',
+        'start_date',
+        'end_date',
         'start_time',
         'end_time',
         'location',
-        'description',
         'status',
     ];
 
@@ -54,7 +53,8 @@ class Schedule extends Model
     protected function casts(): array
     {
         return [
-            'date' => 'date:Y-m-d',
+            'start_date' => 'date:Y-m-d',
+            'end_date' => 'date:Y-m-d',
             'status' => ScheduleStatus::class,
         ];
     }
@@ -110,7 +110,10 @@ class Schedule extends Model
             return $query;
         }
 
-        return $query->whereMonth('date', $month);
+        return $query->where(function (Builder $q) use ($month) {
+            $q->whereMonth('start_date', $month)
+                ->orWhereMonth('end_date', $month);
+        });
     }
 
     /**
@@ -125,7 +128,10 @@ class Schedule extends Model
             return $query;
         }
 
-        return $query->whereYear('date', $year);
+        return $query->where(function (Builder $q) use ($year) {
+            $q->whereYear('start_date', $year)
+                ->orWhereYear('end_date', $year);
+        });
     }
 
     /**
@@ -137,10 +143,10 @@ class Schedule extends Model
     public function scopeSorted(Builder $query, ?string $sort): Builder
     {
         return match ($sort) {
-            'oldest' => $query->oldest('date'),
+            'oldest' => $query->oldest('start_date'),
             'title_asc' => $query->orderBy('title', 'asc'),
             'title_desc' => $query->orderBy('title', 'desc'),
-            default => $query->latest('date'),
+            default => $query->latest('start_date'),
         };
     }
 
@@ -150,14 +156,9 @@ class Schedule extends Model
     public static function syncScheduleStatuses(): void
     {
         static::query()
-            ->where('date', '<', Carbon::today()->toDateString())
-            ->whereIn('status', [
-                ScheduleStatus::Scheduled->value,
-                ScheduleStatus::Ongoing->value,
-            ])
-            ->update([
-                'status' => ScheduleStatus::Completed->value,
-            ]);
+            ->where('end_date', '<', Carbon::today()->toDateString())
+            ->whereIn('status', [ScheduleStatus::Scheduled->value, ScheduleStatus::Ongoing->value])
+            ->update(['status' => ScheduleStatus::Completed->value]);
     }
 
     /**
@@ -172,16 +173,21 @@ class Schedule extends Model
                 return $this->status;
             }
 
-            $isToday = $this->date->isToday();
+            $today = Carbon::today();
             $now = Carbon::now();
+            $isFirstDay = $this->start_date->isToday();
+            $isLastDay = $this->end_date->isToday();
+            $isWithinRange = $today->betweenIncluded($this->start_date, $this->end_date);
+
             $startTime = $this->start_time ? Carbon::parse($this->start_time) : null;
             $endTime = $this->end_time ? Carbon::parse($this->end_time) : null;
 
             return match (true) {
-                $this->date->isPast() && ! $isToday => ScheduleStatus::Completed,
-                $isToday && $endTime && $now->greaterThanOrEqualTo($endTime) => ScheduleStatus::Completed,
-                $isToday && $startTime && $now->greaterThanOrEqualTo($startTime) => ScheduleStatus::Ongoing,
-                $isToday && ! $startTime && ! $endTime => ScheduleStatus::Ongoing,
+                $this->end_date->isPast() && ! $isLastDay => ScheduleStatus::Completed,
+                $isLastDay && $endTime && $now->greaterThanOrEqualTo($endTime) => ScheduleStatus::Completed,
+                $isFirstDay && $startTime && $now->lessThan($startTime) => ScheduleStatus::Scheduled,
+                $isWithinRange => ScheduleStatus::Ongoing,
+
                 default => $this->status,
             };
         });

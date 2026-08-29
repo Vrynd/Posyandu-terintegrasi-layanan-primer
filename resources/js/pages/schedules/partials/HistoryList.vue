@@ -79,7 +79,11 @@ const formatTime = (timeStr?: string | null) => {
                     {{ item.title }}
                 </ListItemTitle>
                 <ListItemMeta class="w-full min-w-0 truncate">
-                    <span class="shrink-0">{{ formatDate(item.date) }}</span>
+                    <span class="shrink-0">{{
+                        item.start_date === item.end_date
+                            ? formatDate(item.start_date)
+                            : `${formatDate(item.start_date)} - ${formatDate(item.end_date)}`
+                    }}</span>
                     <template v-if="item.start_time">
                         <span class="shrink-0">•</span>
                         <span class="shrink-0">{{

@@ -16,12 +16,11 @@ class CreateSchedule
         return Schedule::create([
             'user_id' => Auth::id(),
             'title' => $validated['title'],
-            'activity_type' => $validated['activity_type'] ?? null,
-            'date' => $validated['date'],
+            'location' => $validated['location'],
+            'start_date' => $validated['start_date'],
+            'end_date' => ! empty($validated['end_date']) ? $validated['end_date'] : $validated['start_date'],
             'start_time' => $validated['start_time'] ?? null,
             'end_time' => $validated['end_time'] ?? null,
-            'location' => $validated['location'],
-            'description' => $validated['description'] ?? null,
             'status' => ScheduleStatus::Scheduled->value,
         ]);
     }

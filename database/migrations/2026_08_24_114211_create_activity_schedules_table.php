@@ -16,12 +16,11 @@ return new class extends Migration
             $table->id();
             $table->ulid('ulid')->unique();
             $table->string('title');
-            $table->string('activity_type', 100)->nullable();
-            $table->date('date');
+            $table->date('start_date');
+            $table->date('end_date');
             $table->time('start_time')->nullable();
             $table->time('end_time')->nullable();
             $table->string('location');
-            $table->text('description')->nullable();
             $table->enum('status', array_column(ScheduleStatus::cases(), 'value'))
                 ->default(ScheduleStatus::Scheduled->value);
             $table->foreignId('user_id')
@@ -30,9 +29,10 @@ return new class extends Migration
             $table->timestamps();
 
             // Index query performa
-            $table->index('date');
+            $table->index('start_date');
+            $table->index('end_date');
             $table->index('status');
-            $table->index(['status', 'date']);
+            $table->index(['status', 'start_date']);
             $table->index('user_id');
         });
     }

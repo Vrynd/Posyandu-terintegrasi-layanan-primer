@@ -24,9 +24,7 @@ class StoreScheduleRequest extends FormRequest
     {
         $sanitized = $this->sanitizeTextFields([
             'title',
-            'activity_type',
             'location',
-            'description',
         ]);
         if ($sanitized !== []) {
             $this->merge($sanitized);
@@ -42,12 +40,11 @@ class StoreScheduleRequest extends FormRequest
     {
         return [
             'title' => ['required', 'string', 'max:255'],
-            'activity_type' => ['nullable', 'string', 'max:100'],
-            'date' => ['required', 'date', 'after_or_equal:today'],
+            'location' => ['required', 'string', 'max:255'],
+            'start_date' => ['required', 'date_format:Y-m-d', 'after_or_equal:today'],
+            'end_date' => ['nullable', 'date_format:Y-m-d', 'after_or_equal:start_date'],
             'start_time' => ['nullable', 'date_format:H:i'],
             'end_time' => ['nullable', 'date_format:H:i', 'after:start_time'],
-            'location' => ['required', 'string', 'max:255'],
-            'description' => ['nullable', 'string', 'max:1000'],
         ];
     }
 
@@ -58,10 +55,11 @@ class StoreScheduleRequest extends FormRequest
     {
         return [
             'title.required' => 'Judul kegiatan wajib diisi.',
-            'date.required' => 'Tanggal kegiatan wajib diisi.',
-            'date.after_or_equal' => 'Tanggal kegiatan tidak boleh di masa lalu.',
-            'end_time.after' => 'Jam selesai harus setelah jam mulai.',
             'location.required' => 'Lokasi kegiatan wajib diisi.',
+            'start_date.required' => 'Tanggal pelaksanaan kegiatan wajib diisi.',
+            'start_date.after_or_equal' => 'Tanggal kegiatan tidak boleh di masa lalu.',
+            'end_date.after_or_equal' => 'Tanggal selesai tidak boleh sebelum tanggal mulai.',
+            'end_time.after' => 'Jam selesai harus setelah jam mulai.',
         ];
     }
 }

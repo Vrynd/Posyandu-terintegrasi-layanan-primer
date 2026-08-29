@@ -18,7 +18,8 @@ describe('Schedule Effective Status Timeline Scenarios', function () {
         Carbon::setTestNow('2026-08-26 10:00:00');
 
         $schedule = Schedule::factory()->create([
-            'date' => '2026-08-26',
+            'start_date' => '2026-08-26',
+            'end_date' => '2026-08-26',
             'start_time' => '13:30:00',
             'end_time' => '16:00:00',
             'status' => ScheduleStatus::Scheduled,
@@ -31,7 +32,8 @@ describe('Schedule Effective Status Timeline Scenarios', function () {
         Carbon::setTestNow('2026-08-26 14:00:00');
 
         $schedule = Schedule::factory()->create([
-            'date' => '2026-08-26',
+            'start_date' => '2026-08-26',
+            'end_date' => '2026-08-26',
             'start_time' => '13:30:00',
             'end_time' => '16:00:00',
             'status' => ScheduleStatus::Scheduled,
@@ -44,7 +46,8 @@ describe('Schedule Effective Status Timeline Scenarios', function () {
         Carbon::setTestNow('2026-08-26 20:00:00');
 
         $schedule = Schedule::factory()->create([
-            'date' => '2026-08-26',
+            'start_date' => '2026-08-26',
+            'end_date' => '2026-08-26',
             'start_time' => '13:30:00',
             'end_time' => '16:00:00',
             'status' => ScheduleStatus::Scheduled,
@@ -57,7 +60,8 @@ describe('Schedule Effective Status Timeline Scenarios', function () {
         Carbon::setTestNow('2026-08-26 09:00:00');
 
         $schedule = Schedule::factory()->create([
-            'date' => '2026-08-25',
+            'start_date' => '2026-08-25',
+            'end_date' => '2026-08-25',
             'start_time' => '08:00:00',
             'end_time' => '11:00:00',
             'status' => ScheduleStatus::Scheduled,
@@ -70,7 +74,8 @@ describe('Schedule Effective Status Timeline Scenarios', function () {
         Carbon::setTestNow('2026-08-26 09:00:00');
 
         $schedule = Schedule::factory()->create([
-            'date' => '2026-08-28',
+            'start_date' => '2026-08-28',
+            'end_date' => '2026-08-28',
             'start_time' => '08:00:00',
             'end_time' => '11:00:00',
             'status' => ScheduleStatus::Scheduled,
@@ -83,7 +88,8 @@ describe('Schedule Effective Status Timeline Scenarios', function () {
         Carbon::setTestNow('2026-08-26 14:00:00');
 
         $schedule = Schedule::factory()->create([
-            'date' => '2026-08-26',
+            'start_date' => '2026-08-26',
+            'end_date' => '2026-08-26',
             'start_time' => '13:30:00',
             'end_time' => '16:00:00',
             'status' => ScheduleStatus::Cancelled,
@@ -96,7 +102,8 @@ describe('Schedule Effective Status Timeline Scenarios', function () {
         Carbon::setTestNow('2026-08-26 12:00:00');
 
         $schedule = Schedule::factory()->create([
-            'date' => '2026-08-26',
+            'start_date' => '2026-08-26',
+            'end_date' => '2026-08-26',
             'start_time' => null,
             'end_time' => null,
             'status' => ScheduleStatus::Scheduled,
@@ -111,10 +118,12 @@ describe('Schedule Controller and Authorization', function () {
         $user = User::factory()->create();
 
         Schedule::factory()->create([
-            'date' => '2026-05-10',
+            'start_date' => '2026-05-10',
+            'end_date' => '2026-05-10',
         ]);
         Schedule::factory()->create([
-            'date' => '2025-05-10',
+            'start_date' => '2025-05-10',
+            'end_date' => '2025-05-10',
         ]);
 
         $response = $this->actingAs($user)->get('/schedules?year=2026');
@@ -181,12 +190,14 @@ describe('Database Batch Sync Schedules', function () {
         Carbon::setTestNow('2026-08-26 00:00:00');
 
         $pastSchedule = Schedule::factory()->create([
-            'date' => '2026-08-20',
+            'start_date' => '2026-08-20',
+            'end_date' => '2026-08-20',
             'status' => ScheduleStatus::Scheduled,
         ]);
 
         $futureSchedule = Schedule::factory()->create([
-            'date' => '2026-08-28',
+            'start_date' => '2026-08-28',
+            'end_date' => '2026-08-28',
             'status' => ScheduleStatus::Scheduled,
         ]);
 

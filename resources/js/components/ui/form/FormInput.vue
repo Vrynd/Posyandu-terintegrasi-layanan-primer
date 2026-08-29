@@ -59,7 +59,7 @@ const handleInput = (e: Event) => {
                           !modelValue
                               ? 'text-muted-foreground'
                               : 'text-foreground',
-                          'dark:[color-scheme:dark] [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-50 [&::-webkit-calendar-picker-indicator]:hover:opacity-100',
+                          'dark:scheme-dark [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-50 [&::-webkit-calendar-picker-indicator]:hover:opacity-100',
                       ]
                     : '',
                 error ? 'border-red-500' : '',

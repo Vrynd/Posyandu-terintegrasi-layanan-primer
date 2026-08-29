@@ -3,12 +3,11 @@ export interface ScheduleItem {
     ulid: string;
     user_id?: number | null;
     title: string;
-    activity_type?: string | null;
-    date: string;
+    start_date: string;
+    end_date: string;
     start_time?: string | null;
     end_time?: string | null;
     location: string;
-    description?: string | null;
     status: 'scheduled' | 'ongoing' | 'completed' | 'cancelled';
     effective_status: 'scheduled' | 'ongoing' | 'completed' | 'cancelled';
     created_at?: string;

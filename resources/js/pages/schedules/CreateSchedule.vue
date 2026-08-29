@@ -11,8 +11,8 @@ import {
     create as createSchedule,
     index as scheduleIndex,
 } from '@/routes/schedules';
-import GeneralScheduleFields from './partials/GeneralScheduleFields.vue';
-import ScheduleTimingFields from './partials/ScheduleTimingFields.vue';
+import GeneralFields from './partials/GeneralFields.vue';
+import TimingFields from './partials/TimingFields.vue';
 
 defineOptions({
     layout: {
@@ -27,9 +27,16 @@ defineOptions({
 const props = withDefaults(
     defineProps<{
         defaultDate?: string;
+        locations?: Array<{
+            value: string;
+            label: string;
+            description: string;
+            icon?: string;
+        }>;
     }>(),
     {
         defaultDate: () => '',
+        locations: () => [],
     },
 );
 
@@ -60,13 +67,16 @@ const form = ref({
 
         <!-- 2. Kontainer Formulir Terpadu (2 Seksi Inti) -->
         <div class="flex max-w-4xl flex-1 flex-col gap-6 pb-24 sm:pb-8">
-            <!-- SEKSI 01: INFORMASI UTAMA KEGIATAN (Judul & Lokasi) -->
+            <!-- SEKSI 01: INFORMASI UTAMA KEGIATAN (Judul & Lokasi dari Enum) -->
             <FormSection
                 number="01"
                 title="Informasi Utama Kegiatan"
                 :completed="Boolean(form.title && form.location)"
             >
-                <GeneralScheduleFields v-model:form="form" />
+                <GeneralFields
+                    v-model:form="form"
+                    :locations="props.locations"
+                />
             </FormSection>
 
             <!-- SEKSI 02: WAKTU & TANGGAL PELAKSANAAN -->
@@ -75,7 +85,7 @@ const form = ref({
                 title="Waktu & Tanggal Pelaksanaan"
                 :completed="Boolean(form.start_date)"
             >
-                <ScheduleTimingFields v-model:form="form" />
+                <TimingFields v-model:form="form" />
             </FormSection>
 
             <!-- TOMBOL AKSI UNIVERSAL MENGGUNAKAN ACTIONBAR -->

@@ -38,15 +38,16 @@ class ScheduleFactory extends Factory
             'Pustu (Puskesmas Pembantu)',
         ];
 
+        $startDate = fake()->dateTimeBetween('-1 month', '+2 months')->format('Y-m-d');
+
         return [
             'user_id' => User::factory(),
             'title' => fake()->randomElement($activityTypes).' - '.fake()->monthName(),
-            'activity_type' => fake()->randomElement($activityTypes),
-            'date' => fake()->dateTimeBetween('-1 month', '+2 months')->format('Y-m-d'),
+            'start_date' => $startDate,
+            'end_date' => $startDate,
             'start_time' => '08:30:00',
             'end_time' => '11:30:00',
             'location' => fake()->randomElement($locations),
-            'description' => fake()->optional(0.7)->sentence(10),
             'status' => fake()->randomElement(ScheduleStatus::cases()),
         ];
     }

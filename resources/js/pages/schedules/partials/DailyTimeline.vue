@@ -115,12 +115,6 @@ const complete = (schedule: ScheduleItem) => {
                     >
                         {{ schedule.title }}
                     </h4>
-                    <p
-                        v-if="schedule.description"
-                        class="line-clamp-2 text-xs leading-relaxed text-muted-foreground/80"
-                    >
-                        {{ schedule.description }}
-                    </p>
                 </div>
 
                 <TileGroup
