@@ -4,10 +4,12 @@ import {
     Activity,
     BookOpen,
     Bug,
+    ClipboardList,
     Database,
     FileText,
     KeyRound,
     LayoutGrid,
+    MessageSquare,
     Ruler,
     Stethoscope,
     TrendingUp,
@@ -28,13 +30,72 @@ import {
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
+import examinations from '@/routes/examinations';
+import participants from '@/routes/participants';
+import tokens from '@/routes/tokens';
+import users from '@/routes/users';
 import type { NavGroup } from '@/types';
 
 const page = usePage();
 const userRole = computed(() => page.props.auth?.user?.role);
 
 const navGroups = computed<NavGroup[]>(() => {
-    const groups: NavGroup[] = [
+    // 1. Menu Khusus Administrator (IT & Pemeliharaan Sistem)
+    if (userRole.value === 'administrator') {
+        return [
+            {
+                title: 'Utama',
+                items: [
+                    {
+                        title: 'Dashboard Sistem',
+                        href: dashboard(),
+                        icon: LayoutGrid,
+                    },
+                ],
+            },
+            {
+                title: 'Operasional Sistem',
+                items: [
+                    {
+                        title: 'Manajemen Pengguna',
+                        href: users.index(),
+                        icon: Users,
+                    },
+                    {
+                        title: 'Kelola Token',
+                        href: tokens.index(),
+                        icon: KeyRound,
+                    },
+                    {
+                        title: 'Kelola Formulir',
+                        href: '/myadmin/forms',
+                        icon: ClipboardList,
+                    },
+                    {
+                        title: 'Backup & Restore',
+                        href: '#',
+                        icon: Database,
+                        isLocked: true,
+                    },
+                    {
+                        title: 'Log Aktivitas',
+                        href: '#',
+                        icon: Activity,
+                        isLocked: true,
+                    },
+                    {
+                        title: 'Pusat Pengaduan',
+                        href: '#',
+                        icon: MessageSquare,
+                        isLocked: true,
+                    },
+                ],
+            },
+        ];
+    }
+
+    // 2. Menu Khusus Kader (Pelayanan & Data Kesehatan Posyandu)
+    return [
         {
             title: 'Utama',
             items: [
@@ -47,6 +108,7 @@ const navGroups = computed<NavGroup[]>(() => {
                     title: 'Statistik Posyandu',
                     href: '#',
                     icon: TrendingUp,
+                    isLocked: true,
                 },
             ],
         },
@@ -55,13 +117,35 @@ const navGroups = computed<NavGroup[]>(() => {
             items: [
                 {
                     title: 'Pendaftaran',
-                    href: '/participants',
+                    href: participants.index(),
                     icon: UserPlus,
                 },
                 {
                     title: 'Pemeriksaan',
-                    href: '#',
+                    href: examinations.index(),
                     icon: Stethoscope,
+                    items: [
+                        {
+                            title: 'Ibu Hamil',
+                            href: '/examinations/pregnant-mothers',
+                        },
+                        {
+                            title: 'Balita',
+                            href: '/examinations/toddlers',
+                        },
+                        {
+                            title: 'Usia Remaja',
+                            href: '/examinations/teens',
+                        },
+                        {
+                            title: 'Usia Produktif',
+                            href: '/examinations/productive',
+                        },
+                        {
+                            title: 'Lansia',
+                            href: '/examinations/elderly',
+                        },
+                    ],
                 },
                 {
                     title: 'Monitoring Stunting',
@@ -73,57 +157,28 @@ const navGroups = computed<NavGroup[]>(() => {
                     title: 'Laporan',
                     href: '#',
                     icon: FileText,
+                    isLocked: true,
+                },
+            ],
+        },
+        {
+            title: 'Dukungan',
+            items: [
+                {
+                    title: 'Lapor Kendala / Bug',
+                    href: '#',
+                    icon: Bug,
+                    isLocked: true,
+                },
+                {
+                    title: 'Panduan & Bantuan',
+                    href: '#',
+                    icon: BookOpen,
+                    isLocked: true,
                 },
             ],
         },
     ];
-
-    if (userRole.value === 'administrator') {
-        groups.push({
-            title: 'Operasional Sistem',
-            items: [
-                {
-                    title: 'Manajemen Pengguna',
-                    href: '/users',
-                    icon: Users,
-                },
-                {
-                    title: 'Kelola Token',
-                    href: '/tokens',
-                    icon: KeyRound,
-                },
-                {
-                    title: 'Log Aktivitas',
-                    href: '#',
-                    icon: Activity,
-                },
-                {
-                    title: 'Backup Data',
-                    href: '#',
-                    icon: Database,
-                },
-            ],
-        });
-    }
-
-    groups.push({
-        title: 'Dukungan',
-        items: [
-            {
-                title: 'Pengaduan Bug',
-                href: '#',
-                icon: Bug,
-            },
-            {
-                title: 'Panduan & Bantuan',
-                href: '#',
-                icon: BookOpen,
-                isLocked: true,
-            },
-        ],
-    });
-
-    return groups;
 });
 </script>
 

@@ -158,6 +158,22 @@ class Participant extends Model
     }
 
     /**
+     * @return HasMany<Examination, $this>
+     */
+    public function examinations(): HasMany
+    {
+        return $this->hasMany(Examination::class)->latest('examination_date');
+    }
+
+    /**
+     * @return HasOne<Examination, $this>
+     */
+    public function latestExamination(): HasOne
+    {
+        return $this->hasOne(Examination::class)->latestOfMany('examination_date');
+    }
+
+    /**
      * Scope untuk pencarian berdasarkan NIK (hash), Nama, No Telepon, atau Alamat.
      *
      * @param  Builder<Participant>  $query

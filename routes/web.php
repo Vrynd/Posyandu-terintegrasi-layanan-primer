@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\TokenController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Auth\VerifyTokenController;
+use App\Http\Controllers\Examinations\ExaminationController;
 use App\Http\Controllers\Participants\ParticipantController;
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
@@ -33,6 +34,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('participants.update');
     Route::delete('/participants/{participant}', [ParticipantController::class, 'destroy'])
         ->name('participants.destroy');
+
+    // Route pemeriksaan posyandu (Fase 1)
+    Route::get('/examinations', [ExaminationController::class, 'index'])->name('examinations.index');
+    Route::get('/examinations/create', [ExaminationController::class, 'create'])->name('examinations.create');
+    Route::post('/examinations', [ExaminationController::class, 'store'])->name('examinations.store');
 
     Route::middleware('can:manage-tokens')->group(function () {
         Route::get('users', [UserController::class, 'index'])->name('users.index');
