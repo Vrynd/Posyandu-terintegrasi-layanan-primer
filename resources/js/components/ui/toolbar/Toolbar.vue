@@ -11,7 +11,7 @@ const props = defineProps<{
     <div
         :class="
             cn(
-                'flex flex-col gap-4 rounded-xl border border-border/80 bg-card p-4 shadow-xs',
+                'flex flex-col gap-4 rounded-2xl border border-card bg-card/80 p-5 shadow-none backdrop-blur-xs dark:border-border',
                 props.class,
             )
         "

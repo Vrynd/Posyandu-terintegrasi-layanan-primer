@@ -1,7 +1,9 @@
 <script setup lang="ts">
-import { Head, Link } from '@inertiajs/vue3';
+import { Head, Link, router, setLayoutProps } from '@inertiajs/vue3';
 import { ArrowUpDown, Filter, Plus } from '@lucide/vue';
-import { computed, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
+import ActionBar from '@/components/ActionBar.vue';
+import ConfirmDialog from '@/components/ConfirmDialog.vue';
 import Heading from '@/components/Heading.vue';
 import Pagination from '@/components/Pagination.vue';
 import { Button } from '@/components/ui/button';
@@ -14,7 +16,11 @@ import {
 import { useTableFilter } from '@/composables/useTableFilter';
 import { useTableQuery } from '@/composables/useTableQuery';
 import { dashboard } from '@/routes';
-import { create, index as participantsIndex } from '@/routes/participants';
+import {
+    create,
+    destroy,
+    index as participantsIndex,
+} from '@/routes/participants';
 import type {
     FilterOption,
     PaginatedData,
@@ -23,13 +29,11 @@ import type {
 } from '@/types';
 import ListParticipant from './partials/ListParticipant.vue';
 
-defineOptions({
-    layout: {
-        breadcrumbs: [
-            { title: 'Dashboard', href: dashboard() },
-            { title: 'Pendaftaran Peserta' },
-        ],
-    },
+setLayoutProps({
+    breadcrumbs: [
+        { title: 'Dashboard', href: dashboard() },
+        { title: 'Pendaftaran Peserta' },
+    ],
 });
 
 interface Props {
@@ -44,7 +48,7 @@ const props = withDefaults(defineProps<Props>(), {
         total: 0,
         current_page: 1,
         last_page: 1,
-        per_page: 6,
+        per_page: 8,
         from: null,
         to: null,
     }),
@@ -86,6 +90,41 @@ const { navigate, debouncedNavigate, isLoading } = useTableQuery({
     only: ['participants', 'filters'],
 });
 
+const selectedParticipant = ref<ParticipantItem | null>(null);
+const showDeleteDialog = ref(false);
+const isDeleting = ref(false);
+
+const deleteDescription = computed(() => {
+    const name = selectedParticipant.value?.name ?? '';
+
+    return `Apakah Anda yakin ingin menghapus data peserta ${name}? Seluruh data profil dan riwayat pemeriksaan peserta ini akan dihapus secara permanen.`;
+});
+
+const tapToDelete = (participant: ParticipantItem) => {
+    selectedParticipant.value = participant;
+    showDeleteDialog.value = true;
+};
+
+const confirmDelete = () => {
+    if (!selectedParticipant.value) {
+        return;
+    }
+
+    router.delete(
+        destroy({ participant: selectedParticipant.value.ulid }).url,
+        {
+            onStart: () => {
+                isDeleting.value = true;
+            },
+            onFinish: () => {
+                isDeleting.value = false;
+                showDeleteDialog.value = false;
+                selectedParticipant.value = null;
+            },
+        },
+    );
+};
+
 watch(search, () => {
     debouncedNavigate(toQueryParams());
 });
@@ -102,18 +141,24 @@ watch(
 <template>
     <Head title="Pendaftaran Peserta" />
 
-    <div class="flex h-full flex-1 flex-col p-4 sm:p-5">
+    <div
+        class="flex flex-1 flex-col gap-4 bg-background p-4 pb-24 sm:gap-5 sm:p-5"
+    >
         <!-- 1. Judul Halaman -->
-        <header class="mb-6 flex items-center justify-between gap-4 sm:mb-8">
+        <header class="flex items-center justify-between gap-4">
             <Heading
                 title="Pendaftaran Peserta"
-                description="Kelola data sasaran peserta posyandu"
-                variant="small"
+                description="Kelola data sasaran peserta posyandu serta pantau status pendaftaran."
             />
-            <Button variant="default" class="h-9 bg-linear-to-br" as-child>
+            <Button
+                class="hidden sm:inline-flex"
+                variant="metalic"
+                size="lg"
+                as-child
+            >
                 <Link :href="create()">
                     <Plus class="h-4 w-4" />
-                    <span class="hidden sm:inline">Tambah Peserta</span>
+                    <span>Tambah Peserta</span>
                 </Link>
             </Button>
         </header>
@@ -157,24 +202,50 @@ watch(
 
         <!-- 3. Tabel Peserta -->
         <section
-            class="mt-4 flex-1 transition-opacity"
+            class="flex flex-col gap-4 transition-opacity"
             :class="{ 'pointer-events-none opacity-60': isLoading }"
         >
             <ListParticipant
                 :participants="props.participants.data"
                 :categories="props.categories"
                 :has-search="hasSearch"
+                @delete="tapToDelete"
             />
 
-            <div v-if="props.participants.data.length > 0" class="mt-4">
-                <Pagination
-                    v-if="props.participants.links"
-                    :links="props.participants.links"
-                    :current-count="props.participants.data.length"
-                    :total="props.participants.total"
-                    :last-page="props.participants.last_page"
-                />
-            </div>
+            <Pagination
+                v-if="
+                    props.participants.data.length > 0 &&
+                    props.participants.links
+                "
+                :links="props.participants.links"
+                :current-count="props.participants.data.length"
+                :total="props.participants.total"
+                :last-page="props.participants.last_page"
+            />
         </section>
+
+        <!-- 4. Mobile Sticky Bottom Action Bar (< sm) -->
+        <ActionBar class="sm:hidden" size="lg">
+            <Button as-child>
+                <Link :href="create()">
+                    <Plus class="h-4 w-4" />
+                    <span>Tambah Peserta</span>
+                </Link>
+            </Button>
+        </ActionBar>
+
+        <!-- 5. Dialog Konfirmasi Hapus Data Peserta -->
+        <ConfirmDialog
+            :open="showDeleteDialog"
+            title="Hapus Data Peserta"
+            :description="deleteDescription"
+            confirm-text="Hapus Data"
+            cancel-text="Batal"
+            variant="destructive"
+            :processing="isDeleting"
+            @update:open="(val) => (showDeleteDialog = val)"
+            @confirm="confirmDelete"
+            @cancel="showDeleteDialog = false"
+        />
     </div>
 </template>

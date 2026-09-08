@@ -29,7 +29,7 @@ class ParticipantController extends Controller
             ->search($filters['search'])
             ->ofCategory($filters['category'])
             ->sorted($filters['sort'])
-            ->paginate(6)
+            ->paginate(8)
             ->withQueryString();
 
         return Inertia::render('participants/Index', [

@@ -48,3 +48,50 @@ export function formatTime(start?: string | null, end?: string | null): string {
 
     return `${s} - ${e} WIB`;
 }
+
+export function calculateAge(
+    birthDateStr: string | null | undefined,
+    category?: string,
+): string {
+    if (!birthDateStr) {
+        return '—';
+    }
+
+    const birthDate = new Date(birthDateStr);
+
+    if (isNaN(birthDate.getTime())) {
+        return '—';
+    }
+
+    const today = new Date();
+    let years = today.getFullYear() - birthDate.getFullYear();
+    let months = today.getMonth() - birthDate.getMonth();
+    const days = today.getDate() - birthDate.getDate();
+
+    if (days < 0) {
+        months--;
+    }
+
+    if (months < 0) {
+        years--;
+        months += 12;
+    }
+
+    if (years < 0) {
+        return '—';
+    }
+
+    if (category === 'toddler' || (years === 0 && months >= 0)) {
+        if (years === 0) {
+            return `${months} Bulan`;
+        }
+
+        if (months === 0) {
+            return `${years} Tahun`;
+        }
+
+        return `${years} Thn ${months} Bln`;
+    }
+
+    return `${years} Tahun`;
+}

@@ -8,10 +8,10 @@ const props = defineProps<{
 </script>
 
 <template>
-    <div class="relative w-full overflow-x-auto rounded-xl border border-border/60 overflow-hidden">
+    <div class="relative w-full overflow-x-auto">
         <table
             data-slot="table"
-            :class="cn('w-full text-left text-sm', props.class)"
+            :class="cn('w-full text-left text-sm border-separate border-spacing-y-0.5', props.class)"
         >
             <slot />
         </table>

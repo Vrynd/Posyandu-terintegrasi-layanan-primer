@@ -35,7 +35,7 @@ defineProps<{
                         v-else-if="disabled || locked"
                         class="flex size-7 shrink-0 items-center justify-center rounded-full bg-muted/60 text-muted-foreground ring-1 ring-border"
                     >
-                        <Lock class="size-3.5 stroke-[2]" />
+                        <Lock class="size-3.5 stroke-2" />
                     </div>
                     <div
                         v-else

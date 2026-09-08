@@ -45,12 +45,11 @@ const isActive = computed(() => {
         <DropdownMenuTrigger as-child>
             <Button
                 variant="outline"
-                size="sm"
                 :class="
                     cn(
-                        'h-9.5 justify-between gap-2 rounded-lg border-border/80 bg-background/50 px-3 text-xs font-normal transition-colors hover:bg-accent/40',
+                        'h-9.5 justify-between border-border/80 bg-transparent text-xs shadow-none hover:bg-muted/50 hover:text-foreground',
                         isActive &&
-                            'border-primary/50 bg-primary/5 font-medium text-foreground',
+                            'border-primary/50 bg-primary/10 dark:bg-primary/15 font-medium text-foreground',
                         props.class,
                     )
                 "
@@ -96,7 +95,7 @@ const isActive = computed(() => {
                     type="button"
                     :class="
                         cn(
-                            'rounded-md px-2.5 py-1.5 text-left text-xs font-medium transition-all',
+                            'rounded-md px-2.5 py-2.5 cursor-pointer text-left text-xs font-medium transition-all',
                             index === 0 && 'col-span-2',
                             modelValue === opt.value
                                 ? 'bg-primary text-primary-foreground shadow-xs'

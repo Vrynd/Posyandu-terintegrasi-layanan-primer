@@ -48,7 +48,7 @@ const hasResults = computed(() => props.totalCount > 0);
                     data untuk pencarian
                     <span class="font-medium text-foreground">"{{ props.search }}"</span>
                 </p>
-                <p v-else class="truncate text-rose-500/90 dark:text-rose-400">
+                <p v-else class="truncate text-destructive">
                     Tidak ditemukan data untuk pencarian
                     <span class="font-medium text-foreground">"{{ props.search }}"</span>
                 </p>

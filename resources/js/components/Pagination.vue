@@ -36,7 +36,7 @@ const isNavLabel = (label: string) => {
 <template>
     <Card
         v-if="props.links && props.lastPage > 1"
-        class="gap-0 overflow-hidden border-border/60 bg-card/80 py-0 shadow-xs"
+        class="gap-0 overflow-hidden rounded-xl border-2 border-white bg-white/90 py-0 shadow-none backdrop-blur-xs dark:border-border dark:bg-card"
     >
         <CardContent
             class="flex flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5 sm:py-4"

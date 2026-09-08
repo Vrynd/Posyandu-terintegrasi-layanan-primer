@@ -16,9 +16,9 @@ const emit = defineEmits<{
 <template>
     <th
         data-slot="table-head"
-        :class="cn('px-4 py-4 font-medium capitalize text-xs align-middle text-foreground transition-colors has-[[role=checkbox]]:pr-0', sortable && 'cursor-pointer select-none hover:text-foreground', props.class)"  @click="sortable && emit('sort')"
+        :class="cn('px-4 py-3.5 font-medium capitalize text-xs align-middle text-foreground first:pl-5 last:pr-5 leading-none bg-card/80 border-y border-card first:border-l first:border-card first:rounded-tl-2xl first:rounded-bl-lg last:border-r last:border-card last:rounded-tr-2xl last:rounded-br-lg shadow-none backdrop-blur-xs dark:border-border transition-colors has-[[role=checkbox]]:pr-0', sortable && 'cursor-pointer select-none hover:text-foreground', props.class)"  @click="sortable && emit('sort')"
     >
-        <div class="inline-flex items-center gap-1.5">
+        <div class="inline-flex h-7 items-center gap-1.5">
             <slot />
 
             <template v-if="sortable">
