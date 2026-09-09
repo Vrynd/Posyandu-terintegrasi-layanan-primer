@@ -31,19 +31,44 @@ const isNavLabel = (label: string) => {
         cleanLabel.includes('&raquo;')
     );
 };
+
+const formatLabel = (label: string) => {
+    const clean = label
+        .replace(/<[^>]*>/g, '')
+        .trim()
+        .toLowerCase();
+
+    if (
+        clean.includes('prev') ||
+        label.includes('«') ||
+        label.includes('&laquo;')
+    ) {
+        return 'Sebelumnya';
+    }
+
+    if (
+        clean.includes('next') ||
+        label.includes('»') ||
+        label.includes('&raquo;')
+    ) {
+        return 'Berikutnya';
+    }
+
+    return label;
+};
 </script>
 
 <template>
     <Card
         v-if="props.links && props.lastPage > 1"
-        class="gap-0 overflow-hidden rounded-xl border-2 border-white bg-white/90 py-0 shadow-none backdrop-blur-xs dark:border-border dark:bg-card"
+        class="gap-0 overflow-hidden rounded-xl border border-card bg-card/80 py-0 shadow-none backdrop-blur-xs dark:border-border"
     >
         <CardContent
-            class="flex flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5 sm:py-4"
+            class="flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between"
         >
             <Badge
                 variant="outline"
-                class="hidden w-fit rounded-full border-border/60 bg-secondary/40 px-3 py-1.5 text-xs font-normal text-muted-foreground sm:inline-flex"
+                class="hidden w-fit rounded-full border-border bg-secondary/40 px-3 py-1.5 text-xs text-muted-foreground sm:inline-flex"
             >
                 Menampilkan
                 <span class="mx-1 font-semibold text-accent">{{
@@ -66,32 +91,29 @@ const isNavLabel = (label: string) => {
                         variant="outline"
                         size="sm"
                         :class="[
-                            'h-8 text-xs font-semibold transition-all duration-200',
                             isNavLabel(link.label)
-                                ? 'min-w-0 flex-1 px-2 sm:min-w-8 sm:flex-none'
-                                : 'h-8 min-w-8 shrink-0 px-2.5',
-                            link.active
-                                ? 'border-zinc-300/40 bg-linear-to-r from-slate-100 via-zinc-200 to-slate-200 font-bold text-zinc-950 shadow-xs hover:from-slate-200 hover:to-slate-100'
-                                : 'border-border/60 bg-transparent text-muted-foreground hover:bg-secondary/60 hover:text-foreground',
+                                ? 'flex-1 sm:flex-none'
+                                : 'w-8 px-0 font-mono text-xs',
+                            link.active && 'font-bold text-accent',
                         ]"
                     >
                         <Link :href="link.url" preserve-scroll>
-                            <span v-html="link.label" />
+                            <span v-html="formatLabel(link.label)" />
                         </Link>
                     </Button>
+                    <!-- 2. Tombol Disabled (Prev/Next di ujung atau ...) -->
                     <Button
                         v-else
                         disabled
                         variant="outline"
                         size="sm"
-                        :class="[
-                            'h-8 text-xs font-medium opacity-50',
+                        :class="
                             isNavLabel(link.label)
-                                ? 'min-w-0 flex-1 px-2 sm:min-w-8 sm:flex-none'
-                                : 'h-8 min-w-8 shrink-0 px-2.5',
-                        ]"
+                                ? 'flex-1 sm:flex-none'
+                                : 'w-8 px-0 font-mono text-xs'
+                        "
                     >
-                        <span v-html="link.label" />
+                        <span v-html="formatLabel(link.label)" />
                     </Button>
                 </template>
             </div>

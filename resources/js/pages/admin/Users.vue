@@ -151,7 +151,7 @@ const {
                     </CardDescription>
                 </div>
                 <Button
-                    variant="metalic"
+                    variant="default"
                     class="h-9 gap-2"
                     @click="router.visit(create())"
                 >

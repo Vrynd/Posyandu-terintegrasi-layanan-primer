@@ -110,7 +110,7 @@ const categories = computed(() => {
             type="button"
             @click="toggleCategory(item.id)"
             :class="[
-                'group relative flex cursor-pointer flex-col items-start gap-4 rounded-xl border px-4 py-3.5 text-left transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary sm:flex-row sm:items-center',
+                'group relative flex cursor-pointer flex-col items-start gap-4 rounded-xl border p-4 text-left transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary sm:flex-row sm:items-center',
                 modelValue === item.id
                     ? item.activeCardColor
                     : 'border-dashed border-border bg-card hover:border-muted-foreground/40 hover:bg-muted/30',
@@ -125,13 +125,13 @@ const categories = computed(() => {
                         : item.defaultColor,
                 ]"
             >
-                <component :is="item.icon" class="size-4.5" />
+                <component :is="item.icon" class="size-4" />
             </div>
 
             <!-- Konten Teks -->
             <div class="flex min-w-0 flex-1 flex-col gap-1 pr-4 sm:pr-2">
                 <h3
-                    class="font-display text-sm leading-tight font-medium text-foreground"
+                    class="font-display text-sm leading-tight font-semibold text-foreground"
                 >
                     {{ item.title }}
                 </h3>
@@ -145,7 +145,7 @@ const categories = computed(() => {
     <!-- Error Message -->
     <span
         v-if="error"
-        class="mt-3 block text-xs font-medium text-red-500 italic"
+        class="mt-3 block text-xs font-medium text-destructive italic"
     >
         {{ error }}
     </span>

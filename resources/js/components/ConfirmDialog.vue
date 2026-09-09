@@ -55,7 +55,7 @@ const emit = defineEmits<{
                 <!-- 1. Circle Icon dengan Ring Efek -->
                 <div
                     v-if="variant === 'destructive'"
-                    class="flex size-12 items-center justify-center rounded-full bg-red-500/10 text-red-500 ring-8 ring-red-500/10 dark:bg-red-500/20 dark:text-red-400 dark:ring-red-500/10"
+                    class="flex size-12 items-center justify-center rounded-full bg-destructive text-destructive-foreground ring-4 ring-destructive/20"
                 >
                     <component
                         :is="icon ?? AlertTriangle"
@@ -64,7 +64,7 @@ const emit = defineEmits<{
                 </div>
                 <div
                     v-else
-                    class="flex size-12 items-center justify-center rounded-full bg-primary/10 text-primary ring-8 ring-primary/10 dark:bg-primary/20 dark:text-primary dark:ring-primary/10"
+                    class="flex size-12 items-center justify-center rounded-full bg-primary text-primary-foreground ring-4 ring-primary/20"
                 >
                     <component
                         :is="icon ?? HelpCircle"
@@ -78,7 +78,7 @@ const emit = defineEmits<{
                     :class="{ 'max-w-sm': align === 'center' }"
                 >
                     <DialogTitle
-                        class="text-base font-semibold tracking-tight text-foreground sm:text-lg"
+                        class="font-display leading-snug tracking-tight"
                     >
                         {{ title }}
                     </DialogTitle>
@@ -92,14 +92,14 @@ const emit = defineEmits<{
 
             <!-- 3. Border Dashed Footer untuk Tombol Batal & Aksi -->
             <DialogFooter
-                class="flex flex-row items-center justify-end gap-2.5 border-t border-dashed border-border/80 bg-muted/15 px-6 py-4"
+                class="flex flex-row items-center justify-end gap-2.5 border-t border-dashed border-border/80 px-6 py-4"
             >
                 <DialogClose as-child>
                     <Button
                         type="button"
                         variant="outline"
-                        size="sm"
-                        class="h-8.5 cursor-pointer"
+                        size="default"
+                        class="bg-transparent shadow-none"
                         :disabled="processing"
                         @click="emit('cancel')"
                     >
@@ -109,8 +109,7 @@ const emit = defineEmits<{
                 <Button
                     type="button"
                     :variant="variant"
-                    size="sm"
-                    class="h-8.5 cursor-pointer"
+                    size="default"
                     :disabled="processing"
                     @click="emit('confirm')"
                 >

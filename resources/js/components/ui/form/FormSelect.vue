@@ -22,15 +22,15 @@ const modelValue = defineModel<string>({ required: true });
 </script>
 
 <template>
-    <div class="space-y-2">
+    <div class="flex flex-col gap-2">
         <Label :for="id" class="text-xs font-medium text-foreground/90">
             {{ label }}
         </Label>
         <Select v-model="modelValue" :disabled="disabled">
             <SelectTrigger
                 :id="id"
-                class="h-10 w-full text-sm sm:h-9.5"
-                :class="{ 'border-red-500': error }"
+                class="w-full shadow-none"
+                :class="{ 'border-destructive': error }"
             >
                 <SelectValue :placeholder="placeholder || 'Pilih...'" />
             </SelectTrigger>
@@ -44,6 +44,6 @@ const modelValue = defineModel<string>({ required: true });
                 </SelectItem>
             </SelectContent>
         </Select>
-        <InputError :message="error" />
+        <InputError v-if="error" :message="error" />
     </div>
 </template>

@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { Link } from '@inertiajs/vue3';
-import { MoreHorizontal, Plus, Trash2, User, Users } from '@lucide/vue';
+import { Link, router } from '@inertiajs/vue3';
+import { Loader2, MoreHorizontal, Plus, Trash2, Users } from '@lucide/vue';
 import { computed } from 'vue';
 import EmptyState from '@/components/EmptyState.vue';
 import StatusBadge from '@/components/StatusBadge.vue';
@@ -10,7 +10,6 @@ import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
-    DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import {
@@ -28,6 +27,8 @@ import type { FilterOption, ParticipantItem } from '@/types';
 
 const props = defineProps<{
     participants: ParticipantItem[];
+    mobileParticipants?: ParticipantItem[];
+    isLoadingMore?: boolean;
     categories?: FilterOption[];
     hasSearch?: boolean;
 }>();
@@ -88,31 +89,35 @@ const getBpjsBadgeColor = (hasBpjs: boolean) => {
             <!-- 2. Mobile View: Card List (< md) -->
             <div class="flex flex-col gap-3 md:hidden">
                 <Card
-                    v-for="participant in participants"
+                    v-for="participant in props.mobileParticipants ||
+                    props.participants"
                     :key="participant.ulid"
-                    class="gap-0 overflow-hidden rounded-xl border border-card bg-card/80 py-0 shadow-none backdrop-blur-xs dark:border-border"
+                    class="gap-0 overflow-hidden rounded-2xl border border-card bg-card/80 py-0 shadow-none backdrop-blur-xs dark:border-border"
                 >
                     <!-- Header: Flexbox sejajar tanpa baris kosong berlebih -->
                     <CardHeader
-                        class="flex flex-row items-center justify-between gap-2 border-b border-dashed border-border/60 bg-card px-4 py-3 sm:px-5 [.border-b]:pb-2.5"
+                        class="flex flex-row items-center justify-between gap-2 border-b border-dashed border-border/60 px-4 py-3 sm:px-5 [.border-b]:pb-2.5"
                     >
                         <CardTitle
-                            class="min-w-0 flex-1 font-display text-xs font-normal uppercase"
+                            class="min-w-0 flex-1 font-display text-sm font-semibold"
                         >
-                            <div class="flex items-center gap-1.5 truncate">
+                            <div class="flex items-center gap-2 truncate">
                                 <Link
                                     :href="
                                         edit({
                                             participant: participant.ulid,
                                         })
                                     "
-                                    class="truncate text-foreground transition-colors hover:text-primary"
+                                    class="truncate font-semibold text-foreground transition-colors hover:text-primary"
                                 >
                                     {{ participant.name }}
                                 </Link>
-                                <span class="text-muted-foreground/40">|</span>
                                 <span
-                                    class="shrink-0 text-[11px] font-normal text-muted-foreground normal-case"
+                                    class="h-3 w-px shrink-0 bg-border/80"
+                                    aria-hidden="true"
+                                />
+                                <span
+                                    class="shrink-0 text-xs font-normal text-muted-foreground normal-case"
                                 >
                                     {{
                                         calculateAge(
@@ -137,25 +142,12 @@ const getBpjsBadgeColor = (hasBpjs: boolean) => {
                                     </span>
                                 </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" class="w-36">
-                                <DropdownMenuItem as-child>
-                                    <Link
-                                        :href="
-                                            edit({
-                                                participant: participant.ulid,
-                                            })
-                                        "
-                                        class="flex w-full cursor-pointer items-center gap-2"
-                                    >
-                                        <User
-                                            class="h-4 w-4 text-muted-foreground"
-                                        />
-                                        <span>Profil</span>
-                                    </Link>
-                                </DropdownMenuItem>
-                                <DropdownMenuSeparator />
+                            <DropdownMenuContent
+                                align="end"
+                                class="w-36 border-border/80"
+                            >
                                 <DropdownMenuItem
-                                    class="flex cursor-pointer items-center gap-2 text-destructive focus:bg-destructive/10 focus:text-destructive"
+                                    class="focus:bg-destructive/20 focus:font-medium focus:text-destructive"
                                     @select="emit('delete', participant)"
                                 >
                                     <Trash2 class="h-4 w-4" />
@@ -168,11 +160,13 @@ const getBpjsBadgeColor = (hasBpjs: boolean) => {
                     <CardContent class="grid grid-cols-2 gap-3 p-4 sm:p-5">
                         <div>
                             <span
-                                class="block text-[10px] font-medium text-muted-foreground"
+                                class="block text-xs font-normal text-muted-foreground"
                             >
                                 Kategori
                             </span>
-                            <span class="text-xs font-medium text-foreground">
+                            <span
+                                class="text-[13px] font-medium text-foreground"
+                            >
                                 {{
                                     formatCategory(
                                         participant.category,
@@ -183,16 +177,27 @@ const getBpjsBadgeColor = (hasBpjs: boolean) => {
                         </div>
                         <div>
                             <span
-                                class="block text-[10px] font-medium text-muted-foreground"
+                                class="block text-xs font-normal text-muted-foreground"
                             >
                                 Tanggal Lahir
                             </span>
-                            <span class="text-xs font-medium text-foreground">
+                            <span
+                                class="text-[13px] font-medium text-foreground"
+                            >
                                 {{ formatDate(participant.birth_date) }}
                             </span>
                         </div>
                     </CardContent>
                 </Card>
+
+                <!-- Indikator Loading saat memuat data berikutnya di Mobile -->
+                <div
+                    v-if="props.isLoadingMore"
+                    class="flex items-center justify-center gap-2 py-3 text-xs text-muted-foreground"
+                >
+                    <Loader2 class="size-4 animate-spin text-primary" />
+                    <span>Memuat data peserta lainnya...</span>
+                </div>
             </div>
 
             <div class="hidden md:block">
@@ -205,23 +210,23 @@ const getBpjsBadgeColor = (hasBpjs: boolean) => {
                             <TableHead>Jenis Kelamin</TableHead>
                             <TableHead>Tanggal Lahir</TableHead>
                             <TableHead>Kepesertaan BPJS</TableHead>
-                            <TableHead class="text-right">Aksi</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         <TableRow
                             v-for="participant in participants"
                             :key="participant.ulid"
+                            class="cursor-pointer"
+                            @click="
+                                router.visit(
+                                    edit({ participant: participant.ulid }).url,
+                                )
+                            "
                         >
-                            <TableCell class="font-medium">
-                                <Link
-                                    :href="
-                                        edit({ participant: participant.ulid })
-                                    "
-                                    class="text-foreground transition-colors hover:text-primary"
-                                >
-                                    {{ participant.name }}
-                                </Link>
+                            <TableCell
+                                class="font-medium text-foreground transition-colors group-hover:text-primary"
+                            >
+                                {{ participant.name }}
                             </TableCell>
                             <TableCell class="font-mono tracking-wide">
                                 {{ getNikMasked(participant) }}
@@ -250,24 +255,6 @@ const getBpjsBadgeColor = (hasBpjs: boolean) => {
                                         getBpjsBadgeColor(participant.has_bpjs)
                                     "
                                 />
-                            </TableCell>
-                            <TableCell class="text-right">
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    class="h-7 px-2.5 text-xs text-muted-foreground hover:bg-muted/50 hover:text-foreground"
-                                    as-child
-                                >
-                                    <Link
-                                        :href="
-                                            edit({
-                                                participant: participant.ulid,
-                                            })
-                                        "
-                                    >
-                                        Detail
-                                    </Link>
-                                </Button>
                             </TableCell>
                         </TableRow>
                     </TableBody>

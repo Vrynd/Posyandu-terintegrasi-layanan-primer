@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { Head, Link, useForm } from '@inertiajs/vue3';
+import { Save, X } from '@lucide/vue';
 import { watch } from 'vue';
+import ActionBar from '@/components/ActionBar.vue';
 import CategorySelector from '@/components/CategorySelector.vue';
 import Heading from '@/components/Heading.vue';
 import { Button } from '@/components/ui/button';
@@ -82,11 +84,14 @@ const submit = () => {
 <template>
     <Head title="Tambah Peserta Baru" />
 
-    <main class="flex h-full flex-1 flex-col p-4 sm:p-5">
+    <div
+        class="flex flex-1 flex-col gap-4 bg-background p-4 pb-24 sm:gap-6 sm:p-6 sm:pb-6"
+    >
         <header>
             <Heading
                 title="Tambah Peserta Baru"
                 description="Isi formulir berikut untuk mendaftarkan sasaran posyandu baru"
+                class="mb-0 sm:mb-0"
             />
         </header>
 
@@ -125,19 +130,31 @@ const submit = () => {
                 <ContactFields v-model:form="form" />
             </FormSection>
 
-            <div class="flex items-center justify-end gap-3 pt-2">
-                <Button type="button" variant="outline" as-child>
-                    <Link :href="participantsIndex()">Batal</Link>
+            <!-- Aksi Form: Sticky Floating di Mobile, Flow Standar di Desktop -->
+            <ActionBar>
+                <Button
+                    type="button"
+                    variant="outline"
+                    size="lg"
+                    class="shadow-none"
+                    as-child
+                >
+                    <Link :href="participantsIndex()">
+                        <X class="h-4 w-4" />
+                        <span>Kembali</span>
+                    </Link>
                 </Button>
                 <Button
                     type="submit"
+                    size="lg"
                     :disabled="form.processing || !form.category"
-                    class="min-w-35 cursor-pointer font-medium"
+                    class="cursor-pointer font-medium"
                 >
+                    <Save v-if="!form.processing" class="h-4 w-4" />
                     <span v-if="form.processing">Menyimpan...</span>
                     <span v-else>Simpan Peserta</span>
                 </Button>
-            </div>
+            </ActionBar>
         </form>
-    </main>
+    </div>
 </template>

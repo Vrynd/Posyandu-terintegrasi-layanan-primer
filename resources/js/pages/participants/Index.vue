@@ -13,6 +13,7 @@ import {
     ToolbarDropdown,
     ToolbarSearch,
 } from '@/components/ui/toolbar';
+import { useInfiniteScroll } from '@/composables/useInfiniteScroll';
 import { useTableFilter } from '@/composables/useTableFilter';
 import { useTableQuery } from '@/composables/useTableQuery';
 import { dashboard } from '@/routes';
@@ -94,6 +95,18 @@ const selectedParticipant = ref<ParticipantItem | null>(null);
 const showDeleteDialog = ref(false);
 const isDeleting = ref(false);
 
+const {
+    items: mobileParticipants,
+    isLoadingMore,
+    sentinel,
+    removeItem: removeMobileParticipant,
+} = useInfiniteScroll<ParticipantItem>({
+    paginatedData: () => props.participants,
+    routeUrl: participantsIndex.url(),
+    params: toQueryParams,
+    only: ['participants'],
+});
+
 const deleteDescription = computed(() => {
     const name = selectedParticipant.value?.name ?? '';
 
@@ -110,19 +123,19 @@ const confirmDelete = () => {
         return;
     }
 
-    router.delete(
-        destroy({ participant: selectedParticipant.value.ulid }).url,
-        {
-            onStart: () => {
-                isDeleting.value = true;
-            },
-            onFinish: () => {
-                isDeleting.value = false;
-                showDeleteDialog.value = false;
-                selectedParticipant.value = null;
-            },
+    const deletedUlid = selectedParticipant.value.ulid;
+
+    router.delete(destroy({ participant: deletedUlid }).url, {
+        onStart: () => {
+            isDeleting.value = true;
         },
-    );
+        onFinish: () => {
+            isDeleting.value = false;
+            showDeleteDialog.value = false;
+            removeMobileParticipant((p) => p.ulid === deletedUlid);
+            selectedParticipant.value = null;
+        },
+    });
 };
 
 watch(search, () => {
@@ -142,25 +155,23 @@ watch(
     <Head title="Pendaftaran Peserta" />
 
     <div
-        class="flex flex-1 flex-col gap-4 bg-background p-4 pb-24 sm:gap-5 sm:p-5"
+        class="flex flex-1 flex-col gap-4 bg-background p-4 pb-24 sm:gap-6 sm:p-6"
     >
         <!-- 1. Judul Halaman -->
         <header class="flex items-center justify-between gap-4">
             <Heading
                 title="Pendaftaran Peserta"
                 description="Kelola data sasaran peserta posyandu serta pantau status pendaftaran."
+                class="mb-0 sm:mb-0"
             />
-            <Button
-                class="hidden sm:inline-flex"
-                variant="metalic"
-                size="lg"
-                as-child
-            >
-                <Link :href="create()">
-                    <Plus class="h-4 w-4" />
-                    <span>Tambah Peserta</span>
-                </Link>
-            </Button>
+            <div class="shrink-0 pt-0.5">
+                <Button class="hidden sm:inline-flex" size="lg" as-child>
+                    <Link :href="create()">
+                        <Plus class="h-4 w-4" />
+                        <span>Tambah Peserta</span>
+                    </Link>
+                </Button>
+            </div>
         </header>
 
         <!-- 2. Toolbar Pencarian & Filter -->
@@ -200,19 +211,24 @@ watch(
             />
         </Toolbar>
 
-        <!-- 3. Tabel Peserta -->
+        <!-- 3. Tabel Peserta dan Pagination -->
         <section
-            class="flex flex-col gap-4 transition-opacity"
+            class="flex flex-col transition-opacity"
             :class="{ 'pointer-events-none opacity-60': isLoading }"
         >
             <ListParticipant
                 :participants="props.participants.data"
+                :mobile-participants="mobileParticipants"
+                :is-loading-more="isLoadingMore"
                 :categories="props.categories"
                 :has-search="hasSearch"
                 @delete="tapToDelete"
             />
 
+            <!-- Sentinel sensor scroll untuk Mobile (< md) -->
+            <div ref="sentinel" class="h-1 w-full md:hidden"></div>
             <Pagination
+                class="hidden sm:block mt-6"
                 v-if="
                     props.participants.data.length > 0 &&
                     props.participants.links
@@ -224,11 +240,11 @@ watch(
             />
         </section>
 
-        <!-- 4. Mobile Sticky Bottom Action Bar (< sm) -->
-        <ActionBar class="sm:hidden" size="lg">
-            <Button as-child>
+        <!-- 4. Mobile Sticky Bottom Action Bar-->
+        <ActionBar class="sm:hidden">
+            <Button as-child size="lg">
                 <Link :href="create()">
-                    <Plus class="h-4 w-4" />
+                    <Plus class="size-4" />
                     <span>Tambah Peserta</span>
                 </Link>
             </Button>
@@ -239,7 +255,7 @@ watch(
             :open="showDeleteDialog"
             title="Hapus Data Peserta"
             :description="deleteDescription"
-            confirm-text="Hapus Data"
+            confirm-text="Ya, Hapus"
             cancel-text="Batal"
             variant="destructive"
             :processing="isDeleting"

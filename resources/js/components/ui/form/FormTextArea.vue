@@ -14,7 +14,7 @@ const modelValue = defineModel<string>({ required: true });
 </script>
 
 <template>
-    <div class="space-y-2">
+    <div class="flex flex-col gap-2">
         <Label :for="id" class="text-xs font-medium text-foreground/90">
             {{ label }}
         </Label>
@@ -24,10 +24,10 @@ const modelValue = defineModel<string>({ required: true });
             :rows="rows || 3"
             :placeholder="placeholder"
             :class="[
-                'w-full min-w-0 resize-y rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs transition-[color,box-shadow] outline-none placeholder:text-xs placeholder:text-muted-foreground focus-visible:border-zinc-400 focus-visible:ring-2 focus-visible:ring-zinc-400/20 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-input/30',
+                'block w-full min-w-0 resize-y rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-none transition-[color,box-shadow] outline-none placeholder:text-sm placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/20 focus-visible:ring-2 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-input/30',
                 error ? 'border-destructive' : '',
             ]"
         ></textarea>
-        <InputError :message="error" />
+        <InputError v-if="error" :message="error" />
     </div>
 </template>

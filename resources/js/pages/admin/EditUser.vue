@@ -334,7 +334,7 @@ const submitSucces = () => {
                         >
                             <Button
                                 type="submit"
-                                variant="metalic"
+                                variant="default"
                                 class="h-9 disabled:cursor-not-allowed"
                                 :disabled="!isEditing || processing"
                             >

@@ -1,17 +1,28 @@
 <script setup lang="ts">
+import type { HTMLAttributes } from 'vue';
+import { cn } from '@/lib/utils';
+
 type Props = {
     title: string;
     description?: string;
     variant?: 'default' | 'small';
+    class?: HTMLAttributes['class'];
 };
 
-withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<Props>(), {
     variant: 'default',
 });
 </script>
 
 <template>
-    <header :class="variant === 'small' ? '' : 'mb-6 space-y-0.5 sm:mb-8'">
+    <header
+        :class="
+            cn(
+                variant === 'small' ? '' : 'mb-6 space-y-0.5 sm:mb-8',
+                props.class,
+            )
+        "
+    >
         <h2
             :class="[
                 'font-display font-semibold tracking-tight text-foreground',

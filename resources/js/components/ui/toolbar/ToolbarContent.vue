@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
+import { X } from '@lucide/vue';
 
 interface Props {
     open?: boolean;
@@ -31,10 +32,10 @@ const hasResults = computed(() => props.totalCount > 0);
     >
         <div
             v-show="open"
-            class="flex items-center justify-between gap-3 border-t border-dashed border-border/60 pt-2.5 text-xs"
+            class="flex items-center justify-between gap-2.5 border-t border-dashed border-border/60 pt-2.5 text-[13px] sm:text-sm"
         >
             <!-- 1. Teks Hasil Pencarian & Dot Indicator -->
-            <div class="flex items-center gap-2 text-muted-foreground">
+            <div class="flex min-w-0 flex-1 items-center gap-2 text-muted-foreground">
                 <!-- Dot Indicator Hijau (Ditemukan) / Merah (Tidak Ditemukan) -->
                 <span
                     class="h-2 w-2 shrink-0 rounded-full transition-colors"
@@ -54,13 +55,17 @@ const hasResults = computed(() => props.totalCount > 0);
                 </p>
             </div>
 
+            <!-- 2. Tombol Hapus Pencarian (Icon di Mobile, Teks di Desktop) -->
             <div class="shrink-0">
                 <button
                     type="button"
-                    class="cursor-pointer text-xs text-muted-foreground transition-colors hover:text-foreground hover:underline"
+                    class="inline-flex cursor-pointer items-center justify-center rounded-md p-1 text-muted-foreground transition-colors hover:bg-muted/80 hover:text-foreground sm:p-0 sm:text-[13px] sm:hover:bg-transparent sm:hover:underline sm:text-sm"
+                    title="Hapus pencarian"
+                    aria-label="Hapus pencarian"
                     @click="emit('clearSearch')"
                 >
-                    Hapus pencarian
+                    <X class="h-4 w-4 sm:hidden" />
+                    <span class="hidden sm:inline">Hapus pencarian</span>
                 </button>
             </div>
         </div>

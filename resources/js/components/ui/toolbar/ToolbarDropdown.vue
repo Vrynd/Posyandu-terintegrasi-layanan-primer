@@ -47,14 +47,14 @@ const isActive = computed(() => {
                 variant="outline"
                 :class="
                     cn(
-                        'h-9.5 justify-between border-border/80 bg-transparent text-xs shadow-none hover:bg-muted/50 hover:text-foreground',
+                        'h-9.5 justify-between text-[13px] sm:text-sm border-border/80 bg-transparent shadow-none',
                         isActive &&
                             'border-primary/50 bg-primary/10 dark:bg-primary/15 font-medium text-foreground',
                         props.class,
                     )
                 "
             >
-                <div class="flex items-center gap-1.5 whitespace-nowrap">
+                <div class="flex items-center gap-2 whitespace-nowrap">
                     <component
                         :is="props.icon"
                         v-if="props.icon"
@@ -63,7 +63,7 @@ const isActive = computed(() => {
                                 'h-3.5 w-3.5 shrink-0',
                                 isActive
                                     ? 'text-primary'
-                                    : 'text-muted-foreground',
+                                    : 'text-foreground',
                             )
                         "
                     />
@@ -95,7 +95,7 @@ const isActive = computed(() => {
                     type="button"
                     :class="
                         cn(
-                            'rounded-md px-2.5 py-2.5 cursor-pointer text-left text-xs font-medium transition-all',
+                            'rounded-md px-2.5 py-2.5 cursor-pointer text-left text-[13px] font-medium transition-all',
                             index === 0 && 'col-span-2',
                             modelValue === opt.value
                                 ? 'bg-primary text-primary-foreground shadow-xs'

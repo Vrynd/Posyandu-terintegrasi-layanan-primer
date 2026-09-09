@@ -39,7 +39,7 @@ const handleInput = (e: Event) => {
 </script>
 
 <template>
-    <div class="space-y-2">
+    <div class="flex flex-col gap-2">
         <Label :for="id" class="text-xs font-medium text-foreground/90">
             {{ label }}
         </Label>
@@ -55,7 +55,7 @@ const handleInput = (e: Event) => {
             :placeholder="placeholder"
             @input="handleInput"
             :class="[
-                'h-10 text-sm sm:h-9.5',
+                'shadow-none',
                 type === 'date' || type === 'time'
                     ? [
                           !modelValue
@@ -64,9 +64,9 @@ const handleInput = (e: Event) => {
                           'dark:scheme-dark [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-50 [&::-webkit-calendar-picker-indicator]:hover:opacity-100',
                       ]
                     : '',
-                error ? 'border-red-500' : '',
+                error ? 'border-destructive' : '',
             ]"
         />
-        <InputError :message="error" />
+        <InputError v-if="error" :message="error" />
     </div>
 </template>

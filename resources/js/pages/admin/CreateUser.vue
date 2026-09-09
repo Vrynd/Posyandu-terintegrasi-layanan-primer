@@ -243,7 +243,7 @@ const onSuccess = () => {
                         </Button>
                         <Button
                             type="submit"
-                            variant="metalic"
+                            variant="default"
                             class="h-9 gap-2 disabled:cursor-not-allowed"
                             :disabled="processing"
                         >
