@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Carbon;
 
 /**
@@ -19,10 +20,16 @@ use Illuminate\Support\Carbon;
  * @property float|null $weight
  * @property bool $is_referred
  * @property ExaminationLocation $location
+ * @property array<string>|null $skrining_tbc
+ * @property array<string>|null $edukasi
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property-read Participant $participant
  * @property-read User|null $creator
+ * @property-read ExaminationToddler|null $toddler
+ * @property-read ExaminationPregnantMother|null $pregnantMother
+ * @property-read ExaminationTeen|null $teen
+ * @property-read ExaminationAdult|null $adult
  */
 class Examination extends Model
 {
@@ -81,5 +88,37 @@ class Examination extends Model
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    /**
+     * @return HasOne<ExaminationToddler, $this>
+     */
+    public function toddler(): HasOne
+    {
+        return $this->hasOne(ExaminationToddler::class);
+    }
+
+    /**
+     * @return HasOne<ExaminationPregnantMother, $this>
+     */
+    public function pregnantMother(): HasOne
+    {
+        return $this->hasOne(ExaminationPregnantMother::class);
+    }
+
+    /**
+     * @return HasOne<ExaminationTeen, $this>
+     */
+    public function teen(): HasOne
+    {
+        return $this->hasOne(ExaminationTeen::class);
+    }
+
+    /**
+     * @return HasOne<ExaminationAdult, $this>
+     */
+    public function adult(): HasOne
+    {
+        return $this->hasOne(ExaminationAdult::class);
     }
 }
