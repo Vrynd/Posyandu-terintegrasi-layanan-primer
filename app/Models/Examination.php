@@ -36,6 +36,8 @@ class Examination extends Model
         'weight',
         'is_referred',
         'location',
+        'skrining_tbc',
+        'edukasi',
     ];
 
     protected function casts(): array
@@ -45,6 +47,8 @@ class Examination extends Model
             'weight' => 'decimal:2',
             'is_referred' => 'boolean',
             'location' => ExaminationLocation::class,
+            'skrining_tbc' => 'array',
+            'edukasi' => 'array',
         ];
     }
 

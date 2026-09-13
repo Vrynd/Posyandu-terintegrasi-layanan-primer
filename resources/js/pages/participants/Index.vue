@@ -228,7 +228,7 @@ watch(
             <!-- Sentinel sensor scroll untuk Mobile (< md) -->
             <div ref="sentinel" class="h-1 w-full md:hidden"></div>
             <Pagination
-                class="hidden sm:block mt-6"
+                class="mt-6 hidden sm:block"
                 v-if="
                     props.participants.data.length > 0 &&
                     props.participants.links

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3';
 import { Plus } from '@lucide/vue';
+import ActionBar from '@/components/ActionBar.vue';
 import Heading from '@/components/Heading.vue';
 import PlaceholderPattern from '@/components/PlaceholderPattern.vue';
 import { Button } from '@/components/ui/button';
@@ -20,20 +21,24 @@ defineOptions({
 <template>
     <Head title="Pemeriksaan Kesehatan" />
 
-    <div class="flex h-full flex-1 flex-col p-4 sm:p-5">
-        <!-- 1. Header & Tombol Tambah Pemeriksaan -->
-        <header class="mb-6 flex items-center justify-between gap-4 sm:mb-8">
+    <div
+        class="flex flex-1 flex-col gap-4 bg-background p-4 pb-24 sm:gap-6 sm:p-6"
+    >
+        <!-- 1. Judul Halaman -->
+        <header class="flex items-center justify-between gap-4">
             <Heading
                 title="Pemeriksaan Kesehatan"
                 description="Kelola dan pantau hasil pemeriksaan kesehatan peserta posyandu"
-                variant="small"
+                class="mb-0 sm:mb-0"
             />
-            <Button variant="default" class="h-9 bg-linear-to-br" as-child>
-                <Link :href="create()">
-                    <Plus class="h-4 w-4" />
-                    <span class="hidden sm:inline">Catat Pemeriksaan</span>
-                </Link>
-            </Button>
+            <div class="shrink-0 pt-0.5">
+                <Button class="hidden sm:inline-flex" size="lg" as-child>
+                    <Link :href="create()">
+                        <Plus class="h-4 w-4" />
+                        <span>Catat Pemeriksaan</span>
+                    </Link>
+                </Button>
+            </div>
         </header>
 
         <!-- 2. Kontainer Placeholder Pattern -->
@@ -50,5 +55,14 @@ defineOptions({
                 </p>
             </div>
         </section>
+
+        <ActionBar class="sm:hidden">
+            <Button as-child size="lg">
+                <Link :href="create()">
+                    <Plus class="size-4" />
+                    <span>Catat </span>
+                </Link>
+            </Button>
+        </ActionBar>
     </div>
 </template>

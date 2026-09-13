@@ -68,7 +68,7 @@ const submit = () => {
     <Head :title="`Data Peserta - ${props.participant.name}`" />
 
     <div
-        class="flex flex-1 flex-col gap-4 bg-background p-4 pb-24 sm:gap-6 sm:p-6 sm:pb-8"
+        class="flex flex-1 flex-col gap-4 bg-background p-4 pb-24 sm:gap-6 sm:p-6 sm:pb-6"
     >
         <!-- 1. Judul Halaman Bersih -->
         <header>

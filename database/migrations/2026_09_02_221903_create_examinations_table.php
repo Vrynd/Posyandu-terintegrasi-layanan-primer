@@ -20,6 +20,8 @@ return new class extends Migration
             $table->decimal('weight', 5, 2)->nullable();
             $table->boolean('is_referred')->default(false);
             $table->enum('location', ['health_post', 'home_visit'])->default('health_post');
+            $table->json('skrining_tbc')->nullable();
+            $table->json('edukasi')->nullable();
             $table->timestamps();
 
             // Index query performa
