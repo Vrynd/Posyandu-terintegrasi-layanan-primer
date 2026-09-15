@@ -34,7 +34,7 @@ const hasValue = () =>
 
     <div
       v-if="$slots.default || hasValue()"
-      class="font-medium text-muted-foreground"
+      class="font-normal text-muted-foreground"
     >
       <slot>
         {{ props.value }}

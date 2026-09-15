@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Link, router } from '@inertiajs/vue3';
+import { Link } from '@inertiajs/vue3';
 import { Loader2, MoreHorizontal, Plus, Trash2, Users } from '@lucide/vue';
 import { computed } from 'vue';
 import EmptyState from '@/components/EmptyState.vue';
@@ -22,7 +22,7 @@ import {
 } from '@/components/ui/table';
 import { calculateAge, formatDate } from '@/lib/date';
 import { badgeColor, formatCategory, genderMap } from '@/lib/participant';
-import { create, edit } from '@/routes/participants';
+import { create } from '@/routes/participants';
 import type { FilterOption, ParticipantItem } from '@/types';
 
 const props = defineProps<{
@@ -35,6 +35,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
     (e: 'delete', participant: ParticipantItem): void;
+    (e: 'select', participant: ParticipantItem): void;
 }>();
 
 const emptyDescription = computed(() => {
@@ -92,7 +93,8 @@ const getBpjsBadgeColor = (hasBpjs: boolean) => {
                     v-for="participant in props.mobileParticipants ||
                     props.participants"
                     :key="participant.ulid"
-                    class="gap-0 overflow-hidden rounded-2xl border border-card bg-card/80 py-0 shadow-none backdrop-blur-xs dark:border-border"
+                    class="cursor-pointer gap-0 overflow-hidden rounded-2xl border border-card bg-card/80 py-0 shadow-none backdrop-blur-xs transition-colors hover:border-primary/40 active:bg-muted/30 dark:border-border"
+                    @click="emit('select', participant)"
                 >
                     <!-- Header: Flexbox sejajar tanpa baris kosong berlebih -->
                     <CardHeader
@@ -102,16 +104,11 @@ const getBpjsBadgeColor = (hasBpjs: boolean) => {
                             class="min-w-0 flex-1 font-display text-sm font-semibold"
                         >
                             <div class="flex items-center gap-2 truncate">
-                                <Link
-                                    :href="
-                                        edit({
-                                            participant: participant.ulid,
-                                        })
-                                    "
+                                <span
                                     class="truncate font-semibold text-foreground transition-colors hover:text-primary"
                                 >
                                     {{ participant.name }}
-                                </Link>
+                                </span>
                                 <span
                                     class="h-3 w-px shrink-0 bg-border/80"
                                     aria-hidden="true"
@@ -135,6 +132,7 @@ const getBpjsBadgeColor = (hasBpjs: boolean) => {
                                     variant="ghost"
                                     size="icon-sm"
                                     class="size-6 rounded-full text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+                                    @click.stop
                                 >
                                     <MoreHorizontal class="h-4 w-4" />
                                     <span class="sr-only">
@@ -216,12 +214,8 @@ const getBpjsBadgeColor = (hasBpjs: boolean) => {
                         <TableRow
                             v-for="participant in participants"
                             :key="participant.ulid"
-                            class="cursor-pointer"
-                            @click="
-                                router.visit(
-                                    edit({ participant: participant.ulid }).url,
-                                )
-                            "
+                            class="cursor-pointer transition-colors hover:bg-muted/50"
+                            @click="emit('select', participant)"
                         >
                             <TableCell
                                 class="font-medium text-foreground transition-colors group-hover:text-primary"

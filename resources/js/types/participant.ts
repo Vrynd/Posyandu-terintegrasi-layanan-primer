@@ -19,7 +19,9 @@ export interface TeenDetail {
 export interface AdultDetail {
     employment?: string | null;
     employment_other?: string | null;
+    employment_label?: string | null;
     marital_status?: string | null;
+    marital_status_label?: string | null;
 }
 
 /**

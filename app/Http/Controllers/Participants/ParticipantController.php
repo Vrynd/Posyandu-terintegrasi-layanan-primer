@@ -26,6 +26,7 @@ class ParticipantController extends Controller
     {
         $filters = $request->toFilters();
         $participants = Participant::query()
+            ->with(['toddler', 'latestPregnancy', 'teen', 'adult'])
             ->search($filters['search'])
             ->ofCategory($filters['category'])
             ->sorted($filters['sort'])

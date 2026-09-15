@@ -29,6 +29,7 @@ import type {
     ParticipantItem,
 } from '@/types';
 import ListParticipant from './partials/ListParticipant.vue';
+import ProfileParticipant from './partials/ProfileParticipant.vue';
 
 setLayoutProps({
     breadcrumbs: [
@@ -94,6 +95,14 @@ const { navigate, debouncedNavigate, isLoading } = useTableQuery({
 const selectedParticipant = ref<ParticipantItem | null>(null);
 const showDeleteDialog = ref(false);
 const isDeleting = ref(false);
+
+const selectedDetailParticipant = ref<ParticipantItem | null>(null);
+const showDetailSheet = ref(false);
+
+const openDetailSheet = (participant: ParticipantItem) => {
+    selectedDetailParticipant.value = participant;
+    showDetailSheet.value = true;
+};
 
 const {
     items: mobileParticipants,
@@ -223,6 +232,7 @@ watch(
                 :categories="props.categories"
                 :has-search="hasSearch"
                 @delete="tapToDelete"
+                @select="openDetailSheet"
             />
 
             <!-- Sentinel sensor scroll untuk Mobile (< md) -->
@@ -262,6 +272,14 @@ watch(
             @update:open="(val) => (showDeleteDialog = val)"
             @confirm="confirmDelete"
             @cancel="showDeleteDialog = false"
+        />
+
+        <!-- 6. Bottom Sheet Profil Lengkap Peserta -->
+        <ProfileParticipant
+            :open="showDetailSheet"
+            :participant="selectedDetailParticipant"
+            :categories="props.categories"
+            @update:open="(val) => (showDetailSheet = val)"
         />
     </div>
 </template>
