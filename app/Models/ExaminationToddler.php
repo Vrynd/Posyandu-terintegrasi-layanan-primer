@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\WeightStatus;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
@@ -18,6 +19,7 @@ use Illuminate\Support\Carbon;
  * @property array<string>|null $interventions
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
+ * @property-read string|null $weight_status_label
  * @property-read Examination $examination
  */
 class ExaminationToddler extends Model
@@ -39,6 +41,10 @@ class ExaminationToddler extends Model
         'interventions',
     ];
 
+    protected $appends = [
+        'weight_status_label',
+    ];
+
     protected function casts(): array
     {
         return [
@@ -50,6 +56,16 @@ class ExaminationToddler extends Model
             'has_illness_symptoms' => 'boolean',
             'interventions' => 'array',
         ];
+    }
+
+    /**
+     * @return Attribute<string|null, never>
+     */
+    protected function weightStatusLabel(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->weight_status?->label()
+        );
     }
 
     /**

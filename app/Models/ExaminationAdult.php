@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\BmiCategory;
 use App\Enums\IndependenceLevel;
 use App\Enums\SensoryTestResult;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
@@ -33,6 +34,10 @@ use Illuminate\Support\Carbon;
  * @property array<string>|null $adl_screenings
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
+ * @property-read string|null $bmi_category_label
+ * @property-read string|null $eye_test_label
+ * @property-read string|null $ear_test_label
+ * @property-read string|null $independence_level_label
  * @property-read Examination $examination
  */
 class ExaminationAdult extends Model
@@ -67,6 +72,13 @@ class ExaminationAdult extends Model
         'adl_screenings',
     ];
 
+    protected $appends = [
+        'bmi_category_label',
+        'eye_test_label',
+        'ear_test_label',
+        'independence_level_label',
+    ];
+
     protected function casts(): array
     {
         return [
@@ -90,6 +102,46 @@ class ExaminationAdult extends Model
             'independence_level' => IndependenceLevel::class,
             'adl_screenings' => 'array',
         ];
+    }
+
+    /**
+     * @return Attribute<string|null, never>
+     */
+    protected function bmiCategoryLabel(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->bmi_category?->label()
+        );
+    }
+
+    /**
+     * @return Attribute<string|null, never>
+     */
+    protected function eyeTestLabel(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->eye_test?->label()
+        );
+    }
+
+    /**
+     * @return Attribute<string|null, never>
+     */
+    protected function earTestLabel(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->ear_test?->label()
+        );
+    }
+
+    /**
+     * @return Attribute<string|null, never>
+     */
+    protected function independenceLevelLabel(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->independence_level?->label()
+        );
     }
 
     /**

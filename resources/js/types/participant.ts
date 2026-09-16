@@ -24,6 +24,84 @@ export interface AdultDetail {
     marital_status_label?: string | null;
 }
 
+export interface ExaminationToddlerDetail {
+    age_in_months?: number | null;
+    weight_status?: string | null;
+    weight_status_label?: string | null;
+    height?: number | null;
+    head_circumference?: number | null;
+    arm_circumference?: number | null;
+    has_illness_symptoms?: boolean;
+    interventions?: string[] | null;
+}
+
+export interface ExaminationPregnantMotherDetail {
+    pregnancy_id?: number | null;
+    gestational_age_weeks?: number | null;
+    upper_arm_circumference?: number | null;
+    systolic_pressure?: number | null;
+    diastolic_pressure?: number | null;
+    has_iron_tablets?: boolean;
+    exclusive_breastfeeding_counseling?: boolean;
+    receives_pmt_kek?: boolean;
+    attends_prenatal_class?: boolean;
+}
+
+export interface ExaminationTeenDetail {
+    height?: number | null;
+    abdominal_circumference?: number | null;
+    systolic_pressure?: number | null;
+    diastolic_pressure?: number | null;
+    blood_sugar?: number | null;
+    hemoglobin?: string | null;
+    bmi_category?: string | null;
+    bmi_category_label?: string | null;
+    mental_screenings?: string[] | null;
+}
+
+export interface ExaminationAdultDetail {
+    height?: number | null;
+    abdominal_circumference?: number | null;
+    systolic_pressure?: number | null;
+    diastolic_pressure?: number | null;
+    blood_sugar?: number | null;
+    uric_acid?: number | null;
+    cholesterol?: number | null;
+    eye_test?: string | null;
+    eye_test_label?: string | null;
+    ear_test?: string | null;
+    ear_test_label?: string | null;
+    contraceptive?: string | null;
+    bmi_category?: string | null;
+    bmi_category_label?: string | null;
+    is_smoking?: boolean;
+    high_sugar_intake?: boolean;
+    high_salt_intake?: boolean;
+    high_fat_intake?: boolean;
+    puma_score?: number | null;
+    puma_screenings?: string[] | null;
+    adl_score?: number | null;
+    independence_level?: string | null;
+    independence_level_label?: string | null;
+    adl_screenings?: string[] | null;
+}
+
+export interface ExaminationItem {
+    id: number;
+    ulid: string;
+    examination_date: string;
+    weight?: number | null;
+    is_referred: boolean;
+    location: string;
+    location_label?: string | null;
+    skrining_tbc?: string[] | null;
+    edukasi?: string[] | null;
+    toddler?: ExaminationToddlerDetail | null;
+    pregnant_mother?: ExaminationPregnantMotherDetail | null;
+    teen?: ExaminationTeenDetail | null;
+    adult?: ExaminationAdultDetail | null;
+}
+
 /**
  * Data entitas peserta posyandu.
  */
@@ -55,6 +133,7 @@ export interface ParticipantItem {
     latest_pregnancy?: PregnancyDetail | null;
     teen?: TeenDetail | null;
     adult?: AdultDetail | null;
+    latest_examination?: ExaminationItem | null;
 }
 
 /**

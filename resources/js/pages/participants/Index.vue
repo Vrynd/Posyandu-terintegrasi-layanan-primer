@@ -1,12 +1,20 @@
 <script setup lang="ts">
 import { Head, Link, router, setLayoutProps } from '@inertiajs/vue3';
-import { ArrowUpDown, Filter, Plus } from '@lucide/vue';
+import { ArrowUpDown, Filter, HeartPulse, Pencil, Plus } from '@lucide/vue';
 import { computed, ref, watch } from 'vue';
 import ActionBar from '@/components/ActionBar.vue';
 import ConfirmDialog from '@/components/ConfirmDialog.vue';
 import Heading from '@/components/Heading.vue';
 import Pagination from '@/components/Pagination.vue';
 import { Button } from '@/components/ui/button';
+import {
+    Sheet,
+    SheetContent,
+    SheetDescription,
+    SheetFooter,
+    SheetHeader,
+    SheetTitle,
+} from '@/components/ui/sheet';
 import {
     Toolbar,
     ToolbarContent,
@@ -17,9 +25,11 @@ import { useInfiniteScroll } from '@/composables/useInfiniteScroll';
 import { useTableFilter } from '@/composables/useTableFilter';
 import { useTableQuery } from '@/composables/useTableQuery';
 import { dashboard } from '@/routes';
+import { create as createExamination } from '@/routes/examinations';
 import {
     create,
     destroy,
+    edit as editParticipant,
     index as participantsIndex,
 } from '@/routes/participants';
 import type {
@@ -275,11 +285,87 @@ watch(
         />
 
         <!-- 6. Bottom Sheet Profil Lengkap Peserta -->
-        <ProfileParticipant
+        <Sheet
             :open="showDetailSheet"
-            :participant="selectedDetailParticipant"
-            :categories="props.categories"
-            @update:open="(val) => (showDetailSheet = val)"
-        />
+            @update:open="(val: boolean) => (showDetailSheet = val)"
+        >
+            <SheetContent
+                side="bottom"
+                @open-auto-focus.prevent
+                class="max-h-[90vh] w-full overflow-y-auto rounded-t-3xl bg-card px-4 pt-0 pb-4 shadow-2xl **:data-[slot=sheet-close]:hidden sm:px-6 sm:py-6 sm:**:data-[slot=sheet-close]:inline-flex"
+            >
+                <template v-if="selectedDetailParticipant">
+                    <div class="mx-auto flex w-full max-w-3xl flex-col">
+                        <div
+                            class="sticky top-0 z-20 -mx-4 flex justify-center rounded-t-3xl bg-card px-4 pt-3 pb-3.5 sm:static sm:z-auto sm:mx-0 sm:mb-4 sm:rounded-none sm:bg-transparent sm:px-0 sm:py-0"
+                        >
+                            <div
+                                class="h-1 w-14 rounded-full bg-muted-foreground/25 sm:h-1.5 sm:w-16"
+                            />
+                        </div>
+
+                        <SheetHeader
+                            class="mb-4 gap-0 space-y-1.5 p-0 text-center sm:mb-8 sm:text-left"
+                        >
+                            <SheetTitle
+                                class="font-display text-lg font-bold text-foreground sm:text-xl"
+                            >
+                                Profil Peserta
+                            </SheetTitle>
+                            <SheetDescription
+                                class="text-sm text-muted-foreground"
+                            >
+                                Informasi lengkap data diri sasaran posyandu dan
+                                riwayat kepesertaan.
+                            </SheetDescription>
+                        </SheetHeader>
+
+                        <ProfileParticipant
+                            :participant="selectedDetailParticipant"
+                            :categories="props.categories"
+                        />
+
+                        <SheetFooter
+                            class="mt-6 flex flex-col-reverse gap-2 p-0 sm:flex-row sm:justify-end sm:gap-4"
+                        >
+                            <Button
+                                variant="outline"
+                                as-child
+                                class="shadow-none"
+                                size="lg"
+                            >
+                                <Link
+                                    :href="
+                                        editParticipant({
+                                            participant:
+                                                selectedDetailParticipant.ulid,
+                                        }).url
+                                    "
+                                >
+                                    <Pencil class="size-4" />
+                                    <span>Ubah Data Peserta</span>
+                                </Link>
+                            </Button>
+
+                            <Button as-child class="shadow-none" size="lg">
+                                <Link
+                                    :href="
+                                        createExamination({
+                                            query: {
+                                                participant:
+                                                    selectedDetailParticipant.ulid,
+                                            },
+                                        }).url
+                                    "
+                                >
+                                    <HeartPulse class="size-4" />
+                                    <span>Input Pemeriksaan</span>
+                                </Link>
+                            </Button>
+                        </SheetFooter>
+                    </div>
+                </template>
+            </SheetContent>
+        </Sheet>
     </div>
 </template>

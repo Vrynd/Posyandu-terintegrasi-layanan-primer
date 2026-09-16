@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\ExaminationLocation;
 use Database\Factories\ExaminationFactory;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -24,6 +25,7 @@ use Illuminate\Support\Carbon;
  * @property array<string>|null $edukasi
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
+ * @property-read string $location_label
  * @property-read Participant $participant
  * @property-read User|null $creator
  * @property-read ExaminationToddler|null $toddler
@@ -47,6 +49,10 @@ class Examination extends Model
         'edukasi',
     ];
 
+    protected $appends = [
+        'location_label',
+    ];
+
     protected function casts(): array
     {
         return [
@@ -57,6 +63,16 @@ class Examination extends Model
             'skrining_tbc' => 'array',
             'edukasi' => 'array',
         ];
+    }
+
+    /**
+     * @return Attribute<string, never>
+     */
+    protected function locationLabel(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->location->label()
+        );
     }
 
     /**

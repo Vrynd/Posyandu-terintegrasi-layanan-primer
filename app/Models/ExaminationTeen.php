@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\BmiCategory;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
@@ -19,6 +20,7 @@ use Illuminate\Support\Carbon;
  * @property array<string>|null $mental_screenings
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
+ * @property-read string|null $bmi_category_label
  * @property-read Examination $examination
  */
 class ExaminationTeen extends Model
@@ -41,6 +43,10 @@ class ExaminationTeen extends Model
         'mental_screenings',
     ];
 
+    protected $appends = [
+        'bmi_category_label',
+    ];
+
     protected function casts(): array
     {
         return [
@@ -52,6 +58,16 @@ class ExaminationTeen extends Model
             'bmi_category' => BmiCategory::class,
             'mental_screenings' => 'array',
         ];
+    }
+
+    /**
+     * @return Attribute<string|null, never>
+     */
+    protected function bmiCategoryLabel(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->bmi_category?->label()
+        );
     }
 
     /**
