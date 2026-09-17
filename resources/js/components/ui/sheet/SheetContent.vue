@@ -45,7 +45,7 @@ const forwarded = useForwardPropsEmits(delegatedProps, emits)
         side === 'top'
           && 'data-[state=closed]:slide-out-to-top data-[state=open]:slide-in-from-top inset-x-0 top-0 h-auto border-b',
         side === 'bottom'
-          && 'data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom inset-x-0 bottom-0 h-auto border-t',
+          && 'data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom inset-x-0 bottom-0 max-h-[90vh] overflow-y-auto rounded-t-3xl border-t bg-card px-4 pt-0 pb-4 shadow-2xl sm:px-6 sm:py-6 **:data-[slot=sheet-close]:hidden sm:**:data-[slot=sheet-close]:inline-flex',
         props.class)"
       v-bind="{ ...$attrs, ...forwarded }"
     >

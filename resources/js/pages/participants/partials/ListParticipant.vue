@@ -1,17 +1,11 @@
 <script setup lang="ts">
-import { Link } from '@inertiajs/vue3';
-import { Loader2, MoreHorizontal, Plus, Trash2, Users } from '@lucide/vue';
+import { Link, router } from '@inertiajs/vue3';
+import { ChevronRight, Loader2, Plus, Users } from '@lucide/vue';
 import { computed } from 'vue';
 import EmptyState from '@/components/EmptyState.vue';
 import StatusBadge from '@/components/StatusBadge.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import {
     Table,
     TableBody,
@@ -22,7 +16,7 @@ import {
 } from '@/components/ui/table';
 import { calculateAge, formatDate } from '@/lib/date';
 import { badgeColor, formatCategory, genderMap } from '@/lib/participant';
-import { create } from '@/routes/participants';
+import * as participantRoutes from '@/routes/participants';
 import type { FilterOption, ParticipantItem } from '@/types';
 
 const props = defineProps<{
@@ -33,10 +27,9 @@ const props = defineProps<{
     hasSearch?: boolean;
 }>();
 
-const emit = defineEmits<{
-    (e: 'delete', participant: ParticipantItem): void;
-    (e: 'select', participant: ParticipantItem): void;
-}>();
+const goToProfile = (participant: ParticipantItem) => {
+    router.visit(participantRoutes.show({ participant: participant.ulid }).url);
+};
 
 const emptyDescription = computed(() => {
     if (props.hasSearch) {
@@ -79,7 +72,7 @@ const getBpjsBadgeColor = (hasBpjs: boolean) => {
                 class="h-8 text-xs"
                 as-child
             >
-                <Link :href="create()">
+                <Link :href="participantRoutes.create()">
                     <Plus class="h-3.5 w-3.5" />
                     Tambah Peserta
                 </Link>
@@ -93,8 +86,8 @@ const getBpjsBadgeColor = (hasBpjs: boolean) => {
                     v-for="participant in props.mobileParticipants ||
                     props.participants"
                     :key="participant.ulid"
-                    class="cursor-pointer gap-0 overflow-hidden rounded-2xl border border-card bg-card/80 py-0 shadow-none backdrop-blur-xs transition-colors hover:border-primary/40 active:bg-muted/30 dark:border-border"
-                    @click="emit('select', participant)"
+                    class="group cursor-pointer gap-0 overflow-hidden rounded-2xl border border-card bg-card/80 py-0 shadow-none backdrop-blur-xs transition-all duration-150 hover:border-primary/50 hover:shadow-xs active:scale-[0.99] active:bg-muted/50 dark:border-border"
+                    @click="goToProfile(participant)"
                 >
                     <!-- Header: Flexbox sejajar tanpa baris kosong berlebih -->
                     <CardHeader
@@ -105,7 +98,7 @@ const getBpjsBadgeColor = (hasBpjs: boolean) => {
                         >
                             <div class="flex items-center gap-2 truncate">
                                 <span
-                                    class="truncate font-semibold text-foreground transition-colors hover:text-primary"
+                                    class="truncate font-semibold text-foreground transition-colors group-hover:text-primary"
                                 >
                                     {{ participant.name }}
                                 </span>
@@ -126,33 +119,9 @@ const getBpjsBadgeColor = (hasBpjs: boolean) => {
                             </div>
                         </CardTitle>
 
-                        <DropdownMenu>
-                            <DropdownMenuTrigger as-child>
-                                <Button
-                                    variant="ghost"
-                                    size="icon-sm"
-                                    class="size-6 rounded-full text-muted-foreground hover:bg-muted/50 hover:text-foreground"
-                                    @click.stop
-                                >
-                                    <MoreHorizontal class="h-4 w-4" />
-                                    <span class="sr-only">
-                                        Menu aksi {{ participant.name }}
-                                    </span>
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent
-                                align="end"
-                                class="w-36 border-border/80"
-                            >
-                                <DropdownMenuItem
-                                    class="focus:bg-destructive/20 focus:font-medium focus:text-destructive"
-                                    @select="emit('delete', participant)"
-                                >
-                                    <Trash2 class="h-4 w-4" />
-                                    <span>Hapus</span>
-                                </DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
+                        <ChevronRight
+                            class="size-4 shrink-0 text-muted-foreground/50 transition-transform group-hover:translate-x-0.5 group-hover:text-primary"
+                        />
                     </CardHeader>
 
                     <CardContent class="grid grid-cols-2 gap-3 p-4 sm:p-5">
@@ -177,12 +146,26 @@ const getBpjsBadgeColor = (hasBpjs: boolean) => {
                             <span
                                 class="block text-xs font-normal text-muted-foreground"
                             >
-                                Tanggal Lahir
+                                Terakhir Diperiksa
                             </span>
                             <span
-                                class="text-[13px] font-medium text-foreground"
+                                class="text-[13px] font-medium"
+                                :class="
+                                    participant.latest_examination
+                                        ?.examination_date
+                                        ? 'text-foreground'
+                                        : 'text-muted-foreground/70 italic'
+                                "
                             >
-                                {{ formatDate(participant.birth_date) }}
+                                {{
+                                    participant.latest_examination
+                                        ?.examination_date
+                                        ? formatDate(
+                                              participant.latest_examination
+                                                  .examination_date,
+                                          )
+                                        : 'Belum pernah'
+                                }}
                             </span>
                         </div>
                     </CardContent>
@@ -214,8 +197,8 @@ const getBpjsBadgeColor = (hasBpjs: boolean) => {
                         <TableRow
                             v-for="participant in participants"
                             :key="participant.ulid"
-                            class="cursor-pointer transition-colors hover:bg-muted/50"
-                            @click="emit('select', participant)"
+                            class="group cursor-pointer transition-colors hover:bg-card"
+                            @click="goToProfile(participant)"
                         >
                             <TableCell
                                 class="font-medium text-foreground transition-colors group-hover:text-primary"

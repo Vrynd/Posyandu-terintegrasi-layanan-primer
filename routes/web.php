@@ -28,6 +28,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/participants', [ParticipantController::class, 'store'])
         ->middleware('throttle:30,1')
         ->name('participants.store');
+    Route::get('/participants/{participant}', [ParticipantController::class, 'show'])
+        ->name('participants.show');
     Route::get('/participants/{participant}/edit', [ParticipantController::class, 'edit'])
         ->name('participants.edit');
     Route::put('/participants/{participant}', [ParticipantController::class, 'update'])

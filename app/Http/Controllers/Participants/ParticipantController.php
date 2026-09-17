@@ -26,16 +26,7 @@ class ParticipantController extends Controller
     {
         $filters = $request->toFilters();
         $participants = Participant::query()
-            ->with([
-                'toddler',
-                'latestPregnancy',
-                'teen',
-                'adult',
-                'latestExamination.toddler',
-                'latestExamination.pregnantMother',
-                'latestExamination.teen',
-                'latestExamination.adult',
-            ])
+            ->with(['latestExamination'])
             ->search($filters['search'])
             ->ofCategory($filters['category'])
             ->sorted($filters['sort'])
@@ -84,6 +75,25 @@ class ParticipantController extends Controller
         session()->flash('success', 'Data peserta posyandu berhasil didaftarkan.');
 
         return redirect()->route('participants.index');
+    }
+
+    public function show(Participant $participant): Response
+    {
+        $participant->load([
+            'toddler',
+            'latestPregnancy',
+            'teen',
+            'adult',
+            'latestExamination.toddler',
+            'latestExamination.pregnantMother',
+            'latestExamination.teen',
+            'latestExamination.adult',
+        ]);
+
+        return Inertia::render('participants/Show', [
+            'participant' => $participant,
+            'categories' => ParticipantCategory::toOptions(),
+        ]);
     }
 
     public function edit(Participant $participant): Response
