@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
+import { computed } from 'vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -56,6 +57,79 @@ const formatLabel = (label: string) => {
 
     return label;
 };
+
+// Batasi tampilan nomor halaman agar tidak memanjang (maksimal 7 tombol nomor + elipsis)
+const visibleLinks = computed(() => {
+    if (!props.links || props.links.length <= 3) {
+        return props.links;
+    }
+
+    const prevLink = props.links[0];
+    const nextLink = props.links[props.links.length - 1];
+    const pageLinks = props.links.slice(1, -1);
+
+    if (props.lastPage <= 7) {
+        return props.links;
+    }
+
+    const activeIndex = pageLinks.findIndex((l) => l.active);
+    const currentPage =
+        activeIndex !== -1 ? parseInt(pageLinks[activeIndex].label, 10) : 1;
+    const lastPage = props.lastPage;
+
+    const result: PaginationLink[] = [prevLink];
+
+    const getPageLink = (num: number): PaginationLink => {
+        const found = pageLinks.find((l) => parseInt(l.label, 10) === num);
+
+        return (
+            found ?? {
+                url: null,
+                label: String(num),
+                active: num === currentPage,
+            }
+        );
+    };
+
+    const ellipsisLink: PaginationLink = {
+        url: null,
+        label: '...',
+        active: false,
+    };
+
+    if (currentPage <= 4) {
+        // Dekat awal: [1] [2] [3] [4] [5] [...] [lastPage]
+        for (let i = 1; i <= Math.min(5, lastPage); i++) {
+            result.push(getPageLink(i));
+        }
+
+        if (lastPage > 5) {
+            result.push(ellipsisLink);
+            result.push(getPageLink(lastPage));
+        }
+    } else if (currentPage >= lastPage - 3) {
+        // Dekat akhir: [1] [...] [lastPage-4] [lastPage-3] [lastPage-2] [lastPage-1] [lastPage]
+        result.push(getPageLink(1));
+        result.push(ellipsisLink);
+
+        for (let i = lastPage - 4; i <= lastPage; i++) {
+            result.push(getPageLink(i));
+        }
+    } else {
+        // Di tengah: [1] [...] [current-1] [current] [current+1] [...] [lastPage]
+        result.push(getPageLink(1));
+        result.push(ellipsisLink);
+        result.push(getPageLink(currentPage - 1));
+        result.push(getPageLink(currentPage));
+        result.push(getPageLink(currentPage + 1));
+        result.push(ellipsisLink);
+        result.push(getPageLink(lastPage));
+    }
+
+    result.push(nextLink);
+
+    return result;
+});
 </script>
 
 <template>
@@ -84,7 +158,7 @@ const formatLabel = (label: string) => {
             <div
                 class="flex w-full items-center justify-between gap-1.5 sm:w-auto"
             >
-                <template v-for="(link, index) in props.links" :key="index">
+                <template v-for="(link, index) in visibleLinks" :key="index">
                     <Button
                         v-if="link.url"
                         as-child

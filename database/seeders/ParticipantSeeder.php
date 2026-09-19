@@ -24,7 +24,7 @@ class ParticipantSeeder extends Seeder
                 'category' => ParticipantCategory::PregnantMother,
                 'birth_date' => '1996-05-14',
                 'gender' => Gender::Female,
-                'address' => 'Jl. Mawar No. 12, Dusun Krajan',
+                'address' => 'Ds. Tondomulyo, Dk. Tanianyar Kec. Jakenan Kab. Pati',
                 'rt' => '01',
                 'rw' => '03',
                 'phone' => '+6281234567801',
@@ -43,7 +43,7 @@ class ParticipantSeeder extends Seeder
                 'category' => ParticipantCategory::Teenager,
                 'birth_date' => '2011-10-28',
                 'gender' => Gender::Female,
-                'address' => 'Jl. Melati RT 03 RW 02, Desa Tondomulyo',
+                'address' => 'Ds. Tondomulyo, Dk. Pencil Kec. Jakenan Kab. Pati',
                 'rt' => '04',
                 'rw' => '04',
                 'phone' => '+6285712345603',
@@ -61,7 +61,7 @@ class ParticipantSeeder extends Seeder
                 'category' => ParticipantCategory::Productive,
                 'birth_date' => '1988-04-15',
                 'gender' => Gender::Male,
-                'address' => 'Perum Griya Indah Blok C-5',
+                'address' => 'Ds. Tondomulyo, Dk. Sampang Kec. Jakenan Kab. Pati',
                 'rt' => '03',
                 'rw' => '07',
                 'phone' => '+6282134567804',
@@ -81,7 +81,7 @@ class ParticipantSeeder extends Seeder
                 'category' => ParticipantCategory::Adult,
                 'birth_date' => '1955-01-01',
                 'gender' => Gender::Male,
-                'address' => 'Dusun Tondo RT 01 RW 01',
+                'address' => 'Ds. Tondomulyo, Dk. Kedungbanteng Kec. Jakenan Kab. Pati',
                 'rt' => '01',
                 'rw' => '01',
                 'phone' => '+6281298765405',
@@ -101,7 +101,7 @@ class ParticipantSeeder extends Seeder
                 'category' => ParticipantCategory::PregnantMother,
                 'birth_date' => '1997-03-15',
                 'gender' => Gender::Female,
-                'address' => 'Jl. Melati No. 45',
+                'address' => 'Ds. Tondomulyo, Dk. Tanianyar Kec. Jakenan Kab. Pati',
                 'rt' => '02',
                 'rw' => '04',
                 'phone' => '+6285712345672',
@@ -120,7 +120,7 @@ class ParticipantSeeder extends Seeder
                 'category' => ParticipantCategory::Toddler,
                 'birth_date' => '2020-06-22',
                 'gender' => Gender::Male,
-                'address' => 'Perum Permata Hijau Blok C3',
+                'address' => 'Ds. Tondomulyo, Dk. Pencil Kec. Jakenan Kab. Pati',
                 'rt' => '04',
                 'rw' => '08',
                 'phone' => '+6281398765433',
@@ -138,7 +138,7 @@ class ParticipantSeeder extends Seeder
                 'category' => ParticipantCategory::Productive,
                 'birth_date' => '2001-02-08',
                 'gender' => Gender::Female,
-                'address' => 'Kp. Sindanggalih No. 22',
+                'address' => 'Ds. Tondomulyo, Dk. Sampang Kec. Jakenan Kab. Pati',
                 'rt' => '03',
                 'rw' => '04',
                 'phone' => '+6285812345678',
@@ -158,7 +158,7 @@ class ParticipantSeeder extends Seeder
                 'category' => ParticipantCategory::Teenager,
                 'birth_date' => '2011-09-11',
                 'gender' => Gender::Female,
-                'address' => 'Jl. Mawar Indah Gang 3 No. 17',
+                'address' => 'Ds. Tondomulyo, Dk. Kedungbanteng Kec. Jakenan Kab. Pati',
                 'rt' => '04',
                 'rw' => '04',
                 'phone' => '+6289612345606',
@@ -176,7 +176,7 @@ class ParticipantSeeder extends Seeder
                 'category' => ParticipantCategory::Toddler,
                 'birth_date' => '2022-04-10',
                 'gender' => Gender::Female,
-                'address' => 'Dusun Krajan RT 02 RW 01',
+                'address' => 'Ds. Tondomulyo, Dk. Tanianyar Kec. Jakenan Kab. Pati',
                 'rt' => '02',
                 'rw' => '01',
                 'phone' => '+6281234567807',
@@ -194,7 +194,7 @@ class ParticipantSeeder extends Seeder
                 'category' => ParticipantCategory::Toddler,
                 'birth_date' => '2023-01-15',
                 'gender' => Gender::Male,
-                'address' => 'Jl. Dahlia No. 8',
+                'address' => 'Ds. Tondomulyo, Dk. Pencil Kec. Jakenan Kab. Pati',
                 'rt' => '01',
                 'rw' => '02',
                 'phone' => '+6281345678908',
@@ -212,7 +212,7 @@ class ParticipantSeeder extends Seeder
                 'category' => ParticipantCategory::Toddler,
                 'birth_date' => '2021-08-25',
                 'gender' => Gender::Female,
-                'address' => 'Jl. Anggrek No. 19',
+                'address' => 'Ds. Tondomulyo, Dk. Sampang Kec. Jakenan Kab. Pati',
                 'rt' => '03',
                 'rw' => '03',
                 'phone' => '+6285678901209',
@@ -230,7 +230,7 @@ class ParticipantSeeder extends Seeder
                 'category' => ParticipantCategory::Toddler,
                 'birth_date' => '2022-11-03',
                 'gender' => Gender::Male,
-                'address' => 'Dusun Sumber RT 01 RW 05',
+                'address' => 'Ds. Tondomulyo, Dk. Kedungbanteng Kec. Jakenan Kab. Pati',
                 'rt' => '01',
                 'rw' => '05',
                 'phone' => '+6287890123410',
@@ -248,7 +248,7 @@ class ParticipantSeeder extends Seeder
                 'category' => ParticipantCategory::Toddler,
                 'birth_date' => '2023-05-19',
                 'gender' => Gender::Female,
-                'address' => 'Jl. Flamboyan No. 5',
+                'address' => 'Ds. Tondomulyo, Dk. Tanianyar Kec. Jakenan Kab. Pati',
                 'rt' => '02',
                 'rw' => '02',
                 'phone' => '+6289901234511',
@@ -266,7 +266,7 @@ class ParticipantSeeder extends Seeder
                 'category' => ParticipantCategory::Toddler,
                 'birth_date' => '2020-09-12',
                 'gender' => Gender::Male,
-                'address' => 'Perum Asri Blok D-2',
+                'address' => 'Ds. Tondomulyo, Dk. Pencil Kec. Jakenan Kab. Pati',
                 'rt' => '04',
                 'rw' => '06',
                 'phone' => '+6281234509812',
@@ -284,7 +284,7 @@ class ParticipantSeeder extends Seeder
                 'category' => ParticipantCategory::PregnantMother,
                 'birth_date' => '1998-07-22',
                 'gender' => Gender::Female,
-                'address' => 'Dusun Krajan RT 03 RW 01',
+                'address' => 'Ds. Tondomulyo, Dk. Sampang Kec. Jakenan Kab. Pati',
                 'rt' => '03',
                 'rw' => '01',
                 'phone' => '+6282198765413',
@@ -303,7 +303,7 @@ class ParticipantSeeder extends Seeder
                 'category' => ParticipantCategory::PregnantMother,
                 'birth_date' => '1995-11-09',
                 'gender' => Gender::Female,
-                'address' => 'Jl. Kenanga No. 27',
+                'address' => 'Ds. Tondomulyo, Dk. Kedungbanteng Kec. Jakenan Kab. Pati',
                 'rt' => '02',
                 'rw' => '03',
                 'phone' => '+6285234567814',
@@ -322,7 +322,7 @@ class ParticipantSeeder extends Seeder
                 'category' => ParticipantCategory::PregnantMother,
                 'birth_date' => '2000-01-18',
                 'gender' => Gender::Female,
-                'address' => 'Jl. Cempaka RT 01 RW 04',
+                'address' => 'Ds. Tondomulyo, Dk. Tanianyar Kec. Jakenan Kab. Pati',
                 'rt' => '01',
                 'rw' => '04',
                 'phone' => '+6285789012315',
@@ -341,7 +341,7 @@ class ParticipantSeeder extends Seeder
                 'category' => ParticipantCategory::PregnantMother,
                 'birth_date' => '1994-09-30',
                 'gender' => Gender::Female,
-                'address' => 'Dusun Tondo RT 02 RW 02',
+                'address' => 'Ds. Tondomulyo, Dk. Pencil Kec. Jakenan Kab. Pati',
                 'rt' => '02',
                 'rw' => '02',
                 'phone' => '+6281321098716',
@@ -360,7 +360,7 @@ class ParticipantSeeder extends Seeder
                 'category' => ParticipantCategory::Teenager,
                 'birth_date' => '2010-03-14',
                 'gender' => Gender::Male,
-                'address' => 'Jl. Melati RT 01 RW 03',
+                'address' => 'Ds. Tondomulyo, Dk. Sampang Kec. Jakenan Kab. Pati',
                 'rt' => '01',
                 'rw' => '03',
                 'phone' => '+6289876543217',
@@ -378,7 +378,7 @@ class ParticipantSeeder extends Seeder
                 'category' => ParticipantCategory::Teenager,
                 'birth_date' => '2009-08-21',
                 'gender' => Gender::Male,
-                'address' => 'Jl. Kamboja No. 11',
+                'address' => 'Ds. Tondomulyo, Dk. Kedungbanteng Kec. Jakenan Kab. Pati',
                 'rt' => '03',
                 'rw' => '02',
                 'phone' => '+6287712345618',
@@ -396,7 +396,7 @@ class ParticipantSeeder extends Seeder
                 'category' => ParticipantCategory::Teenager,
                 'birth_date' => '2012-05-04',
                 'gender' => Gender::Female,
-                'address' => 'Dusun Krajan RT 04 RW 01',
+                'address' => 'Ds. Tondomulyo, Dk. Tanianyar Kec. Jakenan Kab. Pati',
                 'rt' => '04',
                 'rw' => '01',
                 'phone' => '+6285612345619',
@@ -414,7 +414,7 @@ class ParticipantSeeder extends Seeder
                 'category' => ParticipantCategory::Teenager,
                 'birth_date' => '2010-12-17',
                 'gender' => Gender::Male,
-                'address' => 'Jl. Mawar No. 33',
+                'address' => 'Ds. Tondomulyo, Dk. Pencil Kec. Jakenan Kab. Pati',
                 'rt' => '02',
                 'rw' => '03',
                 'phone' => '+6281901234520',
@@ -432,7 +432,7 @@ class ParticipantSeeder extends Seeder
                 'category' => ParticipantCategory::Productive,
                 'birth_date' => '1992-06-18',
                 'gender' => Gender::Male,
-                'address' => 'Perum Griya Indah Blok A-10',
+                'address' => 'Ds. Tondomulyo, Dk. Sampang Kec. Jakenan Kab. Pati',
                 'rt' => '01',
                 'rw' => '07',
                 'phone' => '+6281234567821',
@@ -452,7 +452,7 @@ class ParticipantSeeder extends Seeder
                 'category' => ParticipantCategory::Productive,
                 'birth_date' => '1995-09-25',
                 'gender' => Gender::Female,
-                'address' => 'Jl. Cempaka No. 14',
+                'address' => 'Ds. Tondomulyo, Dk. Kedungbanteng Kec. Jakenan Kab. Pati',
                 'rt' => '02',
                 'rw' => '04',
                 'phone' => '+6285890123422',
@@ -472,7 +472,7 @@ class ParticipantSeeder extends Seeder
                 'category' => ParticipantCategory::Productive,
                 'birth_date' => '1985-12-10',
                 'gender' => Gender::Male,
-                'address' => 'Dusun Krajan RT 02 RW 02',
+                'address' => 'Ds. Tondomulyo, Dk. Tanianyar Kec. Jakenan Kab. Pati',
                 'rt' => '02',
                 'rw' => '02',
                 'phone' => '+6282234567823',
@@ -492,7 +492,7 @@ class ParticipantSeeder extends Seeder
                 'category' => ParticipantCategory::Productive,
                 'birth_date' => '1990-03-05',
                 'gender' => Gender::Female,
-                'address' => 'Jl. Dahlia No. 2',
+                'address' => 'Ds. Tondomulyo, Dk. Pencil Kec. Jakenan Kab. Pati',
                 'rt' => '03',
                 'rw' => '02',
                 'phone' => '+6285345678924',
@@ -512,7 +512,7 @@ class ParticipantSeeder extends Seeder
                 'category' => ParticipantCategory::Productive,
                 'birth_date' => '1987-10-20',
                 'gender' => Gender::Male,
-                'address' => 'Jl. Kenanga RT 04 RW 03',
+                'address' => 'Ds. Tondomulyo, Dk. Sampang Kec. Jakenan Kab. Pati',
                 'rt' => '04',
                 'rw' => '03',
                 'phone' => '+6281789012325',
@@ -532,7 +532,7 @@ class ParticipantSeeder extends Seeder
                 'category' => ParticipantCategory::Adult,
                 'birth_date' => '1958-08-17',
                 'gender' => Gender::Female,
-                'address' => 'Dusun Tondo RT 03 RW 01',
+                'address' => 'Ds. Tondomulyo, Dk. Kedungbanteng Kec. Jakenan Kab. Pati',
                 'rt' => '03',
                 'rw' => '01',
                 'phone' => '+6281390123426',
@@ -552,7 +552,7 @@ class ParticipantSeeder extends Seeder
                 'category' => ParticipantCategory::Adult,
                 'birth_date' => '1950-04-22',
                 'gender' => Gender::Male,
-                'address' => 'Dusun Krajan RT 01 RW 01',
+                'address' => 'Ds. Tondomulyo, Dk. Tanianyar Kec. Jakenan Kab. Pati',
                 'rt' => '01',
                 'rw' => '01',
                 'phone' => '+6285212345627',
@@ -572,7 +572,7 @@ class ParticipantSeeder extends Seeder
                 'category' => ParticipantCategory::Adult,
                 'birth_date' => '1960-11-12',
                 'gender' => Gender::Female,
-                'address' => 'Jl. Melati RT 02 RW 03',
+                'address' => 'Ds. Tondomulyo, Dk. Pencil Kec. Jakenan Kab. Pati',
                 'rt' => '02',
                 'rw' => '03',
                 'phone' => '+6287812345628',
@@ -592,7 +592,7 @@ class ParticipantSeeder extends Seeder
                 'category' => ParticipantCategory::Adult,
                 'birth_date' => '1948-02-14',
                 'gender' => Gender::Male,
-                'address' => 'Dusun Sumber RT 02 RW 05',
+                'address' => 'Ds. Tondomulyo, Dk. Tanianyar Kec. Jakenan Kab. Pati',
                 'rt' => '02',
                 'rw' => '05',
                 'phone' => '+6289654321029',
@@ -612,7 +612,7 @@ class ParticipantSeeder extends Seeder
                 'category' => ParticipantCategory::Adult,
                 'birth_date' => '1953-06-30',
                 'gender' => Gender::Female,
-                'address' => 'Jl. Anggrek No. 3',
+                'address' => 'Ds. Tondomulyo, Dk. Kedungbanteng Kec. Jakenan Kab. Pati',
                 'rt' => '01',
                 'rw' => '02',
                 'phone' => '+6281290876530',
@@ -635,22 +635,32 @@ class ParticipantSeeder extends Seeder
 
             unset($data['toddler'], $data['pregnancy'], $data['teen'], $data['adult']);
 
-            $participant = Participant::create($data);
+            $existing = Participant::where('nik_hash', hash('sha256', $data['nik']))->first();
+
+            if ($existing) {
+                $existing->update($data);
+                $participant = $existing;
+            } else {
+                $participant = Participant::create($data);
+            }
 
             if ($toddlerData) {
-                $participant->toddler()->create($toddlerData);
+                $participant->toddler()->updateOrCreate([], $toddlerData);
             }
 
             if ($pregnancyData) {
-                $participant->pregnancies()->create($pregnancyData);
+                $participant->pregnancies()->updateOrCreate(
+                    ['participant_id' => $participant->id, 'husband_name' => $pregnancyData['husband_name']],
+                    $pregnancyData
+                );
             }
 
             if ($teenData) {
-                $participant->teen()->create($teenData);
+                $participant->teen()->updateOrCreate([], $teenData);
             }
 
             if ($adultData) {
-                $participant->adult()->create($adultData);
+                $participant->adult()->updateOrCreate([], $adultData);
             }
         }
     }

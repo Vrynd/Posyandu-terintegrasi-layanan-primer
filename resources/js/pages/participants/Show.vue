@@ -1,19 +1,12 @@
 <script setup lang="ts">
 import { Head, Link, router, setLayoutProps } from '@inertiajs/vue3';
-import {
-    Activity,
-    CalendarCheck,
-    HeartPulse,
-    Pencil,
-    Trash2,
-    User,
-} from '@lucide/vue';
+import { HeartPulse, Pencil, Trash2 } from '@lucide/vue';
 import { ref } from 'vue';
 import ActionBar from '@/components/ActionBar.vue';
+import ConfirmDialog from '@/components/ConfirmDialog.vue';
 import Heading from '@/components/Heading.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { dashboard } from '@/routes';
 import * as examinations from '@/routes/examinations';
 import * as participants from '@/routes/participants';
@@ -115,66 +108,42 @@ const confirmDelete = () => {
             </div>
         </header>
 
-        <Tabs default-value="profile" class="flex flex-col gap-4">
-            <TabsList class="grid w-full grid-cols-3">
-                <TabsTrigger value="profile" class="px-2 sm:px-3">
-                    <User class="size-3.5 shrink-0" />
-                    <span>Data Diri</span>
-                </TabsTrigger>
-                <TabsTrigger value="health" class="px-2 sm:px-3">
-                    <Activity class="size-3.5 shrink-0" />
-                    <span>
-                        <span class="hidden sm:inline">Data </span>Kesehatan
-                    </span>
-                </TabsTrigger>
-                <TabsTrigger value="attendance" class="px-2 sm:px-3">
-                    <CalendarCheck class="size-3.5 shrink-0" />
-                    <span>Kehadiran</span>
-                </TabsTrigger>
-            </TabsList>
-            <TabsContent value="profile" class="mt-0">
-                <Card
-                    class="rounded-2xl border-card py-4 shadow-none sm:py-5 dark:border-border"
-                >
-                    <CardContent class="px-4 sm:px-5">
-                        <ProfileParticipant
-                            :participant="props.participant"
-                            :categories="props.categories"
-                        />
-                    </CardContent>
-                </Card>
-            </TabsContent>
-            <TabsContent value="health" class="mt-0">
-                <Card
-                    class="rounded-2xl border-card py-4 shadow-none sm:py-5 dark:border-border"
-                >
-                    <CardContent class="px-4 sm:px-5">
-                        <LastHealth :participant="props.participant" />
-                    </CardContent>
-                </Card>
-            </TabsContent>
-
-            <TabsContent value="attendance" class="mt-0">
-                <Card
-                    class="rounded-2xl border-card shadow-none dark:border-border"
-                >
-                    <CardContent
-                        class="flex flex-col items-center justify-center py-12 text-center text-muted-foreground"
+        <!-- Data Diri -->
+        <Card
+            class="rounded-2xl border-card py-4 shadow-none sm:py-5 dark:border-border"
+        >
+            <CardContent class="px-4 sm:px-5">
+                <div class="flex flex-col gap-4">
+                    <h3
+                        class="flex items-center gap-2.5 font-display text-base font-semibold text-foreground"
                     >
-                        <CalendarCheck
-                            class="mb-3 size-10 stroke-[1.5] text-muted-foreground/50"
-                        />
-                        <h4 class="text-sm font-semibold text-foreground">
-                            Pelacak Kehadiran Posyandu
-                        </h4>
-                        <p class="mt-1 max-w-sm text-xs">
-                            Fitur pemantauan keikutsertaan bulanan peserta akan
-                            segera diintegrasikan di sini.
-                        </p>
-                    </CardContent>
-                </Card>
-            </TabsContent>
-        </Tabs>
+                        <span class="h-4 w-0.5 rounded-full bg-primary"></span>
+                        Data Diri
+                    </h3>
+                    <ProfileParticipant
+                        :participant="props.participant"
+                        :categories="props.categories"
+                    />
+                </div>
+            </CardContent>
+        </Card>
+
+        <!-- Data Kesehatan Terakhir -->
+        <Card
+            class="rounded-2xl border-card py-4 shadow-none sm:py-5 dark:border-border"
+        >
+            <CardContent class="px-4 sm:px-5">
+                <div class="flex flex-col gap-4">
+                    <h3
+                        class="flex items-center gap-2.5 font-display text-base font-semibold text-foreground"
+                    >
+                        <span class="h-4 w-0.5 rounded-full bg-primary"></span>
+                        Pemeriksaan Kesehatan Terakhir
+                    </h3>
+                    <LastHealth :participant="props.participant" />
+                </div>
+            </CardContent>
+        </Card>
 
         <ActionBar class="sm:hidden">
             <Button variant="outline" size="lg" class="shadow-none" as-child>
