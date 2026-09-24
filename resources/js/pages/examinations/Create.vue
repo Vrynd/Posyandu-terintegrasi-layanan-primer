@@ -35,6 +35,8 @@ const props = defineProps<{
     bmiCategories: FilterOption[];
     sensoryResults: FilterOption[];
     independenceLevels: FilterOption[];
+    tbcSymptoms: FilterOption[];
+    educationTopics: FilterOption[];
 }>();
 
 const form = useForm({
@@ -333,6 +335,8 @@ const submit = () => {
                 <GeneralFields
                     v-model:form="form"
                     :locations="locations"
+                    :tbc-symptoms="tbcSymptoms"
+                    :education-topics="educationTopics"
                     :category="activeParticipant?.category"
                     section="evaluation"
                 />

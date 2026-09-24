@@ -1,9 +1,11 @@
 <?php
 
 use App\Enums\BmiCategory;
+use App\Enums\EducationTopic;
 use App\Enums\IndependenceLevel;
 use App\Enums\ParticipantCategory;
 use App\Enums\SensoryTestResult;
+use App\Enums\TbcSymptom;
 use App\Enums\WeightStatus;
 use App\Models\Participant;
 use App\Models\Pregnancy;
@@ -34,8 +36,8 @@ test('can record toddler examination', function () {
         'weight' => 12.5,
         'location' => 'health_post',
         'is_referred' => false,
-        'skrining_tbc' => ['Batuk berdahak >= 2 minggu'],
-        'edukasi' => ['MP-ASI Kaya Protein Hewani', 'Kebersihan Diri & Lingkungan (PHBS)'],
+        'skrining_tbc' => [TbcSymptom::ContinuousCough->value],
+        'edukasi' => [EducationTopic::MpAsiAnimalProtein->value, EducationTopic::Phbs->value],
         // Data balita
         'age_in_months' => 24,
         'weight_status' => WeightStatus::Increased->value,
@@ -89,7 +91,7 @@ test('can record pregnant mother examination', function () {
         'location' => 'health_post',
         'is_referred' => false,
         'skrining_tbc' => [],
-        'edukasi' => ['Germas (Gerakan Masyarakat Hidup Sehat)'],
+        'edukasi' => [EducationTopic::Germas->value],
         // Data bumil
         'gestational_age_weeks' => 26,
         'upper_arm_circumference' => 25.5,
@@ -134,7 +136,7 @@ test('can record teenager examination with mental screening and disease history'
         'location' => 'health_post',
         'is_referred' => false,
         'skrining_tbc' => [],
-        'edukasi' => ['Pencegahan Anemia', 'Aktivitas Fisik Rutin'],
+        'edukasi' => [EducationTopic::AnemiaPrevention->value, EducationTopic::PhysicalActivity->value],
         // Data remaja
         'height' => 156.0,
         'abdominal_circumference' => 68.0,
@@ -187,7 +189,7 @@ test('can record productive adult examination with puma screening, lifestyle, an
         'location' => 'health_post',
         'is_referred' => false,
         'skrining_tbc' => [],
-        'edukasi' => ['Germas (Gerakan Masyarakat Hidup Sehat)'],
+        'edukasi' => [EducationTopic::Germas->value],
         // Data usia produktif
         'height' => 168.0,
         'abdominal_circumference' => 78.0,
@@ -247,7 +249,7 @@ test('can record elderly examination with barthel adl screening and independence
         'location' => 'home_visit',
         'is_referred' => false,
         'skrining_tbc' => [],
-        'edukasi' => ['Germas (Gerakan Masyarakat Hidup Sehat)'],
+        'edukasi' => [EducationTopic::Germas->value],
         // Data lansia
         'height' => 155.0,
         'abdominal_circumference' => 82.0,

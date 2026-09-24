@@ -19,22 +19,34 @@ const props = defineProps<{
         | 'email'
         | 'url';
     maxlength?: number | string;
-    min?: string;
-    max?: string;
+    min?: number | string;
+    max?: number | string;
+    step?: number | string;
     onlyNumeric?: boolean;
+    isDecimal?: boolean;
 }>();
 
 const modelValue = defineModel<string>({ required: true });
 
 const handleInput = (e: Event) => {
+    const target = e.target as HTMLInputElement;
+    let val = target.value;
+
     if (props.onlyNumeric) {
-        const target = e.target as HTMLInputElement;
-        const cleaned = target.value.replace(/\D/g, '');
-        if (target.value !== cleaned) {
-            target.value = cleaned;
-            modelValue.value = cleaned;
+        val = val.replace(/\D/g, '');
+    } else if (props.isDecimal) {
+        val = val.replace(/,/g, '.');
+        val = val.replace(/[^0-9.]/g, '');
+        const parts = val.split('.');
+        if (parts.length > 2) {
+            val = parts[0] + '.' + parts.slice(1).join('');
         }
     }
+
+    if (target.value !== val) {
+        target.value = val;
+    }
+    modelValue.value = val;
 };
 </script>
 
@@ -52,17 +64,18 @@ const handleInput = (e: Event) => {
             :maxlength="maxlength"
             :min="min"
             :max="max"
+            :step="step"
             :placeholder="placeholder"
             @input="handleInput"
             :class="[
                 'shadow-none',
                 type === 'date' || type === 'time'
                     ? [
-                          !modelValue
-                              ? 'text-muted-foreground'
-                              : 'text-foreground',
-                          'dark:scheme-dark [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-50 [&::-webkit-calendar-picker-indicator]:hover:opacity-100',
-                      ]
+                            !modelValue
+                                ? 'text-muted-foreground'
+                                : 'text-foreground',
+                            'dark:scheme-dark [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-50 [&::-webkit-calendar-picker-indicator]:hover:opacity-100',
+                    ]
                     : '',
                 error ? 'border-destructive' : '',
             ]"

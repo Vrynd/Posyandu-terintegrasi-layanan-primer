@@ -1,70 +1,46 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { Checkbox } from '@/components/ui/checkbox';
-import { FormInput, FormSelect } from '@/components/ui/form';
+import { FormInput, FormMultiSelect, FormSelect } from '@/components/ui/form';
 import type { FilterOption } from '@/types';
 
 const form = defineModel<Record<string, any>>('form', { required: true });
 
 const props = withDefaults(
     defineProps<{
-        locations: FilterOption[];
+        locations?: FilterOption[];
+        tbcSymptoms?: FilterOption[];
+        educationTopics?: FilterOption[];
         section?: 'session' | 'evaluation';
         category?: string;
     }>(),
     {
         section: 'session',
+        locations: () => [],
+        tbcSymptoms: () => [],
+        educationTopics: () => [],
     },
 );
 
-const tbcOptions = [
-    'Demam Lebih dari 2 minggu',
-    'Batuk Terus Menerus',
-    'Keringat Malam Tanpa Aktivitas',
-    'Berat Badan Tidak Naik',
-    'Kontak Erat Penderita TBC',
-    'Tidak Ada Gejala',
-];
-
-const edukasiOptions = computed(() => {
+// Filter materi edukasi sesuai kategori sasaran (khusus balita atau umum)
+const filteredEducationOptions = computed(() => {
     if (props.category === 'toddler') {
-        return [
-            'MP-ASI Kaya Protein Hewani',
-            'Kebersihan Diri & Lingkungan (PHBS)',
-        ];
+        return props.educationTopics.filter((opt) =>
+            ['mp_asi_animal_protein', 'phbs'].includes(opt.value),
+        );
     }
 
-    return [
-        'Germas (Gerakan Masyarakat Hidup Sehat)',
-        'Isi Piringku & Gizi Seimbang',
-        'Pencegahan Anemia',
-        'Aktivitas Fisik Rutin',
-        'Bahaya Rokok & Asap Rokok',
-        'Kebersihan Diri & Lingkungan (PHBS)',
-    ];
+    return props.educationTopics.filter(
+        (opt) => opt.value !== 'mp_asi_animal_protein',
+    );
 });
-
-const toggleArrayItem = (field: 'skrining_tbc' | 'edukasi', item: string) => {
-    if (!form.value[field]) {
-        form.value[field] = [];
-    }
-
-    const index = form.value[field].indexOf(item);
-
-    if (index > -1) {
-        form.value[field].splice(index, 1);
-    } else {
-        form.value[field].push(item);
-    }
-};
 </script>
 
 <template>
     <div>
-        <!-- SECTION 01: WAKTU DAN LOKASI PELAYANAN -->
         <div
             v-if="section === 'session'"
-            class="grid grid-cols-1 gap-4 sm:grid-cols-2"
+            class="grid grid-cols-1 gap-4 sm:grid-cols-2 [&_[data-slot=select-trigger]]:bg-muted/40 [&_[role=combobox]]:bg-muted/40 [&_input]:bg-muted/40"
         >
             <!-- Tanggal Pemeriksaan -->
             <FormInput
@@ -76,7 +52,7 @@ const toggleArrayItem = (field: 'skrining_tbc' | 'edukasi', item: string) => {
                 :error="form.errors.examination_date"
             />
 
-            <!-- Lokasi Pemeriksaan (Default Kosong agar kader memilih secara sadar) -->
+            <!-- Lokasi Pemeriksaan -->
             <FormSelect
                 id="location"
                 v-model="form.location"
@@ -86,79 +62,28 @@ const toggleArrayItem = (field: 'skrining_tbc' | 'edukasi', item: string) => {
                 :error="form.errors.location"
             />
         </div>
-
-        <!-- SECTION 03: EDUKASI, SKRINING TBC & RUJUKAN -->
         <div v-if="section === 'evaluation'" class="space-y-6">
-            <!-- Skrining Gejala TBC -->
-            <div class="space-y-3">
-                <div>
-                    <h4 class="text-sm font-bold text-foreground">
-                        Skrining Gejala TBC
-                    </h4>
-                    <p class="text-xs text-muted-foreground">
-                        Pilih gejala batuk dan kondisi yang dialami sasaran
-                        untuk deteksi dini TBC.
-                    </p>
-                </div>
-                <div
-                    class="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3"
-                >
-                    <label
-                        v-for="item in tbcOptions"
-                        :key="item"
-                        class="flex cursor-pointer items-center gap-3 rounded-lg border border-border/60 p-3 text-xs transition-colors hover:bg-muted/40 sm:text-sm"
-                        :class="{
-                            'border-primary/60 bg-primary/5':
-                                form.skrining_tbc?.includes(item),
-                        }"
-                    >
-                        <input
-                            type="checkbox"
-                            :checked="form.skrining_tbc?.includes(item)"
-                            @change="toggleArrayItem('skrining_tbc', item)"
-                            class="rounded border-border text-primary focus:ring-primary"
-                        />
-                        <span class="font-medium text-foreground">{{
-                            item
-                        }}</span>
-                    </label>
-                </div>
-            </div>
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <!-- 1. Skrining Gejala TBC -->
+                <FormMultiSelect
+                    id="skrining_tbc"
+                    v-model="form.skrining_tbc"
+                    label="Skrining Gejala TBC"
+                    placeholder="Pilih gejala TBC jika ada..."
+                    :options="tbcSymptoms"
+                    none-option="Tidak Ada Gejala"
+                    :error="form.errors.skrining_tbc"
+                />
 
-            <!-- Materi Edukasi & Konseling KIE -->
-            <div class="space-y-3">
-                <div>
-                    <h4 class="text-sm font-bold text-foreground">
-                        Edukasi & Penyuluhan
-                    </h4>
-                    <p class="text-xs text-muted-foreground">
-                        Centang topik komunikasi, informasi, dan edukasi (KIE)
-                        yang telah disampaikan kepada sasaran.
-                    </p>
-                </div>
-                <div
-                    class="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3"
-                >
-                    <label
-                        v-for="item in edukasiOptions"
-                        :key="item"
-                        class="flex cursor-pointer items-center gap-3 rounded-lg border border-border/60 p-3 text-xs transition-colors hover:bg-muted/40 sm:text-sm"
-                        :class="{
-                            'border-primary/60 bg-primary/5':
-                                form.edukasi?.includes(item),
-                        }"
-                    >
-                        <input
-                            type="checkbox"
-                            :checked="form.edukasi?.includes(item)"
-                            @change="toggleArrayItem('edukasi', item)"
-                            class="rounded border-border text-primary focus:ring-primary"
-                        />
-                        <span class="font-medium text-foreground">{{
-                            item
-                        }}</span>
-                    </label>
-                </div>
+                <!-- 2. Edukasi & Penyuluhan KIE -->
+                <FormMultiSelect
+                    id="edukasi"
+                    v-model="form.edukasi"
+                    label="Edukasi & Penyuluhan"
+                    placeholder="Pilih materi edukasi yang disampaikan..."
+                    :options="filteredEducationOptions"
+                    :error="form.errors.edukasi"
+                />
             </div>
 
             <!-- Status Rujukan ke Puskesmas / Faskes -->

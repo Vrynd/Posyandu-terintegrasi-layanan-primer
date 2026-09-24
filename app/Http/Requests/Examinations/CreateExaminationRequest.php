@@ -3,10 +3,12 @@
 namespace App\Http\Requests\Examinations;
 
 use App\Enums\BmiCategory;
+use App\Enums\EducationTopic;
 use App\Enums\ExaminationLocation;
 use App\Enums\IndependenceLevel;
 use App\Enums\ParticipantCategory;
 use App\Enums\SensoryTestResult;
+use App\Enums\TbcSymptom;
 use App\Enums\WeightStatus;
 use App\Models\Participant;
 use Illuminate\Foundation\Http\FormRequest;
@@ -36,9 +38,9 @@ class CreateExaminationRequest extends FormRequest
             'is_referred' => ['boolean'],
             'location' => ['required', Rule::enum(ExaminationLocation::class)],
             'skrining_tbc' => ['nullable', 'array'],
-            'skrining_tbc.*' => ['string'],
+            'skrining_tbc.*' => [Rule::enum(TbcSymptom::class)],
             'edukasi' => ['nullable', 'array'],
-            'edukasi.*' => ['string'],
+            'edukasi.*' => [Rule::enum(EducationTopic::class)],
         ];
 
         $participant = Participant::whereKey($this->input('participant_id'))->first();

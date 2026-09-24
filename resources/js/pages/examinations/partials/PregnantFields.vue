@@ -22,7 +22,20 @@ watch(bloodPressure, (val) => {
         return;
     }
 
-    const parts = val.split('/');
+    let cleaned = val.replace(/[^0-9/]/g, '');
+    const slashParts = cleaned.split('/');
+
+    if (slashParts.length > 2) {
+        cleaned = `${slashParts[0]}/${slashParts.slice(1).join('')}`;
+    }
+
+    if (cleaned !== val) {
+        bloodPressure.value = cleaned;
+
+        return;
+    }
+
+    const parts = cleaned.split('/');
 
     if (parts.length >= 2) {
         form.value.systolic_pressure = parts[0].trim();
@@ -47,13 +60,16 @@ watch(
 </script>
 
 <template>
-    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <div
+        class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 [&_.border-input]:bg-muted/40 [&_input]:bg-muted/40"
+    >
         <!-- 1. Usia Kehamilan (Minggu) -->
         <FormInput
             id="gestational_age_weeks"
             v-model="form.gestational_age_weeks"
             label="Usia Kehamilan (Minggu)"
-            type="number"
+            inputmode="numeric"
+            only-numeric
             placeholder="Contoh: 24"
             :error="form.errors.gestational_age_weeks"
         />
@@ -63,8 +79,8 @@ watch(
             id="weight"
             v-model="form.weight"
             label="Berat Badan Sekarang (kg)"
-            type="number"
-            step="0.01"
+            inputmode="decimal"
+            is-decimal
             placeholder="Contoh: 62.5"
             :error="form.errors.weight"
         />
@@ -73,10 +89,10 @@ watch(
         <FormInput
             id="upper_arm_circumference"
             v-model="form.upper_arm_circumference"
-            label="Lingkar Lengan (cm)"
-            type="number"
-            step="0.1"
-            placeholder="Contoh: 23.5 cm"
+            label="Lingkar Lengan Atas (cm)"
+            inputmode="decimal"
+            is-decimal
+            placeholder="Contoh: 23.5"
             :error="form.errors.upper_arm_circumference"
         />
 
@@ -96,7 +112,7 @@ watch(
             id="has_iron_tablets"
             v-model="form.has_iron_tablets"
             name="has_iron_tablets"
-            label="Tablet Tambah Darah (TTD)"
+            label="Pemberian Tablet Tambah Darah"
             :error="form.errors.has_iron_tablets"
         />
 
@@ -105,7 +121,7 @@ watch(
             id="receives_pmt_kek"
             v-model="form.receives_pmt_kek"
             name="receives_pmt_kek"
-            label="PMT Pemulihan Bumil KEK"
+            label="Pemberian MT Bumil KEK"
             :error="form.errors.receives_pmt_kek"
         />
 
@@ -114,7 +130,7 @@ watch(
             id="exclusive_breastfeeding_counseling"
             v-model="form.exclusive_breastfeeding_counseling"
             name="exclusive_breastfeeding_counseling"
-            label="Konseling ASI Eksklusif"
+            label="ASI Eksklusif"
             :error="form.errors.exclusive_breastfeeding_counseling"
         />
 

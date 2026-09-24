@@ -4,9 +4,11 @@ namespace App\Http\Controllers\Examinations;
 
 use App\Actions\Examinations\CreateExamination;
 use App\Enums\BmiCategory;
+use App\Enums\EducationTopic;
 use App\Enums\ExaminationLocation;
 use App\Enums\IndependenceLevel;
 use App\Enums\SensoryTestResult;
+use App\Enums\TbcSymptom;
 use App\Enums\WeightStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Examinations\CreateExaminationRequest;
@@ -54,6 +56,8 @@ class ExaminationController extends Controller
             'weightStatuses' => WeightStatus::toOptions(),
             'bmiCategories' => BmiCategory::toOptions(),
             'sensoryResults' => SensoryTestResult::toOptions(),
+            'tbcSymptoms' => TbcSymptom::toOptions(),
+            'educationTopics' => EducationTopic::toOptions(),
             'independenceLevels' => IndependenceLevel::toOptions(),
         ]);
     }

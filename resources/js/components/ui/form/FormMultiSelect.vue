@@ -165,7 +165,7 @@ const clearAll = () => {
                     <span
                         v-for="item in visibleItems"
                         :key="item"
-                        class="inline-flex items-center gap-1 rounded bg-secondary px-2 py-0.5 text-xs font-medium text-secondary-foreground"
+                        class="inline-flex items-center gap-1 rounded-full bg-accent/15 px-2 py-0.5 text-xs font-medium text-accent border border-accent/25"
                     >
                         <span class="max-w-[130px] truncate">{{ getLabel(item) }}</span>
                         <button
