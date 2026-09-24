@@ -3,6 +3,7 @@ export interface ToddlerDetail {
 }
 
 export interface PregnancyDetail {
+    id?: number | null;
     husband_name?: string | null;
     pregnancy_number?: number | null;
     birth_spacing_years?: number | null;
@@ -56,6 +57,8 @@ export interface ExaminationTeenDetail {
     hemoglobin?: string | null;
     bmi_category?: string | null;
     bmi_category_label?: string | null;
+    family_disease_history?: string[] | null;
+    risk_behaviors?: string[] | null;
     mental_screenings?: string[] | null;
 }
 
@@ -78,12 +81,14 @@ export interface ExaminationAdultDetail {
     high_sugar_intake?: boolean;
     high_salt_intake?: boolean;
     high_fat_intake?: boolean;
+    family_disease_history?: string[] | null;
+    personal_disease_history?: string[] | null;
     puma_score?: number | null;
     puma_screenings?: string[] | null;
     adl_score?: number | null;
     independence_level?: string | null;
     independence_level_label?: string | null;
-    adl_screenings?: string[] | null;
+    adl_screenings?: Record<string, number> | string[] | null;
 }
 
 export interface ExaminationItem {

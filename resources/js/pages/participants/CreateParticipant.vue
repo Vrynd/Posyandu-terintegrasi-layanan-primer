@@ -6,6 +6,7 @@ import ActionBar from '@/components/ActionBar.vue';
 import CategorySelector from '@/components/CategorySelector.vue';
 import Heading from '@/components/Heading.vue';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { FormSection } from '@/components/ui/form';
 import { useAutoClearErrors } from '@/composables/useAutoClear';
 import { dashboard } from '@/routes';
@@ -49,9 +50,15 @@ const form = useForm({
     bpjs_number: '',
     parent_name: '',
     husband_name: '',
+    pregnancy_number: '',
+    birth_spacing_years: '',
+    weight_before_pregnancy: '',
+    height: '',
+    last_menstrual_period: '',
     employment: '',
     employment_other: '',
     marital_status: '',
+    and_examine: false,
 });
 
 // Auto-clear error & border merah seketika saat field yang memiliki error diedit
@@ -62,6 +69,11 @@ watch(
     (newCategory, oldCategory) => {
         form.parent_name = '';
         form.husband_name = '';
+        form.pregnancy_number = '';
+        form.birth_spacing_years = '';
+        form.weight_before_pregnancy = '';
+        form.height = '';
+        form.last_menstrual_period = '';
         form.marital_status = '';
         form.employment = '';
         form.employment_other = '';
@@ -129,6 +141,30 @@ const submit = () => {
             >
                 <ContactFields v-model:form="form" />
             </FormSection>
+
+            <!-- Opsi Lanjutan: Checkbox Lanjut Pemeriksaan -->
+            <div
+                class="flex items-start gap-4 rounded-2xl border border-card bg-card/80 px-4 py-4 sm:px-5 dark:border-border"
+            >
+                <Checkbox
+                    id="and_examine"
+                    v-model="form.and_examine"
+                    :disabled="!form.category"
+                    class="mt-0.5"
+                />
+                <div class="grid gap-1 leading-none">
+                    <label
+                        for="and_examine"
+                        class="cursor-pointer text-sm font-medium text-foreground select-none"
+                    >
+                        Langsung catat pemeriksaan kesehatan
+                    </label>
+                    <p class="text-xs text-muted-foreground">
+                        Setelah peserta berhasil didaftarkan, sistem akan
+                        otomatis membuka formulir pemeriksaan.
+                    </p>
+                </div>
+            </div>
 
             <!-- Aksi Form: Sticky Floating di Mobile, Flow Standar di Desktop -->
             <ActionBar>

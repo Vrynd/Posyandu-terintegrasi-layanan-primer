@@ -68,9 +68,15 @@ class CreateParticipantRequest extends FormRequest
             // Kategori Peserta
             'parent_name' => ['nullable', 'required_if:category,toddler', 'required_if:category,teenager', 'string', 'max:255'],
             'husband_name' => ['nullable', 'required_if:category,pregnant_mother', 'string', 'max:255'],
+            'pregnancy_number' => ['nullable', 'integer', 'min:1', 'max:20'],
+            'birth_spacing_years' => ['nullable', 'integer', 'min:0', 'max:30'],
+            'weight_before_pregnancy' => ['nullable', 'numeric', 'min:30', 'max:250'],
+            'height' => ['nullable', 'numeric', 'min:100', 'max:250'],
+            'last_menstrual_period' => ['nullable', 'date', 'before_or_equal:today'],
             'employment' => ['nullable', Rule::enum(EmploymentStatus::class)],
             'employment_other' => ['nullable', 'required_if:employment,other', 'string', 'max:100'],
             'marital_status' => ['nullable', Rule::enum(MaritalStatus::class)],
+            'and_examine' => ['nullable', 'boolean'],
         ];
     }
 

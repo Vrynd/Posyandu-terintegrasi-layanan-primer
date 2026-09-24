@@ -48,6 +48,11 @@ class CreateParticipant
             ]),
             ParticipantCategory::PregnantMother => $participant->pregnancies()->create([
                 'husband_name' => $validated['husband_name'] ?? null,
+                'pregnancy_number' => $validated['pregnancy_number'] ?? null,
+                'birth_spacing_years' => $validated['birth_spacing_years'] ?? null,
+                'weight_before_pregnancy' => $validated['weight_before_pregnancy'] ?? null,
+                'height' => $validated['height'] ?? null,
+                'last_menstrual_period' => $validated['last_menstrual_period'] ?? null,
             ]),
             ParticipantCategory::Teenager => $participant->teen()->create([
                 'parent_name' => $validated['parent_name'] ?? null,

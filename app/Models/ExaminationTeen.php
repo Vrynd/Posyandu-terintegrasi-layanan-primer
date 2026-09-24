@@ -40,6 +40,8 @@ class ExaminationTeen extends Model
         'blood_sugar',
         'hemoglobin',
         'bmi_category',
+        'family_disease_history',
+        'risk_behaviors',
         'mental_screenings',
     ];
 
@@ -56,6 +58,8 @@ class ExaminationTeen extends Model
             'diastolic_pressure' => 'integer',
             'blood_sugar' => 'decimal:2',
             'bmi_category' => BmiCategory::class,
+            'family_disease_history' => 'array',
+            'risk_behaviors' => 'array',
             'mental_screenings' => 'array',
         ];
     }

@@ -3,8 +3,14 @@
 namespace App\Http\Controllers\Examinations;
 
 use App\Actions\Examinations\CreateExamination;
+use App\Enums\BmiCategory;
+use App\Enums\ExaminationLocation;
+use App\Enums\IndependenceLevel;
+use App\Enums\SensoryTestResult;
+use App\Enums\WeightStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Examinations\CreateExaminationRequest;
+use App\Models\Participant;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -23,9 +29,33 @@ class ExaminationController extends Controller
     /**
      * Halaman Form Input Pemeriksaan Baru
      */
-    public function create(): Response
+    public function create(Request $request): Response
     {
-        return Inertia::render('examinations/Create');
+        $selectedParticipant = null;
+
+        if ($request->filled('participant')) {
+            $selectedParticipant = Participant::query()
+                ->where('ulid', $request->string('participant'))
+                ->with(['latestPregnancy'])
+                ->first();
+        }
+
+        $participants = Participant::query()
+            ->select(['id', 'ulid', 'name', 'category', 'birth_date', 'gender', 'nik_hash'])
+            ->where('is_active', true)
+            ->with(['latestPregnancy'])
+            ->orderBy('name')
+            ->get();
+
+        return Inertia::render('examinations/Create', [
+            'participants' => $participants,
+            'selectedParticipant' => $selectedParticipant,
+            'locations' => ExaminationLocation::toOptions(),
+            'weightStatuses' => WeightStatus::toOptions(),
+            'bmiCategories' => BmiCategory::toOptions(),
+            'sensoryResults' => SensoryTestResult::toOptions(),
+            'independenceLevels' => IndependenceLevel::toOptions(),
+        ]);
     }
 
     /**

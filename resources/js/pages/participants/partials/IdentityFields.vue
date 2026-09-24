@@ -95,14 +95,61 @@ defineProps<{
             :error="form.errors.parent_name"
         />
 
-        <FormInput
-            v-if="isPregnant(form.category)"
-            id="husband_name"
-            v-model="form.husband_name"
-            label="Nama Suami"
-            placeholder="Nama suami"
-            :error="form.errors.husband_name"
-        />
+        <template v-if="isPregnant(form.category)">
+            <FormInput
+                id="husband_name"
+                v-model="form.husband_name"
+                label="Nama Suami"
+                placeholder="Nama suami"
+                required
+                :error="form.errors.husband_name"
+            />
+            <FormInput
+                id="pregnancy_number"
+                v-model="form.pregnancy_number"
+                label="Hamil Anak Ke-"
+                placeholder="Contoh: 1, 2, 3"
+                inputmode="numeric"
+                :only-numeric="true"
+                :error="form.errors.pregnancy_number"
+            />
+            <FormInput
+                id="birth_spacing_years"
+                v-model="form.birth_spacing_years"
+                label="Jarak Kehamilan (Tahun)"
+                placeholder="Jarak dari anak sebelumnya (tahun)"
+                inputmode="numeric"
+                :only-numeric="true"
+                :error="form.errors.birth_spacing_years"
+            />
+            <FormInput
+                id="weight_before_pregnancy"
+                v-model="form.weight_before_pregnancy"
+                label="Berat Badan Sebelum Hamil (kg)"
+                placeholder="Contoh: 50.5"
+                type="text"
+                inputmode="decimal"
+                :error="form.errors.weight_before_pregnancy"
+            />
+            <FormInput
+                id="height"
+                v-model="form.height"
+                label="Tinggi Badan Ibu (cm)"
+                placeholder="Contoh: 155.0"
+                type="text"
+                inputmode="decimal"
+                :error="form.errors.height"
+            />
+            <FormInput
+                id="last_menstrual_period"
+                v-model="form.last_menstrual_period"
+                label="HPHT (Hari Pertama Haid Terakhir)"
+                type="date"
+                :max="new Date().toISOString().split('T')[0]"
+                :error="form.errors.last_menstrual_period"
+            />
+        </template>
+
         <FormSelect
             v-if="isAdult(form.category)"
             id="marital_status"

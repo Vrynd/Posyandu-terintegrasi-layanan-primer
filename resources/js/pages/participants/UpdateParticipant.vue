@@ -50,6 +50,17 @@ const form = useForm({
         props.participant.teen?.parent_name ??
         '',
     husband_name: props.participant.latest_pregnancy?.husband_name ?? '',
+    pregnancy_number:
+        props.participant.latest_pregnancy?.pregnancy_number ?? '',
+    birth_spacing_years:
+        props.participant.latest_pregnancy?.birth_spacing_years ?? '',
+    weight_before_pregnancy:
+        props.participant.latest_pregnancy?.weight_before_pregnancy ?? '',
+    height: props.participant.latest_pregnancy?.height ?? '',
+    last_menstrual_period: props.participant.latest_pregnancy
+        ?.last_menstrual_period
+        ? props.participant.latest_pregnancy.last_menstrual_period.split('T')[0]
+        : '',
     employment: props.participant.adult?.employment ?? '',
     employment_other: props.participant.adult?.employment_other ?? '',
     marital_status: props.participant.adult?.marital_status ?? '',

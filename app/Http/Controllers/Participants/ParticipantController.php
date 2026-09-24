@@ -62,7 +62,7 @@ class ParticipantController extends Controller
         }
 
         try {
-            $action->execute($validated);
+            $participant = $action->execute($validated);
         } catch (QueryException $e) {
             if ($e->getCode() === '23000') {
                 return back()
@@ -73,6 +73,12 @@ class ParticipantController extends Controller
         }
 
         session()->flash('success', 'Data peserta posyandu berhasil didaftarkan.');
+
+        if ($request->boolean('and_examine')) {
+            return redirect()->route('examinations.create', [
+                'participant' => $participant->ulid,
+            ]);
+        }
 
         return redirect()->route('participants.index');
     }
