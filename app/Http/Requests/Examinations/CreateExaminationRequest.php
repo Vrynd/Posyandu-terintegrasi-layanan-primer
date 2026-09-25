@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Examinations;
 
 use App\Enums\BmiCategory;
+use App\Enums\ContraceptiveMethod;
 use App\Enums\DiseaseHistory;
 use App\Enums\EducationTopic;
 use App\Enums\ExaminationLocation;
@@ -108,16 +109,16 @@ class CreateExaminationRequest extends FormRequest
                     'cholesterol' => ['nullable', 'numeric', 'min:50', 'max:500'],
                     'eye_test' => ['nullable', Rule::enum(SensoryTestResult::class)],
                     'ear_test' => ['nullable', Rule::enum(SensoryTestResult::class)],
-                    'contraceptive' => ['nullable', 'string', 'max:50'],
+                    'contraceptive' => ['nullable', Rule::enum(ContraceptiveMethod::class)],
                     'bmi_category' => ['nullable', Rule::enum(BmiCategory::class)],
                     'is_smoking' => ['nullable', 'boolean'],
                     'high_sugar_intake' => ['nullable', 'boolean'],
                     'high_salt_intake' => ['nullable', 'boolean'],
                     'high_fat_intake' => ['nullable', 'boolean'],
                     'family_disease_history' => ['nullable', 'array'],
-                    'family_disease_history.*' => ['string'],
+                    'family_disease_history.*' => [Rule::enum(DiseaseHistory::class)],
                     'personal_disease_history' => ['nullable', 'array'],
-                    'personal_disease_history.*' => ['string'],
+                    'personal_disease_history.*' => [Rule::enum(DiseaseHistory::class)],
                     'puma_score' => ['nullable', 'integer', 'min:0', 'max:15'],
                     'puma_screenings' => ['nullable', 'array'],
                 ]);
@@ -136,9 +137,9 @@ class CreateExaminationRequest extends FormRequest
                     'ear_test' => ['nullable', Rule::enum(SensoryTestResult::class)],
                     'bmi_category' => ['nullable', Rule::enum(BmiCategory::class)],
                     'family_disease_history' => ['nullable', 'array'],
-                    'family_disease_history.*' => ['string'],
+                    'family_disease_history.*' => [Rule::enum(DiseaseHistory::class)],
                     'personal_disease_history' => ['nullable', 'array'],
-                    'personal_disease_history.*' => ['string'],
+                    'personal_disease_history.*' => [Rule::enum(DiseaseHistory::class)],
                     'adl_score' => ['nullable', 'integer', 'min:0', 'max:20'],
                     'independence_level' => ['nullable', Rule::enum(IndependenceLevel::class)],
                     'adl_screenings' => ['nullable', 'array'],

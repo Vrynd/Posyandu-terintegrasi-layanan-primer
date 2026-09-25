@@ -9,7 +9,7 @@ import { FormSection } from '@/components/ui/form';
 import { useAutoClearErrors } from '@/composables/useAutoClear';
 import { dashboard } from '@/routes';
 import { index, store } from '@/routes/examinations';
-import type { FilterOption, ParticipantItem } from '@/types';
+import type { FilterOption, ParticipantItem, ScreeningItem } from '@/types';
 import ElderlyFields from './partials/ElderlyFields.vue';
 import GeneralFields from './partials/GeneralFields.vue';
 import PregnantFields from './partials/PregnantFields.vue';
@@ -40,6 +40,8 @@ const props = defineProps<{
     toddlerInterventions: FilterOption[];
     diseaseHistories: FilterOption[];
     riskBehaviors: FilterOption[];
+    contraceptiveMethods: FilterOption[];
+    screenings?: Record<string, ScreeningItem[]>;
 }>();
 
 const form = useForm({
@@ -244,6 +246,7 @@ const submit = () => {
                     :disease-histories="diseaseHistories"
                     :risk-behaviors="riskBehaviors"
                     :gender="activeParticipant.gender"
+                    :questions="screenings?.teenager ?? []"
                 />
 
                 <!-- Form Kategori Usia Produktif -->
@@ -252,6 +255,9 @@ const submit = () => {
                     v-model:form="form"
                     :bmi-categories="bmiCategories"
                     :sensory-results="sensoryResults"
+                    :disease-histories="diseaseHistories"
+                    :contraceptive-methods="contraceptiveMethods"
+                    :questions="screenings?.productive ?? []"
                 />
 
                 <!-- Form Kategori Lansia -->
@@ -261,6 +267,8 @@ const submit = () => {
                     :bmi-categories="bmiCategories"
                     :sensory-results="sensoryResults"
                     :independence-levels="independenceLevels"
+                    :disease-histories="diseaseHistories"
+                    :questions="screenings?.adult ?? []"
                 />
             </FormSection>
 

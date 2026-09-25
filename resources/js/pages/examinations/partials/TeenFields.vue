@@ -6,7 +6,7 @@ import {
     FormRadioYesNo,
     FormSelect,
 } from '@/components/ui/form';
-import type { FilterOption } from '@/types';
+import type { FilterOption, ScreeningItem } from '@/types';
 
 const form = defineModel<Record<string, any>>('form', { required: true });
 
@@ -15,6 +15,7 @@ const props = defineProps<{
     diseaseHistories: FilterOption[];
     riskBehaviors: FilterOption[];
     gender?: string;
+    questions?: ScreeningItem[];
 }>();
 
 // 1. Input tunggal Tekanan Darah (Contoh: 120/80)
@@ -65,45 +66,6 @@ watch(
     },
     { immediate: true },
 );
-
-// 2. Instrumen 7 Pertanyaan Skrining Mental Remaja (Kemenkes)
-const mentalQuestions = [
-    {
-        key: 'nyaman_di_rumah',
-        question: 'Apakah kamu merasa nyaman di rumah?',
-    },
-    {
-        key: 'beban_sekolah',
-        question: 'Apakah kamu merasa ada beban di sekolah?',
-    },
-    {
-        key: 'citra_tubuh',
-        question: 'Apakah ada yang kamu suka atau tidak suka pada tubuhmu?',
-    },
-    {
-        key: 'zat_adiktif',
-        question:
-            'Apakah kamu pernah mengonsumsi rokok/alkohol atau obat-obatan (narkoba)?',
-    },
-    {
-        key: 'seksual_pranikah',
-        question:
-            'Apakah kamu pernah melakukan hubungan seksual dengan laki-laki/perempuan?',
-    },
-    {
-        key: 'keamanan_lingkungan',
-        question:
-            'Apakah kamu merasa tidak aman di rumah/lingkungan sekolah/di masyarakat/di jalan?',
-    },
-    {
-        key: 'teman_luar_grup',
-        question: 'Apakah kamu mempunyai teman di luar grupmu?',
-    },
-    {
-        key: 'ingin_bunuh_diri',
-        question: 'Apakah kamu pernah merasa ingin bunuh diri?',
-    },
-];
 </script>
 
 <template>
@@ -225,7 +187,7 @@ const mentalQuestions = [
                 class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 [&_.border-input]:bg-muted/40"
             >
                 <FormRadioYesNo
-                    v-for="item in mentalQuestions"
+                    v-for="item in questions"
                     :key="item.key"
                     :id="`mental_${item.key}`"
                     v-model="form.mental_screenings[item.key]"

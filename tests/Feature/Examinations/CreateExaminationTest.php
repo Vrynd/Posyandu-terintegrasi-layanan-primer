@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\BmiCategory;
+use App\Enums\ContraceptiveMethod;
 use App\Enums\DiseaseHistory;
 use App\Enums\EducationTopic;
 use App\Enums\IndependenceLevel;
@@ -203,14 +204,14 @@ test('can record productive adult examination with puma screening, lifestyle, an
         'cholesterol' => 180.0,
         'eye_test' => SensoryTestResult::Normal->value,
         'ear_test' => SensoryTestResult::Normal->value,
-        'contraceptive' => 'Spiral',
+        'contraceptive' => ContraceptiveMethod::Iud->value,
         'bmi_category' => BmiCategory::Normal->value,
         'is_smoking' => false,
         'high_sugar_intake' => true,
         'high_salt_intake' => false,
         'high_fat_intake' => false,
-        'family_disease_history' => ['Diabetes Melitus'],
-        'personal_disease_history' => ['Tidak Ada'],
+        'family_disease_history' => [DiseaseHistory::Diabetes->value],
+        'personal_disease_history' => [DiseaseHistory::None->value],
         'puma_score' => 1,
         'puma_screenings' => [
             'napas_pendek' => 'ya',
@@ -231,7 +232,7 @@ test('can record productive adult examination with puma screening, lifestyle, an
     $this->assertDatabaseHas('examination_adults', [
         'height' => 168.0,
         'systolic_pressure' => 125,
-        'contraceptive' => 'Spiral',
+        'contraceptive' => ContraceptiveMethod::Iud->value,
         'high_sugar_intake' => true,
         'puma_score' => 1,
     ]);
@@ -264,8 +265,8 @@ test('can record elderly examination with barthel adl screening and independence
         'eye_test' => SensoryTestResult::Normal->value,
         'ear_test' => SensoryTestResult::Impaired->value,
         'bmi_category' => BmiCategory::Normal->value,
-        'family_disease_history' => ['Hipertensi'],
-        'personal_disease_history' => ['Hipertensi'],
+        'family_disease_history' => [DiseaseHistory::Hypertension->value],
+        'personal_disease_history' => [DiseaseHistory::Hypertension->value],
         'adl_score' => 18,
         'independence_level' => IndependenceLevel::Mild->value,
         'adl_screenings' => [

@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             ParticipantSeeder::class,
             ExaminationSeeder::class,
+            ScreeningQuestionSeeder::class,
         ]);
     }
 }

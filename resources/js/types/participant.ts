@@ -157,3 +157,20 @@ export interface ParticipantFilters {
     category?: string | null;
     sort?: string | null;
 }
+
+export interface ScreeningOption {
+    label: string;
+    value: string;
+}
+
+export interface ScreeningItem {
+    id: number;
+    category: string;
+    group_name: string;
+    key: string;
+    question: string;
+    input_type: 'radio_yes_no' | 'select' | string;
+    options?: ScreeningOption[] | null;
+    order: number;
+    is_active: boolean;
+}

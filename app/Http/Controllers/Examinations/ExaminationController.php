@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Examinations;
 
 use App\Actions\Examinations\CreateExamination;
 use App\Enums\BmiCategory;
+use App\Enums\ContraceptiveMethod;
 use App\Enums\DiseaseHistory;
 use App\Enums\EducationTopic;
 use App\Enums\ExaminationLocation;
@@ -16,6 +17,7 @@ use App\Enums\WeightStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Examinations\CreateExaminationRequest;
 use App\Models\Participant;
+use App\Models\ScreeningQuestion;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -52,6 +54,12 @@ class ExaminationController extends Controller
             ->orderBy('name')
             ->get();
 
+        $screening = ScreeningQuestion::query()
+            ->where('is_active', true)
+            ->orderBy('order')
+            ->get()
+            ->groupBy(fn ($item) => $item->category->value);
+
         return Inertia::render('examinations/Create', [
             'participants' => $participants,
             'selectedParticipant' => $selectedParticipant,
@@ -65,6 +73,8 @@ class ExaminationController extends Controller
             'toddlerInterventions' => Intervention::toOptions(),
             'diseaseHistories' => DiseaseHistory::toOptions(),
             'riskBehaviors' => RiskBehavior::toOptions(),
+            'contraceptiveMethods' => ContraceptiveMethod::toOptions(),
+            'screenings' => $screening,
         ]);
     }
 
