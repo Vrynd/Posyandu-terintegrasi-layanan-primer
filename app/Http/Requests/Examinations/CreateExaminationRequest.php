@@ -3,11 +3,13 @@
 namespace App\Http\Requests\Examinations;
 
 use App\Enums\BmiCategory;
+use App\Enums\DiseaseHistory;
 use App\Enums\EducationTopic;
 use App\Enums\ExaminationLocation;
 use App\Enums\IndependenceLevel;
 use App\Enums\Intervention;
 use App\Enums\ParticipantCategory;
+use App\Enums\RiskBehavior;
 use App\Enums\SensoryTestResult;
 use App\Enums\TbcSymptom;
 use App\Enums\WeightStatus;
@@ -88,9 +90,9 @@ class CreateExaminationRequest extends FormRequest
                     'hemoglobin' => ['nullable', 'string', 'max:20'],
                     'bmi_category' => ['nullable', Rule::enum(BmiCategory::class)],
                     'family_disease_history' => ['nullable', 'array'],
-                    'family_disease_history.*' => ['string'],
+                    'family_disease_history.*' => [Rule::enum(DiseaseHistory::class)],
                     'risk_behaviors' => ['nullable', 'array'],
-                    'risk_behaviors.*' => ['string'],
+                    'risk_behaviors.*' => [Rule::enum(RiskBehavior::class)],
                     'mental_screenings' => ['nullable', 'array'],
                 ]);
                 break;

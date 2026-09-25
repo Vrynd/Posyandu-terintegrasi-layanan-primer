@@ -1,10 +1,12 @@
 <?php
 
 use App\Enums\BmiCategory;
+use App\Enums\DiseaseHistory;
 use App\Enums\EducationTopic;
 use App\Enums\IndependenceLevel;
 use App\Enums\Intervention;
 use App\Enums\ParticipantCategory;
+use App\Enums\RiskBehavior;
 use App\Enums\SensoryTestResult;
 use App\Enums\TbcSymptom;
 use App\Enums\WeightStatus;
@@ -146,8 +148,8 @@ test('can record teenager examination with mental screening and disease history'
         'blood_sugar' => 90.0,
         'hemoglobin' => '12.5',
         'bmi_category' => BmiCategory::Normal->value,
-        'family_disease_history' => ['Hipertensi', 'Asma'],
-        'risk_behaviors' => ['Kurang Aktivitas Fisik', 'Kurang Sayur dan Buah'],
+        'family_disease_history' => [DiseaseHistory::Hypertension->value, DiseaseHistory::AsthmaOrAllergy->value],
+        'risk_behaviors' => [RiskBehavior::LackOfPhysicalActivity->value, RiskBehavior::LackOfVegetablesAndFruits->value],
         'mental_screenings' => [
             'beban_sekolah' => 'tidak',
             'citra_tubuh' => 'ya',

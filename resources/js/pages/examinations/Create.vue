@@ -38,6 +38,8 @@ const props = defineProps<{
     tbcSymptoms: FilterOption[];
     educationTopics: FilterOption[];
     toddlerInterventions: FilterOption[];
+    diseaseHistories: FilterOption[];
+    riskBehaviors: FilterOption[];
 }>();
 
 const form = useForm({
@@ -81,7 +83,7 @@ const form = useForm({
     family_disease_history: [] as string[],
     risk_behaviors: [] as string[],
     personal_disease_history: [] as string[],
-    mental_screenings: {} as Record<string, string>,
+    mental_screenings: {} as Record<string, boolean>,
     uric_acid: '',
     cholesterol: '',
     eye_test: '',
@@ -91,9 +93,9 @@ const form = useForm({
     high_sugar_intake: null as boolean | null,
     high_salt_intake: null as boolean | null,
     high_fat_intake: null as boolean | null,
-    puma_score: 0,
-    puma_screenings: {} as Record<string, string>,
-    adl_score: 0,
+    puma_score: null as number | null,
+    puma_screenings: {} as Record<string, boolean>,
+    adl_score: null as number | null,
     independence_level: '',
     adl_screenings: {} as Record<string, number>,
 });
@@ -111,59 +113,6 @@ const activeParticipant = computed(() => {
             (p) => String(p.id) === String(form.participant_id),
         ) || null
     );
-});
-
-// Kategori sasaran yang menggunakan 4 section (karena memiliki instrumen kuesioner terpisah)
-const isFourSections = computed(() => {
-    return ['teenager', 'productive', 'adult'].includes(
-        activeParticipant.value?.category ?? '',
-    );
-});
-
-// Judul & deskripsi dinamis untuk Section 02
-const sectionTwoMeta = computed(() => {
-    if (isFourSections.value) {
-        return {
-            title: 'Pemeriksaan Fisik & Klinis',
-            description:
-                'Pencatatan antropometri, tanda vital, dan riwayat kesehatan',
-        };
-    }
-
-    return {
-        title: 'Pemeriksaan Kesehatan',
-        description:
-            'Pencatatan hasil pengukuran fisik, klinis, dan skrining spesifik sasaran',
-    };
-});
-
-// Judul & deskripsi dinamis untuk Section 03 skrining khusus sasaran
-const screeningMeta = computed(() => {
-    switch (activeParticipant.value?.category) {
-        case 'teenager':
-            return {
-                title: 'Skrining Kesehatan Mental & Emosional Remaja',
-                description:
-                    'Instrumen 7 pertanyaan evaluasi kesehatan mental, beban psikologis, dan perilaku remaja',
-            };
-        case 'productive':
-            return {
-                title: 'Skrining Risiko Paru (PUMA)',
-                description:
-                    'Kuesioner deteksi dini gangguan pernapasan dan risiko Penyakit Paru Obstruktif Kronis (PPOK)',
-            };
-        case 'adult':
-            return {
-                title: 'Pengkajian Fungsional Lansia (ADL)',
-                description:
-                    'Instrumen evaluasi kemandirian aktivitas sehari-hari menggunakan Indeks Barthel',
-            };
-        default:
-            return {
-                title: 'Skrining Khusus Sasaran',
-                description: 'Instrumen evaluasi kesehatan spesifik kategori',
-            };
-    }
 });
 
 // Set otomatis field saat peserta terpilih terdeteksi
@@ -252,6 +201,7 @@ const submit = () => {
         </header>
 
         <form @submit.prevent="submit" class="flex flex-1 flex-col gap-6">
+            <!-- SECTION 01: Waktu & Lokasi -->
             <FormSection
                 number="01"
                 title="Waktu dan Lokasi Pelayanan"
@@ -265,11 +215,12 @@ const submit = () => {
                 />
             </FormSection>
 
+            <!-- SECTION 02: Pemeriksaan Kesehatan & Skrining Sasaran (3 Section Konsisten) -->
             <FormSection
                 v-if="activeParticipant"
                 number="02"
-                :title="sectionTwoMeta.title"
-                :description="sectionTwoMeta.description"
+                title="Pemeriksaan Kesehatan & Skrining"
+                description="Pencatatan hasil pengukuran fisik, klinis, dan instrumen skrining spesifik sasaran"
             >
                 <!-- Form Kategori Balita -->
                 <ToddlerFields
@@ -290,7 +241,9 @@ const submit = () => {
                     v-else-if="activeParticipant.category === 'teenager'"
                     v-model:form="form"
                     :bmi-categories="bmiCategories"
-                    section="physical"
+                    :disease-histories="diseaseHistories"
+                    :risk-behaviors="riskBehaviors"
+                    :gender="activeParticipant.gender"
                 />
 
                 <!-- Form Kategori Usia Produktif -->
@@ -299,54 +252,21 @@ const submit = () => {
                     v-model:form="form"
                     :bmi-categories="bmiCategories"
                     :sensory-results="sensoryResults"
-                    section="physical"
                 />
 
-                <!-- Form Kategori Lansia (Pemeriksaan Fisik & Klinis) -->
+                <!-- Form Kategori Lansia -->
                 <ElderlyFields
                     v-else-if="activeParticipant.category === 'adult'"
                     v-model:form="form"
                     :bmi-categories="bmiCategories"
                     :sensory-results="sensoryResults"
                     :independence-levels="independenceLevels"
-                    section="physical"
                 />
             </FormSection>
 
-            <!-- Section 03 Khusus Remaja, Produktif & Lansia (Instrumen Skrining Khusus) -->
+            <!-- SECTION 03: Edukasi, Skrining TBC & Rujukan (Umum untuk Semua) -->
             <FormSection
-                v-if="isFourSections && activeParticipant"
                 number="03"
-                :title="screeningMeta.title"
-                :description="screeningMeta.description"
-            >
-                <TeenFields
-                    v-if="activeParticipant.category === 'teenager'"
-                    v-model:form="form"
-                    :bmi-categories="bmiCategories"
-                    section="mental"
-                />
-
-                <ProductiveFields
-                    v-else-if="activeParticipant.category === 'productive'"
-                    v-model:form="form"
-                    :bmi-categories="bmiCategories"
-                    :sensory-results="sensoryResults"
-                    section="screening"
-                />
-
-                <ElderlyFields
-                    v-else-if="activeParticipant.category === 'adult'"
-                    v-model:form="form"
-                    :bmi-categories="bmiCategories"
-                    :sensory-results="sensoryResults"
-                    :independence-levels="independenceLevels"
-                    section="screening"
-                />
-            </FormSection>
-
-            <FormSection
-                :number="isFourSections ? '04' : '03'"
                 title="Edukasi, Skrining TBC & Rujukan"
                 description="Skrining gejala batuk TBC, penyuluhan KIE, dan evaluasi rujukan fasilitas kesehatan"
             >

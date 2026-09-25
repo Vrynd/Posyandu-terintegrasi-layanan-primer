@@ -4,10 +4,12 @@ namespace App\Http\Controllers\Examinations;
 
 use App\Actions\Examinations\CreateExamination;
 use App\Enums\BmiCategory;
+use App\Enums\DiseaseHistory;
 use App\Enums\EducationTopic;
 use App\Enums\ExaminationLocation;
 use App\Enums\IndependenceLevel;
 use App\Enums\Intervention;
+use App\Enums\RiskBehavior;
 use App\Enums\SensoryTestResult;
 use App\Enums\TbcSymptom;
 use App\Enums\WeightStatus;
@@ -61,6 +63,8 @@ class ExaminationController extends Controller
             'educationTopics' => EducationTopic::toOptions(),
             'independenceLevels' => IndependenceLevel::toOptions(),
             'toddlerInterventions' => Intervention::toOptions(),
+            'diseaseHistories' => DiseaseHistory::toOptions(),
+            'riskBehaviors' => RiskBehavior::toOptions(),
         ]);
     }
 

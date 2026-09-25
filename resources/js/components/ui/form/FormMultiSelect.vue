@@ -26,7 +26,7 @@ const props = withDefaults(
         noneOption: 'Tidak Ada',
         disabled: false,
         maxVisibleTags: 2,
-    }
+    },
 );
 
 const modelValue = defineModel<string[]>({ default: () => [] });
@@ -53,11 +53,17 @@ const isSelected = (val: string) => {
 };
 
 const visibleItems = computed(() => {
-    if (!Array.isArray(modelValue.value)) {
+    if (!Array.isArray(modelValue.value) || modelValue.value.length === 0) {
         return [];
     }
 
-    return modelValue.value.slice(0, props.maxVisibleTags);
+    // Jika total pilihan <= 2, tampilkan keduanya (1 atau 2 tag)
+    // Jika lebih dari 2, cukup tampilkan 1 tag utama + counter (+X lainnya) agar strictly 1 baris
+    if (modelValue.value.length <= props.maxVisibleTags) {
+        return modelValue.value;
+    }
+
+    return modelValue.value.slice(0, 1);
 });
 
 const remainingCount = computed(() => {
@@ -65,7 +71,16 @@ const remainingCount = computed(() => {
         return 0;
     }
 
-    return Math.max(0, modelValue.value.length - props.maxVisibleTags);
+    return Math.max(0, modelValue.value.length - visibleItems.value.length);
+});
+
+// Tooltip yang menampilkan seluruh opsi yang dipilih saat di-hover
+const allSelectedLabels = computed(() => {
+    if (!Array.isArray(modelValue.value) || modelValue.value.length === 0) {
+        return '';
+    }
+
+    return modelValue.value.map((v) => getLabel(v)).join(', ');
 });
 
 const getLabel = (val: string) => {
@@ -136,7 +151,7 @@ const clearAll = () => {
             {{ label }}
         </Label>
 
-        <!-- Trigger Input Box -->
+        <!-- Trigger Input Box (Tinggi Tetap Bersih & Konsisten) -->
         <div
             :id="id"
             role="combobox"
@@ -145,15 +160,15 @@ const clearAll = () => {
             @click="!disabled && (isOpen = !isOpen)"
             @keydown.enter.prevent="!disabled && (isOpen = !isOpen)"
             @keydown.space.prevent="!disabled && (isOpen = !isOpen)"
-            class="flex h-10 sm:min-h-9.5 w-full items-center justify-between rounded-md border border-input bg-transparent px-3 py-1 text-sm transition-[color,box-shadow] outline-none cursor-pointer select-none"
+            class="flex h-10 sm:h-9.5 w-full items-center justify-between rounded-md border border-input bg-transparent px-3 py-1 text-sm transition-[color,box-shadow] outline-none cursor-pointer select-none"
             :class="[
                 disabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-muted/15',
                 isOpen ? 'border-ring ring-2 ring-ring/20' : '',
                 error ? 'border-destructive ring-destructive/20' : '',
             ]"
         >
-            <!-- Placeholder atau Selected Tags -->
-            <div class="flex flex-1 flex-wrap items-center gap-1.5 overflow-hidden py-0.5 pr-2">
+            <!-- Single-Line Tags Wrapper (Strict 1 Baris, Anti Tumpah) -->
+            <div class="flex flex-1 items-center gap-1.5 min-w-0 overflow-hidden pr-2">
                 <span
                     v-if="!modelValue || modelValue.length === 0"
                     class="text-muted-foreground text-sm truncate"
@@ -165,9 +180,9 @@ const clearAll = () => {
                     <span
                         v-for="item in visibleItems"
                         :key="item"
-                        class="inline-flex items-center gap-1 rounded-full bg-accent/15 px-2 py-0.5 text-xs font-medium text-accent border border-accent/25"
+                        class="inline-flex shrink-0 items-center gap-1 rounded-full bg-accent/15 px-2 py-0.5 text-xs font-medium text-accent border border-accent/25"
                     >
-                        <span class="max-w-[130px] truncate">{{ getLabel(item) }}</span>
+                        <span class="max-w-[110px] sm:max-w-[130px] truncate">{{ getLabel(item) }}</span>
                         <button
                             type="button"
                             @click.stop="removeOption(item)"
@@ -180,7 +195,8 @@ const clearAll = () => {
 
                     <span
                         v-if="remainingCount > 0"
-                        class="inline-flex items-center rounded-full bg-accent/15 px-1.5 py-0.5 text-[11px] font-semibold text-accent border border-accent/25"
+                        class="inline-flex shrink-0 items-center rounded-full bg-accent/15 px-2 py-0.5 text-[11px] font-semibold text-accent border border-accent/25"
+                        :title="`Pilihan tersimpan: ${allSelectedLabels}`"
                     >
                         +{{ remainingCount }} lainnya
                     </span>
