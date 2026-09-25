@@ -7,6 +7,7 @@ use App\Enums\BmiCategory;
 use App\Enums\EducationTopic;
 use App\Enums\ExaminationLocation;
 use App\Enums\IndependenceLevel;
+use App\Enums\Intervention;
 use App\Enums\SensoryTestResult;
 use App\Enums\TbcSymptom;
 use App\Enums\WeightStatus;
@@ -59,6 +60,7 @@ class ExaminationController extends Controller
             'tbcSymptoms' => TbcSymptom::toOptions(),
             'educationTopics' => EducationTopic::toOptions(),
             'independenceLevels' => IndependenceLevel::toOptions(),
+            'toddlerInterventions' => Intervention::toOptions(),
         ]);
     }
 

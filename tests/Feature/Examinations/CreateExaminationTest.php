@@ -3,6 +3,7 @@
 use App\Enums\BmiCategory;
 use App\Enums\EducationTopic;
 use App\Enums\IndependenceLevel;
+use App\Enums\Intervention;
 use App\Enums\ParticipantCategory;
 use App\Enums\SensoryTestResult;
 use App\Enums\TbcSymptom;
@@ -45,7 +46,7 @@ test('can record toddler examination', function () {
         'head_circumference' => 47.0,
         'arm_circumference' => 14.5,
         'has_illness_symptoms' => false,
-        'interventions' => ['Vitamin A', 'Imunisasi Rutin Lengkap'],
+        'interventions' => [Intervention::VitaminA->value, Intervention::RoutineImmunization->value],
     ];
 
     $response = $this->post(route('examinations.store'), $data);

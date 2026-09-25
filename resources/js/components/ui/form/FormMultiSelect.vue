@@ -145,7 +145,7 @@ const clearAll = () => {
             @click="!disabled && (isOpen = !isOpen)"
             @keydown.enter.prevent="!disabled && (isOpen = !isOpen)"
             @keydown.space.prevent="!disabled && (isOpen = !isOpen)"
-            class="flex min-h-10 sm:min-h-9.5 w-full items-center justify-between rounded-md border border-input bg-transparent px-3 py-1 text-sm transition-[color,box-shadow] outline-none cursor-pointer select-none"
+            class="flex h-10 sm:min-h-9.5 w-full items-center justify-between rounded-md border border-input bg-transparent px-3 py-1 text-sm transition-[color,box-shadow] outline-none cursor-pointer select-none"
             :class="[
                 disabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-muted/15',
                 isOpen ? 'border-ring ring-2 ring-ring/20' : '',
@@ -180,7 +180,7 @@ const clearAll = () => {
 
                     <span
                         v-if="remainingCount > 0"
-                        class="inline-flex items-center rounded bg-muted px-1.5 py-0.5 text-[11px] font-semibold text-muted-foreground"
+                        class="inline-flex items-center rounded-full bg-accent/15 px-1.5 py-0.5 text-[11px] font-semibold text-accent border border-accent/25"
                     >
                         +{{ remainingCount }} lainnya
                     </span>

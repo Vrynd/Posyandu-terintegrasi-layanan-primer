@@ -37,6 +37,7 @@ const props = defineProps<{
     independenceLevels: FilterOption[];
     tbcSymptoms: FilterOption[];
     educationTopics: FilterOption[];
+    toddlerInterventions: FilterOption[];
 }>();
 
 const form = useForm({
@@ -185,27 +186,43 @@ watch(
     { immediate: true },
 );
 
-// Auto-kalkulasi IMT jika BB dan TB terisi
-watch([() => form.weight, () => form.height], ([newWeight, newHeight]) => {
-    const w = parseFloat(newWeight);
-    const h = parseFloat(newHeight) / 100;
+// Auto-kalkulasi IMT (Hanya aktif untuk kategori: Remaja, Usia Produktif, dan Lansia)
+watch(
+    [
+        () => form.weight,
+        () => form.height,
+        () => activeParticipant.value?.category,
+    ],
+    ([newWeight, newHeight, category]) => {
+        // Balita & Ibu Hamil tidak menggunakan kalkulasi IMT dewasa
+        if (!['teenager', 'productive', 'adult'].includes(category ?? '')) {
+            form.bmi_category = '';
 
-    if (w > 0 && h > 0) {
-        const bmi = w / (h * h);
-
-        if (bmi < 17) {
-            form.bmi_category = 'severely_underweight';
-        } else if (bmi < 18.5) {
-            form.bmi_category = 'underweight';
-        } else if (bmi <= 25) {
-            form.bmi_category = 'normal';
-        } else if (bmi <= 27) {
-            form.bmi_category = 'overweight';
-        } else {
-            form.bmi_category = 'obese';
+            return;
         }
-    }
-});
+
+        const w = parseFloat(newWeight);
+        const h = parseFloat(newHeight) / 100;
+
+        if (w > 0 && h > 0) {
+            const bmi = w / (h * h);
+
+            if (bmi < 17) {
+                form.bmi_category = 'severely_underweight';
+            } else if (bmi < 18.5) {
+                form.bmi_category = 'underweight';
+            } else if (bmi <= 25) {
+                form.bmi_category = 'normal';
+            } else if (bmi <= 27) {
+                form.bmi_category = 'overweight';
+            } else {
+                form.bmi_category = 'obese';
+            }
+        } else {
+            form.bmi_category = '';
+        }
+    },
+);
 
 const submit = () => {
     form.post(store().url, {
@@ -259,6 +276,7 @@ const submit = () => {
                     v-if="activeParticipant.category === 'toddler'"
                     v-model:form="form"
                     :weight-statuses="weightStatuses"
+                    :interventions="toddlerInterventions"
                 />
 
                 <!-- Form Kategori Ibu Hamil -->

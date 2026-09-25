@@ -6,6 +6,7 @@ use App\Enums\BmiCategory;
 use App\Enums\EducationTopic;
 use App\Enums\ExaminationLocation;
 use App\Enums\IndependenceLevel;
+use App\Enums\Intervention;
 use App\Enums\ParticipantCategory;
 use App\Enums\SensoryTestResult;
 use App\Enums\TbcSymptom;
@@ -59,7 +60,7 @@ class CreateExaminationRequest extends FormRequest
                     'arm_circumference' => ['nullable', 'numeric', 'min:5', 'max:35'],
                     'has_illness_symptoms' => ['nullable', 'boolean'],
                     'interventions' => ['nullable', 'array'],
-                    'interventions.*' => ['string'],
+                    'interventions.*' => [Rule::enum(Intervention::class)],
                 ]);
                 break;
 

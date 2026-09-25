@@ -15,10 +15,10 @@ enum WeightStatus: string
     public function label(): string
     {
         return match ($this) {
-            self::Increased => 'Naik (N)',
-            self::Decreased => 'Turun (T)',
-            self::Same => 'Tetap (T)',
-            self::BelowRedLine => 'Bawah Garis Merah (BGM)',
+            self::Increased => 'Naik',
+            self::Decreased => 'Turun ',
+            self::Same => 'Tetap',
+            self::BelowRedLine => 'Bawah Garis Merah',
         };
     }
 
