@@ -102,7 +102,6 @@ defineProps<{
                 placeholder="Pilih suplemen, imunisasi, atau makanan tambahan..."
                 :options="interventions"
                 :error="form.errors.interventions"
-                class="sm:col-span-1 lg:col-span-2"
             />
         </div>
     </div>

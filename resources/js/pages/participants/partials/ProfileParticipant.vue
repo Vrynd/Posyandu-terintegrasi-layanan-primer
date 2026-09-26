@@ -1,14 +1,18 @@
 <script setup lang="ts">
 import {
+    Baby,
     Briefcase,
     Calendar,
     Clock,
     Heart,
+    History,
     House,
     IdCard,
     Layers,
     MapPin,
     Phone,
+    Ruler,
+    Scale,
     ShieldCheck,
     User,
     UserCheck,
@@ -40,7 +44,7 @@ const isMobile = useMediaQuery('(max-width: 639px)');
 
 <template>
     <div v-if="props.participant" class="w-full">
-        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6">
+        <div class="grid grid-cols-1 items-start gap-4 sm:grid-cols-2 sm:gap-6">
             <!-- Kolom 1: Identitas Pokok Peserta -->
             <TileGroup>
                 <TileItem
@@ -98,11 +102,36 @@ const isMobile = useMediaQuery('(max-width: 639px)');
                     :icon="Calendar"
                     icon-class="text-sky-600 dark:text-sky-400"
                 />
+
+                <!-- Tambahan Khusus Ibu Hamil agar Seimbang (8 vs 8) -->
+                <template
+                    v-if="props.participant.category === 'pregnant_mother'"
+                >
+                    <TileItem
+                        label="Nomor Telepon / WA"
+                        :value="props.participant.phone || '—'"
+                        :icon="Phone"
+                        icon-class="text-emerald-600 dark:text-emerald-400"
+                        :is-mono="Boolean(props.participant.phone)"
+                    />
+                    <TileItem
+                        label="Kepesertaan BPJS"
+                        :value="
+                            props.participant.has_bpjs
+                                ? 'Ya (Aktif)'
+                                : 'Tidak Ada'
+                        "
+                        :icon="ShieldCheck"
+                        icon-class="text-teal-600 dark:text-teal-400"
+                    />
+                </template>
             </TileGroup>
 
             <!-- Kolom 2: Kontak, Domisili & Atribut Kategori -->
             <TileGroup>
+                <!-- Nomor Telepon untuk kategori selain Ibu Hamil -->
                 <TileItem
+                    v-if="props.participant.category !== 'pregnant_mother'"
                     label="Nomor Telepon / WA"
                     :value="props.participant.phone || '—'"
                     :icon="Phone"
@@ -144,7 +173,10 @@ const isMobile = useMediaQuery('(max-width: 639px)');
                     :icon="MapPin"
                     icon-class="text-orange-600 dark:text-orange-400"
                 />
+
+                <!-- BPJS untuk kategori selain Ibu Hamil -->
                 <TileItem
+                    v-if="props.participant.category !== 'pregnant_mother'"
                     label="Kepesertaan BPJS"
                     :value="
                         props.participant.has_bpjs ? 'Ya (Aktif)' : 'Tidak Ada'
@@ -169,16 +201,79 @@ const isMobile = useMediaQuery('(max-width: 639px)');
                     icon-class="text-blue-600 dark:text-blue-400"
                 />
 
-                <!-- Khusus Ibu Hamil -->
-                <TileItem
+                <!-- Khusus Ibu Hamil (8 Item Seimbang dengan Kolom Kiri) -->
+                <template
                     v-else-if="props.participant.category === 'pregnant_mother'"
-                    label="Nama Suami"
-                    :value="
-                        props.participant.latest_pregnancy?.husband_name || '—'
-                    "
-                    :icon="User"
-                    icon-class="text-sky-600 dark:text-sky-400"
-                />
+                >
+                    <TileItem
+                        label="Nama Suami"
+                        :value="
+                            props.participant.latest_pregnancy?.husband_name ||
+                            '—'
+                        "
+                        :icon="User"
+                        icon-class="text-sky-600 dark:text-sky-400"
+                    />
+                    <TileItem
+                        label="Hamil Anak Ke-"
+                        :value="
+                            props.participant.latest_pregnancy?.pregnancy_number
+                                ? `Ke-${props.participant.latest_pregnancy.pregnancy_number}`
+                                : '—'
+                        "
+                        :icon="Baby"
+                        icon-class="text-rose-600 dark:text-rose-400"
+                    />
+                    <TileItem
+                        label="Jarak Kehamilan"
+                        :value="
+                            props.participant.latest_pregnancy
+                                ?.birth_spacing_years
+                                ? `${props.participant.latest_pregnancy.birth_spacing_years} Tahun`
+                                : props.participant.latest_pregnancy
+                                        ?.pregnancy_number === 1
+                                  ? 'Anak Pertama'
+                                  : '—'
+                        "
+                        :icon="History"
+                        icon-class="text-amber-600 dark:text-amber-400"
+                    />
+                    <TileItem
+                        label="BB Pra-Hamil"
+                        :value="
+                            props.participant.latest_pregnancy
+                                ?.weight_before_pregnancy
+                                ? `${props.participant.latest_pregnancy.weight_before_pregnancy} kg`
+                                : '—'
+                        "
+                        :icon="Scale"
+                        icon-class="text-teal-600 dark:text-teal-400"
+                    />
+                    <TileItem
+                        label="Tinggi Badan"
+                        :value="
+                            props.participant.latest_pregnancy?.height
+                                ? `${props.participant.latest_pregnancy.height} cm`
+                                : '—'
+                        "
+                        :icon="Ruler"
+                        icon-class="text-indigo-600 dark:text-indigo-400"
+                    />
+                    <TileItem
+                        label="HPHT"
+                        :value="
+                            props.participant.latest_pregnancy
+                                ?.last_menstrual_period
+                                ? formatDate(
+                                      props.participant.latest_pregnancy
+                                          .last_menstrual_period,
+                                  )
+                                : '—'
+                        "
+                        :icon="Calendar"
+                        icon-class="text-pink-600 dark:text-pink-400"
+                    />
+                </template>
 
                 <!-- Khusus Dewasa & Lansia -->
                 <template

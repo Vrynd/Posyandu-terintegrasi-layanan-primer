@@ -112,7 +112,7 @@ watch(
             id="has_iron_tablets"
             v-model="form.has_iron_tablets"
             name="has_iron_tablets"
-            label="Pemberian Tablet Tambah Darah"
+            label="Pemberian Tablet Tambah Darah (TTD)"
             :error="form.errors.has_iron_tablets"
         />
 
@@ -130,7 +130,7 @@ watch(
             id="exclusive_breastfeeding_counseling"
             v-model="form.exclusive_breastfeeding_counseling"
             name="exclusive_breastfeeding_counseling"
-            label="ASI Eksklusif"
+            label="Konseling ASI Eksklusif"
             :error="form.errors.exclusive_breastfeeding_counseling"
         />
 
@@ -139,7 +139,7 @@ watch(
             id="attends_prenatal_class"
             v-model="form.attends_prenatal_class"
             name="attends_prenatal_class"
-            label="Kelas Ibu Hamil"
+            label="Mengikuti Kelas Ibu Hamil"
             :error="form.errors.attends_prenatal_class"
         />
     </div>
