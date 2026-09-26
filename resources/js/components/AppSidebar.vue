@@ -11,7 +11,6 @@ import {
     LayoutGrid,
     MessageSquare,
     Ruler,
-    Stethoscope,
     TrendingUp,
     UserPlus,
     Users,
@@ -30,7 +29,6 @@ import {
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
-import examinations from '@/routes/examinations';
 import participants from '@/routes/participants';
 import tokens from '@/routes/tokens';
 import users from '@/routes/users';
@@ -119,33 +117,6 @@ const navGroups = computed<NavGroup[]>(() => {
                     title: 'Pendaftaran',
                     href: participants.index(),
                     icon: UserPlus,
-                },
-                {
-                    title: 'Pemeriksaan',
-                    href: examinations.index(),
-                    icon: Stethoscope,
-                    items: [
-                        {
-                            title: 'Ibu Hamil',
-                            href: '/examinations/pregnant-mothers',
-                        },
-                        {
-                            title: 'Balita',
-                            href: '/examinations/toddlers',
-                        },
-                        {
-                            title: 'Usia Remaja',
-                            href: '/examinations/teens',
-                        },
-                        {
-                            title: 'Usia Produktif',
-                            href: '/examinations/productive',
-                        },
-                        {
-                            title: 'Lansia',
-                            href: '/examinations/elderly',
-                        },
-                    ],
                 },
                 {
                     title: 'Monitoring Stunting',

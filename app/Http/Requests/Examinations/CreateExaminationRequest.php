@@ -29,6 +29,19 @@ class CreateExaminationRequest extends FormRequest
     }
 
     /**
+     * Prepare the data for validation.
+     */
+    protected function prepareForValidation(): void
+    {
+        $participant = $this->route('participant');
+        if ($participant instanceof Participant) {
+            $this->merge([
+                'participant_id' => $participant->id,
+            ]);
+        }
+    }
+
+    /**
      * Get the validation rules that apply to the request.
      *
      * @return array<string, mixed>
@@ -47,7 +60,9 @@ class CreateExaminationRequest extends FormRequest
             'edukasi.*' => [Rule::enum(EducationTopic::class)],
         ];
 
-        $participant = Participant::whereKey($this->input('participant_id'))->first();
+        $participant = $this->route('participant') instanceof Participant
+            ? $this->route('participant')
+            : Participant::whereKey($this->input('participant_id'))->first();
 
         if (! $participant instanceof Participant) {
             return $rules;

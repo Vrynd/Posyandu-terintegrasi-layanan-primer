@@ -2,13 +2,13 @@
 import { Head, Link, router, setLayoutProps } from '@inertiajs/vue3';
 import { HeartPulse, Pencil, Trash2 } from '@lucide/vue';
 import { ref } from 'vue';
+import { create as createExamination } from '@/actions/App/Http/Controllers/Examinations/ExaminationController';
 import ActionBar from '@/components/ActionBar.vue';
 import ConfirmDialog from '@/components/ConfirmDialog.vue';
 import Heading from '@/components/Heading.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { dashboard } from '@/routes';
-import * as examinations from '@/routes/examinations';
 import * as participants from '@/routes/participants';
 import type { FilterOption, ParticipantItem } from '@/types';
 import LastHealth from './partials/LastHealth.vue';
@@ -94,10 +94,8 @@ const confirmDelete = () => {
                 <Button size="lg" as-child>
                     <Link
                         :href="
-                            examinations.create({
-                                query: {
-                                    participant: props.participant.ulid,
-                                },
+                            createExamination({
+                                participant: props.participant.ulid,
                             }).url
                         "
                     >
@@ -161,10 +159,8 @@ const confirmDelete = () => {
             <Button size="lg" class="flex-1" as-child>
                 <Link
                     :href="
-                        examinations.create({
-                            query: {
-                                participant: props.participant.ulid,
-                            },
+                        createExamination({
+                            participant: props.participant.ulid,
                         }).url
                     "
                 >

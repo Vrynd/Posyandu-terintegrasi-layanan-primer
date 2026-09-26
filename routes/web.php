@@ -36,11 +36,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('participants.update');
     Route::delete('/participants/{participant}', [ParticipantController::class, 'destroy'])
         ->name('participants.destroy');
+    Route::get('/participants/{participant}/examinations/create', [ExaminationController::class, 'create'])
+        ->name('participants.examinations.create');
+    Route::post('/participants/{participant}/examinations', [ExaminationController::class, 'store'])
+        ->name('participants.examinations.store');
 
-    // Route pemeriksaan posyandu (Fase 1)
-    Route::get('/examinations', [ExaminationController::class, 'index'])->name('examinations.index');
-    Route::get('/examinations/create', [ExaminationController::class, 'create'])->name('examinations.create');
-    Route::post('/examinations', [ExaminationController::class, 'store'])->name('examinations.store');
+    // Route::get('/examinations', [ExaminationController::class, 'index'])->name('examinations.index');
 
     Route::middleware('can:manage-tokens')->group(function () {
         Route::get('users', [UserController::class, 'index'])->name('users.index');

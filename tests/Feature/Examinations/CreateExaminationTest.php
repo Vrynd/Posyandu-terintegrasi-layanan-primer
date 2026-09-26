@@ -22,7 +22,9 @@ test('authenticated user can view examination create page', function () {
     $user = User::factory()->create();
     $this->actingAs($user);
 
-    $response = $this->get(route('examinations.create'));
+    $participant = Participant::factory()->create();
+
+    $response = $this->get(route('participants.examinations.create', ['participant' => $participant->ulid]));
     $response->assertOk();
 });
 
@@ -52,9 +54,9 @@ test('can record toddler examination', function () {
         'interventions' => [Intervention::VitaminA->value, Intervention::RoutineImmunization->value],
     ];
 
-    $response = $this->post(route('examinations.store'), $data);
+    $response = $this->post(route('participants.examinations.store', ['participant' => $toddler->ulid]), $data);
 
-    $response->assertRedirect(route('examinations.index'));
+    $response->assertRedirect(route('participants.show', ['participant' => $toddler->ulid]));
     $this->assertDatabaseHas('examinations', [
         'participant_id' => $toddler->id,
         'weight' => 12.5,
@@ -107,9 +109,9 @@ test('can record pregnant mother examination', function () {
         'attends_prenatal_class' => true,
     ];
 
-    $response = $this->post(route('examinations.store'), $data);
+    $response = $this->post(route('participants.examinations.store', ['participant' => $bumil->ulid]), $data);
 
-    $response->assertRedirect(route('examinations.index'));
+    $response->assertRedirect(route('participants.show', ['participant' => $bumil->ulid]));
     $this->assertDatabaseHas('examinations', [
         'participant_id' => $bumil->id,
         'weight' => 62.0,
@@ -162,9 +164,9 @@ test('can record teenager examination with mental screening and disease history'
         ],
     ];
 
-    $response = $this->post(route('examinations.store'), $data);
+    $response = $this->post(route('participants.examinations.store', ['participant' => $teen->ulid]), $data);
 
-    $response->assertRedirect(route('examinations.index'));
+    $response->assertRedirect(route('participants.show', ['participant' => $teen->ulid]));
     $this->assertDatabaseHas('examinations', [
         'participant_id' => $teen->id,
         'weight' => 48.0,
@@ -221,9 +223,9 @@ test('can record productive adult examination with puma screening, lifestyle, an
         ],
     ];
 
-    $response = $this->post(route('examinations.store'), $data);
+    $response = $this->post(route('participants.examinations.store', ['participant' => $productive->ulid]), $data);
 
-    $response->assertRedirect(route('examinations.index'));
+    $response->assertRedirect(route('participants.show', ['participant' => $productive->ulid]));
     $this->assertDatabaseHas('examinations', [
         'participant_id' => $productive->id,
         'weight' => 65.0,
@@ -281,9 +283,9 @@ test('can record elderly examination with barthel adl screening and independence
         ],
     ];
 
-    $response = $this->post(route('examinations.store'), $data);
+    $response = $this->post(route('participants.examinations.store', ['participant' => $elderly->ulid]), $data);
 
-    $response->assertRedirect(route('examinations.index'));
+    $response->assertRedirect(route('participants.show', ['participant' => $elderly->ulid]));
     $this->assertDatabaseHas('examinations', [
         'participant_id' => $elderly->id,
         'location' => 'home_visit',
@@ -300,7 +302,9 @@ test('validation fails when required basic fields are missing', function () {
     $user = User::factory()->create();
     $this->actingAs($user);
 
-    $response = $this->post(route('examinations.store'), []);
+    $participant = Participant::factory()->create();
 
-    $response->assertSessionHasErrors(['participant_id', 'examination_date', 'location']);
+    $response = $this->post(route('participants.examinations.store', ['participant' => $participant->ulid]), []);
+
+    $response->assertSessionHasErrors(['examination_date', 'location']);
 });

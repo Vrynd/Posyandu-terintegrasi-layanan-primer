@@ -9,7 +9,6 @@ import {
     LayoutGrid,
     Menu,
     Ruler,
-    Stethoscope,
     TrendingUp,
     UserPlus,
 } from '@lucide/vue';
@@ -42,7 +41,6 @@ import UserMenuContent from '@/components/UserMenuContent.vue';
 import { useCurrentUrl } from '@/composables/useCurrentUrl';
 import { getInitials } from '@/composables/useInitials';
 import { dashboard } from '@/routes';
-import examinations from '@/routes/examinations';
 import participants from '@/routes/participants';
 import type { BreadcrumbItem } from '@/types';
 
@@ -64,12 +62,6 @@ const pelayananItems = [
         href: participants.index(),
         icon: UserPlus,
         description: 'Kelola data sasaran balita, remaja hingga lansia.',
-    },
-    {
-        title: 'Pemeriksaan',
-        href: examinations.index(),
-        icon: Stethoscope,
-        description: 'Catat hasil pemeriksaan kesehatan 5 klaster usia.',
     },
     {
         title: 'Monitoring Stunting',

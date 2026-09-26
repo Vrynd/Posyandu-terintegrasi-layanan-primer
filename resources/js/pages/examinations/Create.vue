@@ -1,14 +1,16 @@
 <script setup lang="ts">
-import { Head, Link, useForm } from '@inertiajs/vue3';
-import { ArrowLeft, Save } from '@lucide/vue';
+import { Head, Link, setLayoutProps, useForm } from '@inertiajs/vue3';
+import { Save } from '@lucide/vue';
 import { computed, watch } from 'vue';
+import { store } from '@/actions/App/Http/Controllers/Examinations/ExaminationController';
 import ActionBar from '@/components/ActionBar.vue';
 import Heading from '@/components/Heading.vue';
+import ProfileSummary from '@/components/ProfileSummary.vue';
 import { Button } from '@/components/ui/button';
 import { FormSection } from '@/components/ui/form';
 import { useAutoClearErrors } from '@/composables/useAutoClear';
 import { dashboard } from '@/routes';
-import { index, store } from '@/routes/examinations';
+import * as participants from '@/routes/participants';
 import type { FilterOption, ParticipantItem, ScreeningItem } from '@/types';
 import ElderlyFields from './partials/ElderlyFields.vue';
 import GeneralFields from './partials/GeneralFields.vue';
@@ -17,19 +19,8 @@ import ProductiveFields from './partials/ProductiveFields.vue';
 import TeenFields from './partials/TeenFields.vue';
 import ToddlerFields from './partials/ToddlerFields.vue';
 
-defineOptions({
-    layout: {
-        breadcrumbs: [
-            { title: 'Dashboard', href: dashboard() },
-            { title: 'Pemeriksaan', href: index() },
-            { title: 'Catat Pemeriksaan Baru' },
-        ],
-    },
-});
-
 const props = defineProps<{
-    participants: ParticipantItem[];
-    selectedParticipant: ParticipantItem | null;
+    participant: ParticipantItem;
     locations: FilterOption[];
     weightStatuses: FilterOption[];
     bmiCategories: FilterOption[];
@@ -44,12 +35,25 @@ const props = defineProps<{
     screenings?: Record<string, ScreeningItem[]>;
 }>();
 
+// Breadcrumb dinamis yang mencantumkan nama peserta secara aman
+setLayoutProps({
+    breadcrumbs: [
+        { title: 'Dashboard', href: dashboard() },
+        { title: 'Pendaftaran Peserta', href: participants.index.url() },
+        {
+            title: props.participant?.name ?? 'Peserta',
+            href: props.participant?.ulid
+                ? participants.show({ participant: props.participant.ulid }).url
+                : '#',
+        },
+        { title: 'Catat Pemeriksaan' },
+    ],
+});
+
 const form = useForm({
-    participant_id: props.selectedParticipant
-        ? String(props.selectedParticipant.id)
-        : '',
+    participant_id: props.participant?.id ? String(props.participant.id) : '',
     examination_date: new Date().toISOString().split('T')[0],
-    location: '', // Dibiarkan kosong agar kader memilih secara sadar
+    location: '',
     weight: '',
     is_referred: false,
     skrining_tbc: [] as string[],
@@ -64,8 +68,8 @@ const form = useForm({
     interventions: [] as string[],
 
     // Bumil
-    pregnancy_id: props.selectedParticipant?.latest_pregnancy?.id
-        ? String(props.selectedParticipant.latest_pregnancy.id)
+    pregnancy_id: props.participant?.latest_pregnancy?.id
+        ? String(props.participant.latest_pregnancy.id)
         : '',
     gestational_age_weeks: '',
     upper_arm_circumference: '',
@@ -104,38 +108,7 @@ const form = useForm({
 
 useAutoClearErrors(form);
 
-// Mendapatkan objek peserta terpilih
-const activeParticipant = computed(() => {
-    if (!form.participant_id) {
-        return null;
-    }
-
-    return (
-        props.participants.find(
-            (p) => String(p.id) === String(form.participant_id),
-        ) || null
-    );
-});
-
-// Set otomatis field saat peserta terpilih terdeteksi
-watch(
-    () => form.participant_id,
-    (newId) => {
-        const participant = props.participants.find(
-            (p) => String(p.id) === String(newId),
-        );
-
-        if (participant) {
-            if (
-                participant.category === 'pregnant_mother' &&
-                participant.latest_pregnancy
-            ) {
-                form.pregnancy_id = String(participant.latest_pregnancy.id);
-            }
-        }
-    },
-    { immediate: true },
-);
+const activeParticipant = computed(() => props.participant);
 
 // Auto-kalkulasi IMT (Hanya aktif untuk kategori: Remaja, Usia Produktif, dan Lansia)
 watch(
@@ -145,7 +118,6 @@ watch(
         () => activeParticipant.value?.category,
     ],
     ([newWeight, newHeight, category]) => {
-        // Balita & Ibu Hamil tidak menggunakan kalkulasi IMT dewasa
         if (!['teenager', 'productive', 'adult'].includes(category ?? '')) {
             form.bmi_category = '';
 
@@ -176,31 +148,33 @@ watch(
 );
 
 const submit = () => {
-    form.post(store().url, {
+    if (!props.participant?.ulid) {
+        return;
+    }
+
+    form.post(store({ participant: props.participant.ulid }).url, {
         preserveScroll: true,
     });
 };
 </script>
 
 <template>
-    <Head title="Catat Pemeriksaan Baru" />
+    <Head :title="`Catat Pemeriksaan - ${props.participant?.name ?? ''}`" />
 
     <div
         class="flex flex-1 flex-col gap-4 bg-background p-4 pb-24 sm:gap-6 sm:p-6 sm:pb-6"
     >
+        <!-- Header Halaman -->
         <header class="flex items-center justify-between gap-4">
             <Heading
                 title="Catat Pemeriksaan Baru"
-                description="Formulir pencatatan hasil pengukuran dan pemeriksaan kesehatan posyandu"
+                :description="`Formulir pencatatan hasil pengukuran dan pemeriksaan kesehatan posyandu untuk ${props.participant?.name ?? ''}`"
                 class="mb-0 sm:mb-0"
             />
-            <Button variant="outline" size="sm" as-child>
-                <Link :href="index()">
-                    <ArrowLeft class="mr-1.5 h-4 w-4" />
-                    <span>Kembali</span>
-                </Link>
-            </Button>
         </header>
+
+        <!-- Profile Summary Peserta Reusable (Tanpa Card Wrapper, Terpisah Gap) -->
+        <ProfileSummary :participant="props.participant" />
 
         <form @submit.prevent="submit" class="flex flex-1 flex-col gap-6">
             <!-- SECTION 01: Waktu & Lokasi -->
@@ -289,23 +263,33 @@ const submit = () => {
             </FormSection>
 
             <ActionBar>
+                <!-- Tombol Batal: Hanya tampil di Desktop (sm+) -->
                 <Button
                     type="button"
                     variant="outline"
                     size="lg"
-                    class="shadow-none"
+                    class="hidden shadow-none sm:inline-flex"
                     as-child
                 >
-                    <Link :href="index()">
+                    <Link
+                        :href="
+                            props.participant?.ulid
+                                ? participants.show({
+                                      participant: props.participant.ulid,
+                                  }).url
+                                : participants.index.url()
+                        "
+                    >
                         <span>Batal</span>
                     </Link>
                 </Button>
 
+                <!-- Tombol Simpan: Full-width di Mobile, Auto di Desktop -->
                 <Button
                     type="submit"
                     size="lg"
                     :disabled="form.processing || !form.participant_id"
-                    class="cursor-pointer gap-2 font-medium"
+                    class="w-full cursor-pointer gap-2 font-medium sm:w-auto"
                 >
                     <Save v-if="!form.processing" class="h-4 w-4" />
                     <span v-if="form.processing">Menyimpan...</span>

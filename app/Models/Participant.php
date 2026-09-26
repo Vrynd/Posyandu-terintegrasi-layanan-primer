@@ -66,6 +66,8 @@ class Participant extends Model
 
     protected $appends = [
         'nik_masked',
+        'category_label',
+        'gender_label',
     ];
 
     protected function casts(): array
@@ -114,6 +116,26 @@ class Participant extends Model
             get: fn () => $this->nik
                 ? str_repeat('*', 12).substr($this->nik, -4)
                 : null,
+        );
+    }
+
+    /**
+     * @return Attribute<string, never>
+     */
+    protected function categoryLabel(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->category->label()
+        );
+    }
+
+    /**
+     * @return Attribute<string, never>
+     */
+    protected function genderLabel(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->gender->label()
         );
     }
 

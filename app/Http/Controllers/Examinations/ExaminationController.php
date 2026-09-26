@@ -36,23 +36,9 @@ class ExaminationController extends Controller
     /**
      * Halaman Form Input Pemeriksaan Baru
      */
-    public function create(Request $request): Response
+    public function create(Participant $participant): Response
     {
-        $selectedParticipant = null;
-
-        if ($request->filled('participant')) {
-            $selectedParticipant = Participant::query()
-                ->where('ulid', $request->string('participant'))
-                ->with(['latestPregnancy'])
-                ->first();
-        }
-
-        $participants = Participant::query()
-            ->select(['id', 'ulid', 'name', 'category', 'birth_date', 'gender', 'nik_hash'])
-            ->where('is_active', true)
-            ->with(['latestPregnancy'])
-            ->orderBy('name')
-            ->get();
+        $participant->loadMissing(['latestPregnancy', 'latestExamination']);
 
         $screening = ScreeningQuestion::query()
             ->where('is_active', true)
@@ -61,8 +47,7 @@ class ExaminationController extends Controller
             ->groupBy(fn ($item) => $item->category->value);
 
         return Inertia::render('examinations/Create', [
-            'participants' => $participants,
-            'selectedParticipant' => $selectedParticipant,
+            'participant' => $participant,
             'locations' => ExaminationLocation::toOptions(),
             'weightStatuses' => WeightStatus::toOptions(),
             'bmiCategories' => BmiCategory::toOptions(),
@@ -81,12 +66,15 @@ class ExaminationController extends Controller
     /**
      * Simpan Data Pemeriksaan
      */
-    public function store(CreateExaminationRequest $request, CreateExamination $action): RedirectResponse
+    public function store(CreateExaminationRequest $request, Participant $participant, CreateExamination $action): RedirectResponse
     {
-        $action->execute($request->validated());
+        $validated = $request->validated();
+        $validated['participant_id'] = $participant->id;
+
+        $action->execute($validated);
 
         session()->flash('success', 'Data pemeriksaan posyandu berhasil disimpan.');
 
-        return redirect()->route('examinations.index');
+        return redirect()->route('participants.show', ['participant' => $participant->ulid]);
     }
 }

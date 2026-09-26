@@ -123,8 +123,10 @@ export interface ParticipantItem {
         | 'productive'
         | 'adult'
         | string;
+    category_label?: string | null;
     birth_date: string;
     gender: 'male' | 'female' | string;
+    gender_label?: string | null;
     address?: string | null;
     rt?: string | null;
     rw?: string | null;
