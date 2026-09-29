@@ -126,9 +126,8 @@ const navGroups = computed<NavGroup[]>(() => {
                 },
                 {
                     title: 'Laporan',
-                    href: '#',
+                    href: '/reports',
                     icon: FileText,
-                    isLocked: true,
                 },
             ],
         },

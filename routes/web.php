@@ -41,6 +41,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/participants/{participant}/examinations', [ExaminationController::class, 'store'])
         ->name('participants.examinations.store');
 
+    // Route Laporan
+    Route::inertia('/reports', 'reports/Index')->name('reports.index');
+
     // Route::get('/examinations', [ExaminationController::class, 'index'])->name('examinations.index');
 
     Route::middleware('can:manage-tokens')->group(function () {

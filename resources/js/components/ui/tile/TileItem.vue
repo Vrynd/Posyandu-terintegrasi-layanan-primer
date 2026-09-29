@@ -18,7 +18,7 @@ const hasValue = () =>
 <template>
   <div
     data-slot="tile-item"
-    :class="cn('flex items-center justify-between gap-3 px-3.5 py-2.5 sm:px-4 sm:py-3 transition-colors hover:bg-muted/30', props.class)"
+    :class="cn('flex items-center justify-between gap-3 px-3.5 py-2.5 sm:px-4 sm:py-3 transition-colors', props.class)"
   >
     <!-- Sisi Kiri: Ikon & Label Deskriptor -->
     <span class="flex items-center gap-2.5 text-xs sm:text-[13px] font-medium text-muted-foreground shrink-0">
