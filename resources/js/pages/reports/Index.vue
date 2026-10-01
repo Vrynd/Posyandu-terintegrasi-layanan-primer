@@ -1,13 +1,12 @@
 <script setup lang="ts">
-import { Head, setLayoutProps } from '@inertiajs/vue3';
 import {
-    Calendar,
-    CalendarDays,
-    CheckCircle2,
-    Clock,
-    Download,
-    FileText,
-} from '@lucide/vue';
+    Calendar01Icon,
+    Calendar03Icon,
+    File01Icon,
+} from '@hugeicons/core-free-icons';
+import { HugeiconsIcon } from '@hugeicons/vue';
+import { Head, router, setLayoutProps } from '@inertiajs/vue3';
+import { CheckCircle2, Clock, Download, Lock, Unlock } from '@lucide/vue';
 import { computed, ref } from 'vue';
 import ActionBar from '@/components/ActionBar.vue';
 import Heading from '@/components/Heading.vue';
@@ -19,6 +18,22 @@ import DownloadAllSheet from './partials/DownloadAllSheet.vue';
 import ReportList from './partials/ReportList.vue';
 import type { ReportItem } from './partials/ReportList.vue';
 
+interface CurrentPeriod {
+    year: number;
+    month: number;
+    monthName: string;
+    isFinalized: boolean;
+    finalizedAt: string | null;
+    examinationCount: number;
+}
+
+interface Props {
+    reports: ReportItem[];
+    currentPeriod: CurrentPeriod;
+}
+
+const props = defineProps<Props>();
+
 setLayoutProps({
     breadcrumbs: [
         { title: 'Dashboard', href: dashboard() },
@@ -26,73 +41,77 @@ setLayoutProps({
     ],
 });
 
-// 1. Data Periode Saat Ini
-const now = new Date();
-const currentYearFull = String(now.getFullYear()); // e.g. "2026"
-const currentMonthName = new Intl.DateTimeFormat('id-ID', {
-    month: 'long',
-}).format(now); // e.g. "Oktober"
-
-// 2. Daftar 4 Dokumen Laporan yang Tersedia
-const reports = computed<ReportItem[]>(() => [
-    {
-        id: 'examination',
-        title: 'Laporan Pemeriksaan & Layanan',
-        description:
-            'Rekapitulasi hasil penimbangan, antropometri, dan pemeriksaan posyandu ILP.',
-        status: 'completed',
-        statusLabel: 'Selesai',
-        createdAt: `01 ${currentMonthName} ${currentYearFull}`,
-    },
-    {
-        id: 'participant',
-        title: 'Laporan Data Sasaran Peserta',
-        description:
-            'Rekapitulasi demografi peserta aktif, kelompok siklus hidup, dan registrasi warga.',
-        status: 'completed',
-        statusLabel: 'Selesai',
-        createdAt: `01 ${currentMonthName} ${currentYearFull}`,
-    },
-    {
-        id: 'risk',
-        title: 'Laporan Kasus Risiko & Rujukan',
-        description:
-            'Deteksi dini risiko kesehatan sasaran, tindak lanjut, dan rujukan faskes.',
-        status: 'completed',
-        statusLabel: 'Selesai',
-        createdAt: `01 ${currentMonthName} ${currentYearFull}`,
-    },
-    {
-        id: 'attendance',
-        title: 'Laporan Kehadiran Posyandu',
-        description:
-            'Tingkat presensi dan rekap kehadiran kunjungan sasaran per hari buka posyandu.',
-        status: 'pending',
-        statusLabel: 'Belum Selesai',
-        createdAt: 'Belum Tersedia',
-    },
-]);
-
-// 3. Kalkulasi Metrik Status
-const totalReports = computed(() => reports.value.length);
+// Metrik Status Laporan
+const totalReports = computed(() => props.reports.length);
 const completedReports = computed(
-    () => reports.value.filter((r) => r.status === 'completed').length,
+    () => props.reports.filter((r) => r.status === 'completed').length,
 );
 const pendingReports = computed(
-    () => reports.value.filter((r) => r.status === 'pending').length,
+    () => props.reports.filter((r) => r.status === 'pending').length,
 );
 
-// 4. State Kontrol Bottom Sheet Unduh Semua
+// State Modal Download Semua
 const isDownloadSheetOpen = ref(false);
 
-// 5. Handler Aksi Unduh Satuan
+// Handler Unduh Satuan
 const downloadReport = (report: ReportItem) => {
     if (report.status !== 'completed') {
         return;
     }
 
-    console.log(
-        `Mengunduh ${report.title} untuk periode ${currentMonthName} ${currentYearFull}`,
+    const url = `/reports/download/${report.id}?year=${props.currentPeriod.year}&month=${props.currentPeriod.month}`;
+    window.location.href = url;
+};
+
+// Handler Selesaikan / Finalisasi Laporan
+const isProcessing = ref(false);
+
+const handleFinalize = () => {
+    if (
+        !confirm(
+            `Kunci dan selesaikan seluruh laporan untuk periode ${props.currentPeriod.monthName} ${props.currentPeriod.year}?`,
+        )
+    ) {
+        return;
+    }
+
+    isProcessing.value = true;
+    router.post(
+        '/reports/finalize',
+        {
+            year: props.currentPeriod.year,
+            month: props.currentPeriod.month,
+        },
+        {
+            onFinish: () => {
+                isProcessing.value = false;
+            },
+        },
+    );
+};
+
+// Handler Buka Kembali Kunci Laporan
+const handleReopen = () => {
+    if (
+        !confirm(
+            `Buka kembali laporan periode ${props.currentPeriod.monthName} ${props.currentPeriod.year} untuk mengedit data?`,
+        )
+    ) {
+        return;
+    }
+
+    isProcessing.value = true;
+    router.post(
+        '/reports/reopen',
+        {
+            year: props.currentPeriod.year,
+            month: props.currentPeriod.month,
+        },
+        {
+            onFinish: () => {
+                isProcessing.value = false;
+            },
+        },
     );
 };
 </script>
@@ -113,28 +132,46 @@ const downloadReport = (report: ReportItem) => {
             <TileItem
                 label="Jumlah Laporan"
                 :value="`${totalReports} Laporan`"
-                :icon="FileText"
-                icon-class="text-accent size-4"
                 class="[&>span]:font-normal"
-            />
+            >
+                <template #icon>
+                    <HugeiconsIcon
+                        :icon="File01Icon"
+                        :size="18"
+                        class="text-accent"
+                    />
+                </template>
+            </TileItem>
         </TileGroup>
 
         <!-- 3. Periode Waktu Saat Ini -->
         <TileGroup class="divide-y-0 border-border/50 bg-card">
             <TileItem
                 label="Bulan"
-                :value="currentMonthName"
-                :icon="Calendar"
-                icon-class="text-accent size-4"
+                :value="currentPeriod.monthName"
                 class="relative after:absolute after:right-0 after:bottom-0 after:left-10 after:h-px after:bg-border/40 sm:after:left-10.5 [&>span]:font-normal"
-            />
+            >
+                <template #icon>
+                    <HugeiconsIcon
+                        :icon="Calendar03Icon"
+                        :size="18"
+                        class="text-accent"
+                    />
+                </template>
+            </TileItem>
             <TileItem
                 label="Tahun"
-                :value="currentYearFull"
-                :icon="CalendarDays"
-                icon-class="text-accent size-4"
+                :value="String(currentPeriod.year)"
                 class="[&>span]:font-normal"
-            />
+            >
+                <template #icon>
+                    <HugeiconsIcon
+                        :icon="Calendar01Icon"
+                        :size="18"
+                        class="text-accent"
+                    />
+                </template>
+            </TileItem>
         </TileGroup>
 
         <!-- 4. Status Laporan Selesai dan Belum -->
@@ -155,18 +192,46 @@ const downloadReport = (report: ReportItem) => {
             />
         </div>
 
-        <!-- 5. Sub Heading Daftar Laporan -->
+        <!-- 5. Tombol Aksi Kontrol Status Finalisasi oleh Kader -->
+        <div class="flex justify-end">
+            <Button
+                v-if="!currentPeriod.isFinalized"
+                type="button"
+                variant="outline"
+                size="sm"
+                :disabled="isProcessing"
+                class="border-emerald-600/30 text-emerald-700 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-emerald-950/30"
+                @click="handleFinalize"
+            >
+                <Lock class="mr-1.5 size-3.5" />
+                <span>Selesaikan Laporan Bulan Ini</span>
+            </Button>
+            <Button
+                v-else
+                type="button"
+                variant="outline"
+                size="sm"
+                :disabled="isProcessing"
+                class="border-amber-600/30 text-amber-700 hover:bg-amber-50 dark:text-amber-400 dark:hover:bg-amber-950/30"
+                @click="handleReopen"
+            >
+                <Unlock class="mr-1.5 size-3.5" />
+                <span>Buka Kembali Laporan</span>
+            </Button>
+        </div>
+
+        <!-- 6. Sub Heading Daftar Laporan -->
         <Heading
             title="Daftar Laporan"
             description="Dokumen rekapitulasi data pelayanan yang siap diunduh pada periode ini."
             variant="small"
-            class="mt-2 mb-0 sm:mt-4 sm:mb-0"
+            class="mt-1 mb-0 sm:mt-2 sm:mb-0"
         />
 
-        <!-- 6. Daftar Laporan -->
+        <!-- 7. Daftar Laporan -->
         <ReportList :reports="reports" @download="downloadReport" />
 
-        <!-- 7. Unduh Semua Laporan -->
+        <!-- 8. Unduh Semua Laporan -->
         <ActionBar>
             <Button
                 type="button"
@@ -179,7 +244,7 @@ const downloadReport = (report: ReportItem) => {
             </Button>
         </ActionBar>
 
-        <!-- 8. Bottom Sheet Filter Unduh Semua Laporan -->
+        <!-- 9. Bottom Sheet Filter Unduh Semua Laporan -->
         <DownloadAllSheet v-model:open="isDownloadSheetOpen" />
     </div>
 </template>

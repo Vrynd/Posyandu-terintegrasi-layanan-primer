@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Auth\VerifyTokenController;
 use App\Http\Controllers\Examinations\ExaminationController;
 use App\Http\Controllers\Participants\ParticipantController;
+use App\Http\Controllers\Reports\ReportController;
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -42,7 +43,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('participants.examinations.store');
 
     // Route Laporan
-    Route::inertia('/reports', 'reports/Index')->name('reports.index');
+    Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+    Route::post('/reports/finalize', [ReportController::class, 'finalize'])->name('reports.finalize');
+    Route::post('/reports/reopen', [ReportController::class, 'reopen'])->name('reports.reopen');
+    Route::get('/reports/download/{type}', [ReportController::class, 'download'])->name('reports.download');
 
     // Route::get('/examinations', [ExaminationController::class, 'index'])->name('examinations.index');
 
