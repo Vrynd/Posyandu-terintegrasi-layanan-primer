@@ -18,7 +18,7 @@ const props = defineProps<Props>();
     <div
         :class="
             cn(
-                'flex flex-col gap-2 rounded-xl border border-card bg-card/80 p-3.5 shadow-none select-none sm:p-4',
+                'flex flex-col gap-2.5 rounded-xl border border-border/50 bg-card p-3.5 shadow-none select-none sm:p-4',
                 props.class,
             )
         "
@@ -43,7 +43,7 @@ const props = defineProps<Props>();
         <div class="flex items-baseline gap-1.5">
             <slot name="value">
                 <span
-                    class="font-display text-2xl font-semibold tracking-tight text-foreground sm:text-3xl"
+                    class="font-display text-2xl leading-none font-semibold tracking-tight text-foreground sm:text-3xl"
                 >
                     {{ value }}
                 </span>
