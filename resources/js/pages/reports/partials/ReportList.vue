@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Download } from '@lucide/vue';
+import { Download, FileText } from '@lucide/vue';
 import { Button } from '@/components/ui/button';
 import {
     Card,
@@ -22,24 +22,25 @@ export interface ReportItem {
 
 interface Props {
     reports: ReportItem[];
+    loadingId?: string | null;
 }
 
 defineProps<Props>();
 
 const emit = defineEmits<{
     (e: 'download', report: ReportItem): void;
+    (e: 'generate', report: ReportItem): void;
 }>();
 </script>
 
 <template>
-    <!-- Grid Kartu Laporan Murni -->
     <div class="grid grid-cols-1 gap-3.5 sm:gap-4">
         <Card
             v-for="item in reports"
             :key="item.id"
             class="gap-4 rounded-2xl border border-border/50 bg-card p-4 shadow-none sm:p-5"
         >
-            <!-- 1. Card Header: Judul & Deskripsi -->
+            <!-- 1. Header Kartu: Judul & Deskripsi -->
             <CardHeader class="gap-1 p-0">
                 <CardTitle
                     class="text-sm font-semibold text-foreground sm:text-base"
@@ -53,7 +54,7 @@ const emit = defineEmits<{
                 </CardDescription>
             </CardHeader>
 
-            <!-- 2. Card Content: Tile Status & Tanggal Dibuat -->
+            <!-- 2. Konten Kartu: Status & Tanggal Pembuatan -->
             <CardContent class="p-0">
                 <TileGroup class="divide-y-0 border-border/50 bg-muted/30">
                     <TileItem
@@ -78,19 +79,34 @@ const emit = defineEmits<{
                 </TileGroup>
             </CardContent>
 
-            <!-- 3. Card Footer: Hanya Muncul Jika Status Selesai -->
-            <CardFooter
-                v-if="item.status === 'completed'"
-                class="flex justify-end p-0"
-            >
+            <!-- 3. Footer Kartu: Tombol Aksi Mandiri per Kartu -->
+            <CardFooter class="flex justify-end p-0">
+                <!-- Jika Selesai: Tampilkan Tombol Unduh -->
                 <Button
+                    v-if="item.status === 'completed'"
                     type="button"
                     size="sm"
-                    class="w-fit shadow-none"
+                    class="w-fit cursor-pointer shadow-none"
                     @click="emit('download', item)"
                 >
                     <Download class="size-3.5" />
                     <span>Unduh Laporan</span>
+                </Button>
+
+                <!-- Jika Belum Dibuat: Tampilkan Tombol Buat Laporan -->
+                <Button
+                    v-else
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    :disabled="loadingId === item.id"
+                    class="w-fit cursor-pointer shadow-none"
+                    @click="emit('generate', item)"
+                >
+                    <FileText class="size-3.5" />
+                    <span>{{
+                        loadingId === item.id ? 'Membuat...' : 'Buat Laporan'
+                    }}</span>
                 </Button>
             </CardFooter>
         </Card>

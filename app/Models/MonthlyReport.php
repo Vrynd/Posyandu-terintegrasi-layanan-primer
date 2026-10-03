@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\ReportStatus;
+use App\Enums\ReportType;
 use Database\Factories\MonthlyReportFactory;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -15,6 +16,7 @@ use Illuminate\Support\Carbon;
  * @property string $ulid
  * @property int $year
  * @property int $month
+ * @property ReportType $report_type
  * @property ReportStatus $status
  * @property Carbon|null $finalized_at
  * @property int|null $finalized_by
@@ -31,6 +33,7 @@ class MonthlyReport extends Model
     protected $fillable = [
         'year',
         'month',
+        'report_type',
         'status',
         'finalized_at',
         'finalized_by',
@@ -42,6 +45,7 @@ class MonthlyReport extends Model
         return [
             'year' => 'integer',
             'month' => 'integer',
+            'report_type' => ReportType::class,
             'status' => ReportStatus::class,
             'finalized_at' => 'datetime',
         ];
@@ -73,7 +77,7 @@ class MonthlyReport extends Model
     }
 
     /**
-     * Cek apakah laporan periode ini sudah berstatus selesai/final.
+     * Cek apakah laporan jenis ini pada periode ini sudah berstatus selesai/final.
      */
     public function isFinalized(): bool
     {

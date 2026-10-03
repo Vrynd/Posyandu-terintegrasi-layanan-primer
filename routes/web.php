@@ -44,8 +44,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Route Laporan
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
-    Route::post('/reports/finalize', [ReportController::class, 'finalize'])->name('reports.finalize');
-    Route::post('/reports/reopen', [ReportController::class, 'reopen'])->name('reports.reopen');
+    Route::post('/reports/generate', [ReportController::class, 'generate'])->name('reports.generate');
     Route::get('/reports/download/{type}', [ReportController::class, 'download'])->name('reports.download');
 
     // Route::get('/examinations', [ExaminationController::class, 'index'])->name('examinations.index');

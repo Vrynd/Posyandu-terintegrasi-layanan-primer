@@ -2,6 +2,7 @@
 
 namespace App\Actions\Reports;
 
+use App\Enums\ReportType;
 use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
@@ -16,6 +17,16 @@ class ExportReport
     public function __construct(
         protected GetReport $dataAction
     ) {}
+
+    public function download(ReportType $type, int $year, int $month): StreamedResponse
+    {
+        return match ($type) {
+            ReportType::Participant => $this->exportParticipants(),
+            ReportType::Examination => $this->exportExaminations($year, $month),
+            ReportType::Risk => $this->exportRisks($year, $month),
+            ReportType::Attendance => $this->exportAttendance($year, $month),
+        };
+    }
 
     public function exportParticipants(): StreamedResponse
     {

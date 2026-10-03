@@ -3,13 +3,61 @@
 namespace App\Actions\Reports;
 
 use App\Enums\ParticipantCategory;
+use App\Enums\ReportStatus;
+use App\Enums\ReportType;
 use App\Models\Examination;
+use App\Models\MonthlyReport;
 use App\Models\Participant;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 
 class GetReport
 {
+    /**
+     * Mengambil data periode dan status masing-masing dari 4 jenis laporan untuk halaman Index.
+     * Murni data terstruktur dari database dan Enum ReportType tanpa teks HTML.
+     *
+     * @return array{
+     *     period: array{year: int, month: int, monthName: string},
+     *     reports: array<int, array{id: string, title: string, description: string, status: string, statusLabel: string, createdAt: string}>
+     * }
+     */
+    public function getIndexData(int $year, int $month): array
+    {
+        $existingReports = MonthlyReport::where('year', $year)
+            ->where('month', $month)
+            ->get()
+            ->keyBy(fn (MonthlyReport $report) => $report->report_type->value);
+
+        $reports = collect(ReportType::cases())->map(function (ReportType $type) use ($existingReports): array {
+            $record = $existingReports->get($type->value);
+            $isCompleted = $record instanceof MonthlyReport && $record->status === ReportStatus::Completed;
+            $createdAt = ($record instanceof MonthlyReport && $record->finalized_at instanceof Carbon)
+                ? $record->finalized_at->translatedFormat('d F Y')
+                : '-';
+
+            return [
+                'id' => $type->value,
+                'title' => $type->label(),
+                'description' => $type->description(),
+                'status' => $isCompleted ? 'completed' : 'pending',
+                'statusLabel' => $isCompleted ? 'Selesai' : 'Belum Dibuat',
+                'createdAt' => $createdAt,
+            ];
+        })->values()->all();
+
+        $monthName = Carbon::createFromDate($year, $month, 1)->translatedFormat('F');
+
+        return [
+            'period' => [
+                'year' => $year,
+                'month' => $month,
+                'monthName' => $monthName,
+            ],
+            'reports' => $reports,
+        ];
+    }
+
     /**
      * 1. Data Sasaran Peserta Aktif
      *
@@ -69,7 +117,7 @@ class GetReport
             ->whereHas('participant', fn ($q) => $q->where('category', ParticipantCategory::Toddler))
             ->with(['toddler', 'participant.toddler'])
             ->get()
-            ->map(fn (Examination $e, int $i) => [
+            ->map(fn (Examination $e, int $i): array => [
                 'no' => $i + 1,
                 'tanggal' => $e->examination_date->format('d/m/Y'),
                 'lokasi' => $e->location_label,
@@ -94,7 +142,7 @@ class GetReport
             ->whereHas('participant', fn ($q) => $q->where('category', ParticipantCategory::PregnantMother))
             ->with(['pregnantMother', 'pregnantMother.pregnancy'])
             ->get()
-            ->map(fn (Examination $e, int $i) => [
+            ->map(fn (Examination $e, int $i): array => [
                 'no' => $i + 1,
                 'tanggal' => $e->examination_date->format('d/m/Y'),
                 'lokasi' => $e->location_label,
@@ -120,7 +168,7 @@ class GetReport
             ->whereHas('participant', fn ($q) => $q->where('category', ParticipantCategory::Teenager))
             ->with(['teen'])
             ->get()
-            ->map(fn (Examination $e, int $i) => [
+            ->map(fn (Examination $e, int $i): array => [
                 'no' => $i + 1,
                 'tanggal' => $e->examination_date->format('d/m/Y'),
                 'lokasi' => $e->location_label,
@@ -143,7 +191,7 @@ class GetReport
             ->whereHas('participant', fn ($q) => $q->whereIn('category', [ParticipantCategory::Adult, ParticipantCategory::Productive]))
             ->with(['adult'])
             ->get()
-            ->map(fn (Examination $e, int $i) => [
+            ->map(fn (Examination $e, int $i): array => [
                 'no' => $i + 1,
                 'tanggal' => $e->examination_date->format('d/m/Y'),
                 'lokasi' => $e->location_label,
@@ -193,7 +241,7 @@ class GetReport
             })
             ->with(['participant', 'creator', 'toddler', 'pregnantMother', 'teen', 'adult'])
             ->get()
-            ->map(function (Examination $e, int $index) {
+            ->map(function (Examination $e, int $index): array {
                 $masalah = [];
                 $pengukuran = [];
 
@@ -308,7 +356,7 @@ class GetReport
         $presensi = Participant::where('is_active', true)
             ->with(['examinations' => fn ($q) => $q->whereYear('examination_date', $year)->whereMonth('examination_date', $month)->latest('examination_date')])
             ->get()
-            ->map(function (Participant $p, int $i) {
+            ->map(function (Participant $p, int $i): array {
                 $lastExam = $p->examinations->first();
                 $statusHadir = 'Tidak Hadir';
                 $tglHadir = '-';
