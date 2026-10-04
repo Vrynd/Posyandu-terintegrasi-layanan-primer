@@ -33,7 +33,7 @@ class ReportController extends Controller
 
         return Inertia::render(
             'reports/Index',
-            $this->getReportAction->getIndexData($year, $month)
+            $this->getReportAction->execute($year, $month)
         );
     }
 

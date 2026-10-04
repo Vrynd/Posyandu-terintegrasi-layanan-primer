@@ -15,9 +15,15 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 class ExportReport
 {
     public function __construct(
-        protected GetReport $dataAction
+        protected ParticipantReport $participantReport,
+        protected ExaminationReport $examinationReport,
+        protected RiskReport $riskReport,
+        protected AttendanceReport $attendanceReport
     ) {}
 
+    /**
+     * Dispatcher unduh dokumen laporan berdasarkan jenisnya.
+     */
     public function download(ReportType $type, int $year, int $month): StreamedResponse
     {
         return match ($type) {
@@ -40,7 +46,7 @@ class ExportReport
             'No. HP/WA', 'BPJS', 'Nomor BPJS', 'Info Khusus Keluarga', 'Status',
         ];
 
-        $data = $this->dataAction->getParticipants();
+        $data = $this->participantReport->execute();
         $this->writeTable($sheet, 'LAPORAN DATA SASARAN PESERTA POSYANDU', $headers, $data->toArray());
 
         return $this->streamDownload($spreadsheet, 'Laporan_Data_Sasaran_'.date('Ymd_His').'.xlsx');
@@ -49,7 +55,7 @@ class ExportReport
     public function exportExaminations(int $year, int $month): StreamedResponse
     {
         $spreadsheet = new Spreadsheet;
-        $reports = $this->dataAction->getExaminations($year, $month);
+        $reports = $this->examinationReport->execute($year, $month);
 
         // Tab Balita
         $sheet1 = $spreadsheet->getActiveSheet();
@@ -59,36 +65,37 @@ class ExportReport
             'Usia (Bln)', 'BB (kg)', 'TB (cm)', 'LK (cm)', 'LiLA (cm)', 'Status BB',
             'Gejala Sakit', 'Intervensi', 'Skrining TBC', 'Dirujuk', 'Petugas',
         ];
-        $this->writeTable($sheet1, "PEMERIKSAAN BALITA - PERIODE {$month}/{$year}", $headers1, $reports['toddler']->toArray());
+        $this->writeTable($sheet1, "DATA PEMERIKSAAN BALITA - {$month}/{$year}", $headers1, $reports['toddler']->toArray());
 
         // Tab Ibu Hamil
         $sheet2 = $spreadsheet->createSheet();
         $sheet2->setTitle('Ibu Hamil');
         $headers2 = [
-            'No', 'Tgl Periksa', 'Lokasi', 'NIK', 'Nama Ibu', 'Nama Suami', 'Hamil Ke',
-            'Usia Gestasi', 'BB (kg)', 'LiLA (cm)', 'Status Gizi', 'Tensi', 'Tablet Fe',
-            'Konseling ASI', 'PMT KEK', 'Kelas Bumil', 'Dirujuk', 'Petugas',
+            'No', 'Tgl Periksa', 'Lokasi', 'NIK', 'Nama Ibu Hamil', 'Nama Suami',
+            'Hamil Ke', 'Usia Hamil', 'BB (kg)', 'LiLA (cm)', 'Status KEK', 'Tekanan Darah',
+            'Tablet Tambah Darah', 'Konseling ASI', 'PMT Pemulihan', 'Kelas Bumil', 'Dirujuk', 'Petugas',
         ];
-        $this->writeTable($sheet2, "PEMERIKSAAN IBU HAMIL - PERIODE {$month}/{$year}", $headers2, $reports['pregnant']->toArray());
+        $this->writeTable($sheet2, "DATA PEMERIKSAAN IBU HAMIL - {$month}/{$year}", $headers2, $reports['pregnant']->toArray());
 
-        // Tab Remaja
+        // Tab Usia Remaja
         $sheet3 = $spreadsheet->createSheet();
         $sheet3->setTitle('Remaja');
         $headers3 = [
-            'No', 'Tgl Periksa', 'Lokasi', 'NIK', 'Nama Remaja', 'L/P', 'BB (kg)',
-            'TB (cm)', 'LP (cm)', 'Kategori IMT', 'Tensi', 'GDS (mg/dL)', 'Hb', 'Dirujuk', 'Petugas',
+            'No', 'Tgl Periksa', 'Lokasi', 'NIK', 'Nama Remaja', 'L/P',
+            'BB (kg)', 'TB (cm)', 'Lingkar Perut (cm)', 'Kategori IMT', 'Tekanan Darah',
+            'Gula Darah (mg/dL)', 'Hemoglobin (g/dL)', 'Dirujuk', 'Petugas',
         ];
-        $this->writeTable($sheet3, "PEMERIKSAAN REMAJA - PERIODE {$month}/{$year}", $headers3, $reports['teen']->toArray());
+        $this->writeTable($sheet3, "DATA PEMERIKSAAN USIA REMAJA - {$month}/{$year}", $headers3, $reports['teen']->toArray());
 
         // Tab Dewasa & Lansia
         $sheet4 = $spreadsheet->createSheet();
         $sheet4->setTitle('Dewasa & Lansia');
         $headers4 = [
             'No', 'Tgl Periksa', 'Lokasi', 'NIK', 'Nama Peserta', 'L/P', 'Kategori',
-            'BB (kg)', 'TB (cm)', 'LP (cm)', 'IMT', 'Tensi', 'GDS (mg/dL)', 'Kolesterol',
-            'Asam Urat', 'Merokok', 'Kemandirian ADL', 'Dirujuk', 'Petugas',
+            'BB (kg)', 'TB (cm)', 'Lingkar Perut (cm)', 'Kategori IMT', 'Tekanan Darah',
+            'Gula Darah', 'Kolesterol', 'Asam Urat', 'Merokok', 'Tingkat Kemandirian', 'Dirujuk', 'Petugas',
         ];
-        $this->writeTable($sheet4, "PEMERIKSAAN DEWASA & LANSIA - PERIODE {$month}/{$year}", $headers4, $reports['adult']->toArray());
+        $this->writeTable($sheet4, "DATA PEMERIKSAAN USIA DEWASA & LANSIA - {$month}/{$year}", $headers4, $reports['adult']->toArray());
 
         $spreadsheet->setActiveSheetIndex(0);
 
@@ -102,12 +109,12 @@ class ExportReport
         $sheet->setTitle('Kasus Risiko & Rujukan');
 
         $headers = [
-            'No', 'Tgl Pemeriksaan', 'NIK', 'Nama Peserta', 'Kategori', 'Gender / Usia',
-            'RT/RW', 'No. HP', 'Indikasi Risiko / Masalah', 'Hasil Pengukuran Terkait',
-            'Status Rujukan', 'Tempat Pelayanan', 'Edukasi & Intervensi',
+            'No', 'Tgl Pelayanan', 'NIK', 'Nama Peserta', 'Kategori Sasaran', 'Gender / Umur',
+            'RT/RW', 'No. HP/WA', 'Faktor Risiko / Masalah Ditemukan', 'Hasil Pengukuran Kunci',
+            'Status Rujukan', 'Lokasi Pelayanan', 'Konseling & Edukasi',
         ];
 
-        $data = $this->dataAction->getRisks($year, $month);
+        $data = $this->riskReport->execute($year, $month);
         $this->writeTable($sheet, "LAPORAN KASUS RISIKO & RUJUKAN - PERIODE {$month}/{$year}", $headers, $data->toArray());
 
         return $this->streamDownload($spreadsheet, "Laporan_Kasus_Risiko_Rujukan_{$year}_{$month}.xlsx");
@@ -116,19 +123,19 @@ class ExportReport
     public function exportAttendance(int $year, int $month): StreamedResponse
     {
         $spreadsheet = new Spreadsheet;
-        $attendance = $this->dataAction->getAttendance($year, $month);
+        $attendance = $this->attendanceReport->execute($year, $month);
 
         // Tab Rekap Statistik D/S
         $sheet1 = $spreadsheet->getActiveSheet();
         $sheet1->setTitle('Statistik D-S');
         $headers1 = ['Kelompok Sasaran', 'Sasaran (S)', 'Posyandu (H)', 'Kunjungan (K)', 'Total Terlayani (D)', 'Absen (S-D)', 'Cakupan (%)'];
-        $this->writeTable($sheet1, "REKAPITULASI CAKUPAN KEHADIRAN POSYANDU (D/S) - {$month}/{$year}", $headers1, $attendance['rekap']);
+        $this->writeTable($sheet1, "REKAPITULASI CAKUPAN KEHADIRAN POSYANDU (D/S) - {$month}/{$year}", $headers1, $attendance['summary']);
 
         // Tab Presensi Detail
         $sheet2 = $spreadsheet->createSheet();
         $sheet2->setTitle('Daftar Presensi Warga');
         $headers2 = ['No', 'NIK', 'Nama Lengkap', 'Kategori Sasaran', 'RT/RW', 'Status Kehadiran', 'Tanggal Pelayanan'];
-        $this->writeTable($sheet2, "DAFTAR PRESENSI KEHADIRAN WARGA - {$month}/{$year}", $headers2, $attendance['presensi']->toArray());
+        $this->writeTable($sheet2, "DAFTAR PRESENSI KEHADIRAN WARGA - {$month}/{$year}", $headers2, $attendance['attendances']->toArray());
 
         $spreadsheet->setActiveSheetIndex(0);
 

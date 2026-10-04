@@ -98,9 +98,8 @@ const emit = defineEmits<{
                     v-else
                     type="button"
                     size="sm"
-                    variant="outline"
                     :disabled="loadingId === item.id"
-                    class="w-fit cursor-pointer shadow-none"
+                    class="w-fit cursor-pointer border border-amber-500/30 bg-amber-500/10 text-amber-700 shadow-none hover:bg-amber-500/20 active:scale-[0.98] dark:border-amber-500/30 dark:bg-amber-500/15 dark:text-amber-300"
                     @click="emit('generate', item)"
                 >
                     <FileText class="size-3.5" />
