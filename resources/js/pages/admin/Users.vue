@@ -13,7 +13,6 @@ import {
 import { computed } from 'vue';
 import ConfirmDialog from '@/components/ConfirmDialog.vue';
 import Heading from '@/components/Heading.vue';
-import Metric from '@/components/Metric.vue';
 import Pagination from '@/components/Pagination.vue';
 import StatusBadge from '@/components/StatusBadge.vue';
 import { Button } from '@/components/ui/button';
@@ -25,6 +24,12 @@ import {
     CardFooter,
     CardDescription,
 } from '@/components/ui/card';
+import {
+    MetricCard,
+    MetricContent,
+    MetricContour,
+    MetricHeader,
+} from '@/components/ui/metric';
 import {
     Table,
     TableBody,
@@ -126,14 +131,15 @@ const {
         />
 
         <div class="grid grid-cols-2 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <Metric
+            <MetricCard
                 v-for="metric in metricList"
                 :key="metric.title"
-                :title="metric.title"
-                :value="metric.value"
-                :icon="metric.icon"
                 :variant="metric.variant"
-            />
+            >
+                <MetricContour />
+                <MetricHeader :icon="metric.icon" />
+                <MetricContent :title="metric.title" :value="metric.value" />
+            </MetricCard>
         </div>
 
         <Card

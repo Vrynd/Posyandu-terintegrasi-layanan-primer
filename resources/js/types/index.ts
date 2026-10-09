@@ -5,3 +5,4 @@ export * from './user';
 export * from './token';
 export * from './participant';
 export * from './report';
+export * from './metric';

@@ -20,15 +20,11 @@ const { isCurrentUrl } = useCurrentUrl();
 </script>
 
 <template>
-    <template v-if="groups && groups.length > 0">
-        <SidebarGroup
-            v-for="group in groups"
-            :key="group.title"
-            class="px-2 py-1"
-        >
-            <SidebarGroupLabel>{{ group.title }}</SidebarGroupLabel>
+    <!-- Template jika data berupa daftar menu langsung tanpa grup/kelompok -->
+    <template v-if="items && items.length > 0">
+        <SidebarGroup class="px-2 py-1">
             <SidebarMenu>
-                <SidebarMenuItem v-for="item in group.items" :key="item.title">
+                <SidebarMenuItem v-for="item in items" :key="item.title">
                     <SidebarMenuButton
                         as-child
                         :is-active="isCurrentUrl(item.href)"
@@ -61,11 +57,18 @@ const { isCurrentUrl } = useCurrentUrl();
         </SidebarGroup>
     </template>
 
-    <template v-else-if="items && items.length > 0">
-        <SidebarGroup class="px-2 py-1">
-            <SidebarGroupLabel>Platform</SidebarGroupLabel>
+    <!-- Template fallback jika data mengoper groups -->
+    <template v-else-if="groups && groups.length > 0">
+        <SidebarGroup
+            v-for="group in groups"
+            :key="group.title"
+            class="px-2 py-1"
+        >
+            <SidebarGroupLabel v-if="group.title">{{
+                group.title
+            }}</SidebarGroupLabel>
             <SidebarMenu>
-                <SidebarMenuItem v-for="item in items" :key="item.title">
+                <SidebarMenuItem v-for="item in group.items" :key="item.title">
                     <SidebarMenuButton
                         as-child
                         :is-active="isCurrentUrl(item.href)"

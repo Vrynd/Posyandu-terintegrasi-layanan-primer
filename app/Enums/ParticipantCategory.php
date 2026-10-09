@@ -17,7 +17,7 @@ enum ParticipantCategory: string
     {
         return match ($this) {
             self::PregnantMother => 'Ibu Hamil & Nifas',
-            self::Toddler => 'Balita',
+            self::Toddler => 'Bayi atau Balita',
             self::Teenager => 'Anak Remaja',
             self::Productive => 'Usia Produktif',
             self::Adult => 'Usia Lansia',

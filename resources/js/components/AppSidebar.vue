@@ -2,16 +2,15 @@
 import { Link, usePage } from '@inertiajs/vue3';
 import {
     Activity,
-    BookOpen,
+    Bot,
     Bug,
     ClipboardList,
     Database,
     FileText,
+    History,
     KeyRound,
     LayoutGrid,
     MessageSquare,
-    Ruler,
-    TrendingUp,
     UserPlus,
     Users,
 } from '@lucide/vue';
@@ -32,62 +31,52 @@ import { dashboard } from '@/routes';
 import participants from '@/routes/participants';
 import tokens from '@/routes/tokens';
 import users from '@/routes/users';
-import type { NavGroup } from '@/types';
+import type { NavItem } from '@/types';
 
 const page = usePage();
 const userRole = computed(() => page.props.auth?.user?.role);
 
-const navGroups = computed<NavGroup[]>(() => {
+const navItems = computed<NavItem[]>(() => {
     // 1. Menu Khusus Administrator (IT & Pemeliharaan Sistem)
     if (userRole.value === 'administrator') {
         return [
             {
-                title: 'Utama',
-                items: [
-                    {
-                        title: 'Dashboard Sistem',
-                        href: dashboard(),
-                        icon: LayoutGrid,
-                    },
-                ],
+                title: 'Dashboard Sistem',
+                href: dashboard(),
+                icon: LayoutGrid,
             },
             {
-                title: 'Operasional Sistem',
-                items: [
-                    {
-                        title: 'Manajemen Pengguna',
-                        href: users.index(),
-                        icon: Users,
-                    },
-                    {
-                        title: 'Kelola Token',
-                        href: tokens.index(),
-                        icon: KeyRound,
-                    },
-                    {
-                        title: 'Kelola Formulir',
-                        href: '/myadmin/forms',
-                        icon: ClipboardList,
-                    },
-                    {
-                        title: 'Backup & Restore',
-                        href: '#',
-                        icon: Database,
-                        isLocked: true,
-                    },
-                    {
-                        title: 'Log Aktivitas',
-                        href: '#',
-                        icon: Activity,
-                        isLocked: true,
-                    },
-                    {
-                        title: 'Pusat Pengaduan',
-                        href: '#',
-                        icon: MessageSquare,
-                        isLocked: true,
-                    },
-                ],
+                title: 'Manajemen Pengguna',
+                href: users.index(),
+                icon: Users,
+            },
+            {
+                title: 'Kelola Token',
+                href: tokens.index(),
+                icon: KeyRound,
+            },
+            {
+                title: 'Kelola Formulir',
+                href: '/myadmin/forms',
+                icon: ClipboardList,
+            },
+            {
+                title: 'Backup & Restore',
+                href: '#',
+                icon: Database,
+                isLocked: true,
+            },
+            {
+                title: 'Log Aktivitas',
+                href: '#',
+                icon: Activity,
+                isLocked: true,
+            },
+            {
+                title: 'Pusat Pengaduan',
+                href: '#',
+                icon: MessageSquare,
+                isLocked: true,
             },
         ];
     }
@@ -95,58 +84,37 @@ const navGroups = computed<NavGroup[]>(() => {
     // 2. Menu Khusus Kader (Pelayanan & Data Kesehatan Posyandu)
     return [
         {
-            title: 'Utama',
-            items: [
-                {
-                    title: 'Dashboard',
-                    href: dashboard(),
-                    icon: LayoutGrid,
-                },
-                {
-                    title: 'Statistik Posyandu',
-                    href: '#',
-                    icon: TrendingUp,
-                    isLocked: true,
-                },
-            ],
+            title: 'Dashboard',
+            href: dashboard(),
+            icon: LayoutGrid,
         },
         {
-            title: 'Pelayanan',
-            items: [
-                {
-                    title: 'Pendaftaran',
-                    href: participants.index(),
-                    icon: UserPlus,
-                },
-                {
-                    title: 'Monitoring Stunting',
-                    href: '#',
-                    icon: Ruler,
-                    isLocked: true,
-                },
-                {
-                    title: 'Laporan',
-                    href: '/reports',
-                    icon: FileText,
-                },
-            ],
+            title: 'Peserta',
+            href: participants.index(),
+            icon: UserPlus,
         },
         {
-            title: 'Dukungan',
-            items: [
-                {
-                    title: 'Lapor Kendala / Bug',
-                    href: '#',
-                    icon: Bug,
-                    isLocked: true,
-                },
-                {
-                    title: 'Panduan & Bantuan',
-                    href: '#',
-                    icon: BookOpen,
-                    isLocked: true,
-                },
-            ],
+            title: 'Laporan',
+            href: '/reports',
+            icon: FileText,
+        },
+        {
+            title: 'Riwayat Aktivitas',
+            href: '#',
+            icon: History,
+            isLocked: true,
+        },
+        {
+            title: 'Tanya AI',
+            href: '#',
+            icon: Bot,
+            isLocked: true,
+        },
+        {
+            title: 'Pengaduan Bug',
+            href: '#',
+            icon: Bug,
+            isLocked: true,
         },
     ];
 });
@@ -167,7 +135,7 @@ const navGroups = computed<NavGroup[]>(() => {
         </SidebarHeader>
 
         <SidebarContent>
-            <NavMain :groups="navGroups" />
+            <NavMain :items="navItems" />
         </SidebarContent>
 
         <SidebarFooter>

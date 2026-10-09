@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\TokenController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Auth\VerifyTokenController;
+use App\Http\Controllers\Dashboard\DashboardController;
 use App\Http\Controllers\Examinations\ExaminationController;
 use App\Http\Controllers\Participants\ParticipantController;
 use App\Http\Controllers\Reports\ReportController;
@@ -21,7 +22,7 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::inertia('dashboard', 'Dashboard')->name('dashboard');
+    Route::get('dashboard', DashboardController::class)->name('dashboard');
 
     // Route pendaftaran peserta
     Route::get('/participants', [ParticipantController::class, 'index'])->name('participants.index');
