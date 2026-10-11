@@ -77,3 +77,51 @@ test('dashboard metrics calculate trend and period when previous month data exis
         )
     );
 });
+
+test('dashboard returns follow up examinations for risky or referred participants', function () {
+    $user = User::factory()->create(['name' => 'Bidan Ratna']);
+    $this->actingAs($user);
+
+    $pregnant = Participant::factory()->create([
+        'name' => 'Fitri Handayani',
+        'category' => ParticipantCategory::PregnantMother,
+    ]);
+
+    $examination = $pregnant->examinations()->create([
+        'created_by' => $user->id,
+        'examination_date' => now()->toDateString(),
+        'weight' => 45.8,
+        'is_referred' => true,
+        'location' => 'health_post',
+        'skrining_tbc' => ['no_symptoms'],
+    ]);
+
+    $examination->pregnantMother()->create([
+        'gestational_age_weeks' => 18,
+        'upper_arm_circumference' => 22.0,
+        'systolic_pressure' => 100,
+        'diastolic_pressure' => 65,
+        'has_iron_tablets' => true,
+        'exclusive_breastfeeding_counseling' => true,
+        'receives_pmt_kek' => true,
+        'attends_prenatal_class' => true,
+    ]);
+
+    $response = $this->get(route('dashboard'));
+    $response->assertSuccessful();
+
+    $response->assertInertia(fn (Assert $page) => $page
+        ->component('dashboard/Index')
+        ->has('followUps', 1)
+        ->has('followUps.0', fn (Assert $item) => $item
+            ->where('id', $examination->id)
+            ->where('ulid', $pregnant->ulid)
+            ->where('name', 'Fitri Handayani')
+            ->where('category', 'pregnant')
+            ->where('issues', ['Ibu Hamil KEK'])
+            ->where('location', 'Posyandu')
+            ->where('examinerName', 'Bidan Ratna')
+            ->etc()
+        )
+    );
+});

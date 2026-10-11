@@ -32,3 +32,14 @@ export interface MonthlyExamination {
     productive: number;
     adult: number;
 }
+
+export interface FollowUpItem {
+    id: number | string;
+    ulid?: string;
+    name: string;
+    category: TrendCategory;
+    issues: string[];
+    examinationDate: string;
+    location: string;
+    examinerName: string;
+}

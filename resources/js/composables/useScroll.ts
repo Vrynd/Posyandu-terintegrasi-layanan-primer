@@ -15,6 +15,7 @@ export function useScroll(
     { scrollAmount, gap = 0, threshold = 10 }: UseScrollOptions = {},
 ) {
     const containerWidth = ref(0);
+    const scrollOffset = ref(0);
     const canScrollLeft = ref(false);
     const canScrollRight = ref(true);
 
@@ -27,6 +28,7 @@ export function useScroll(
 
         const { scrollLeft, scrollWidth, clientWidth } = containerRef.value;
         containerWidth.value = clientWidth;
+        scrollOffset.value = scrollLeft;
         canScrollLeft.value = scrollLeft > threshold;
         canScrollRight.value =
             scrollLeft < scrollWidth - clientWidth - threshold;
@@ -107,6 +109,7 @@ export function useScroll(
 
     return {
         containerWidth,
+        scrollOffset,
         canScrollLeft,
         canScrollRight,
         scrollPrev,

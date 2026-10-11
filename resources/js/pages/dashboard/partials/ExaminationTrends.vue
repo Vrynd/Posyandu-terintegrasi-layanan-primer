@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { AltArrowLeftIcon, AltArrowRightIcon } from '@solar-icons/vue/linear';
 import { computed, nextTick, onMounted, ref, watch } from 'vue';
+import ChartLegend from '@/components/ChartLegend.vue';
 import ChartTooltip from '@/components/ChartTooltip.vue';
 import type { ChartTooltipItem } from '@/components/ChartTooltip.vue';
 import { Button } from '@/components/ui/button';
@@ -93,7 +94,7 @@ function getTooltipItems(d: MonthlyExamination): ChartTooltipItem[] {
 
     return trendCategories.map((cat) => ({
         key: cat.key,
-        label: cat.label,
+        label: cat.shortLabel,
         value: d[cat.key],
         color: cat.color,
     }));
@@ -140,22 +141,7 @@ watch(barColumns, syncActiveMonthScroll);
                 </CardTitle>
             </div>
             <div class="flex flex-wrap items-center gap-3 sm:gap-4">
-                <div
-                    class="hidden flex-wrap items-center gap-2 text-xs text-muted-foreground sm:flex sm:gap-2.5"
-                >
-                    <div
-                        v-for="cat in trendCategories"
-                        :key="cat.key"
-                        class="flex items-center gap-1.5 select-none"
-                    >
-                        <span class="size-2 rounded-full" :class="cat.color" />
-                        <span
-                            class="text-[11px] font-medium text-foreground/80 sm:text-xs"
-                        >
-                            {{ cat.label }}
-                        </span>
-                    </div>
-                </div>
+                <ChartLegend class="hidden sm:flex" />
 
                 <div class="flex items-center gap-1">
                     <Button

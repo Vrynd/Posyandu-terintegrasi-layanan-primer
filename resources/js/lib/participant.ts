@@ -12,6 +12,7 @@ import type { TrendCategory } from '@/types';
 export interface CategoryMeta {
     key: TrendCategory;
     label: string;
+    shortLabel: string;
     color: string;
     icon: Component;
 }
@@ -32,31 +33,36 @@ export const badgeMap: Record<string, BadgeColor> = {
 export const trendCategories: readonly CategoryMeta[] = [
     {
         key: 'pregnant',
-        label: 'Ibu Hamil',
+        label: 'Ibu Hamil & Nifas',
+        shortLabel: 'Ibu Hamil',
         color: 'bg-linear-to-r from-pink-500 to-pink-400',
         icon: HeartPulse,
     },
     {
         key: 'toddler',
-        label: 'Balita',
+        label: 'Bayi atau Balita',
+        shortLabel: 'Balita',
         color: 'bg-linear-to-r from-blue-500 to-blue-400',
         icon: Baby,
     },
     {
         key: 'teenager',
-        label: 'Remaja',
+        label: 'Anak Remaja',
+        shortLabel: 'Remaja',
         color: 'bg-linear-to-r from-teal-500 to-teal-400',
         icon: GraduationCap,
     },
     {
         key: 'productive',
-        label: 'Produktif',
+        label: 'Usia Produktif',
+        shortLabel: 'Produktif',
         color: 'bg-linear-to-r from-orange-500 to-orange-400',
         icon: Briefcase,
     },
     {
         key: 'adult',
-        label: 'Lansia',
+        label: 'Usia Lansia',
+        shortLabel: 'Lansia',
         color: 'bg-linear-to-r from-amber-400 to-amber-300',
         icon: HeartHandshake,
     },

@@ -2,7 +2,11 @@
 
 namespace App\Http\Controllers\Dashboard;
 
+use App\Enums\BmiCategory;
+use App\Enums\IndependenceLevel;
 use App\Enums\ParticipantCategory;
+use App\Enums\TbcSymptom;
+use App\Enums\WeightStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Examination;
 use App\Models\Participant;
@@ -109,6 +113,7 @@ class DashboardController extends Controller
                 ],
             ],
             'trends' => $this->getExaminationTrends($now->year),
+            'followUps' => $this->getFollowUpExaminations($now->year),
         ]);
     }
 
@@ -194,5 +199,143 @@ class DashboardController extends Controller
         }
 
         return $trends;
+    }
+
+    /**
+     * Ambil daftar peserta yang dirujuk ke Puskesmas berdasarkan pemeriksaan terbaru.
+     *
+     * @return list<array{
+     *     id: int,
+     *     ulid: string,
+     *     name: string,
+     *     category: string,
+     *     issues: list<string>,
+     *     examinationDate: string,
+     *     location: string,
+     *     examinerName: string
+     * }>
+     */
+    private function getFollowUpExaminations(int $year): array
+    {
+        $examinations = Examination::query()
+            ->whereYear('examination_date', $year)
+            ->with(['participant', 'creator', 'toddler', 'pregnantMother', 'teen', 'adult'])
+            ->orderByDesc('examination_date')
+            ->orderByDesc('id')
+            ->get()
+            ->unique('participant_id');
+
+        $followUps = [];
+
+        foreach ($examinations as $examination) {
+            if (! $examination->is_referred) {
+                continue;
+            }
+
+            $issues = $this->extractFollowUpIssues($examination);
+
+            $trendCategory = match ($examination->participant->category) {
+                ParticipantCategory::PregnantMother => 'pregnant',
+                ParticipantCategory::Toddler => 'toddler',
+                ParticipantCategory::Teenager => 'teenager',
+                ParticipantCategory::Productive => 'productive',
+                ParticipantCategory::Adult => 'adult',
+            };
+
+            $date = $examination->examination_date->copy();
+            $date->locale('id');
+
+            $followUps[] = [
+                'id' => $examination->id,
+                'ulid' => $examination->participant->ulid,
+                'name' => $examination->participant->name,
+                'category' => $trendCategory,
+                'issues' => $issues,
+                'examinationDate' => $date->translatedFormat('D, d M Y'),
+                'location' => $examination->location->label(),
+                'examinerName' => $examination->creator ? $examination->creator->name : 'Petugas Posyandu',
+            ];
+        }
+
+        return $followUps;
+    }
+
+    /**
+     * Ekstrak daftar masalah kesehatan ringkas yang menyebabkan peserta dirujuk.
+     *
+     * @return list<string>
+     */
+    private function extractFollowUpIssues(Examination $examination): array
+    {
+        $issues = [];
+
+        if ($toddler = $examination->toddler) {
+            if ($toddler->weight_status === WeightStatus::BelowRedLine) {
+                $issues[] = 'Balita BGM';
+            } elseif ($toddler->weight_status === WeightStatus::Decreased) {
+                $issues[] = 'Berat Badan Turun';
+            } elseif ($toddler->weight_status === WeightStatus::Same) {
+                $issues[] = 'Berat Badan Tetap';
+            }
+
+            if ($toddler->has_illness_symptoms) {
+                $issues[] = 'Gejala Sakit';
+            }
+        }
+
+        if ($pregnant = $examination->pregnantMother) {
+            if ($pregnant->upper_arm_circumference !== null && (float) $pregnant->upper_arm_circumference < 23.5) {
+                $issues[] = 'Ibu Hamil KEK';
+            }
+
+            if ($pregnant->systolic_pressure !== null && $pregnant->systolic_pressure >= 140) {
+                $issues[] = 'Tekanan Darah Tinggi';
+            }
+        }
+
+        if ($teen = $examination->teen) {
+            if ($teen->hemoglobin !== null && is_numeric($teen->hemoglobin) && (float) $teen->hemoglobin < 12.0) {
+                $issues[] = 'Risiko Anemia';
+            }
+
+            if (in_array($teen->bmi_category, [BmiCategory::SeverelyUnderweight, BmiCategory::Underweight], true)) {
+                $issues[] = 'Gizi Kurang';
+            } elseif (in_array($teen->bmi_category, [BmiCategory::Overweight, BmiCategory::Obese], true)) {
+                $issues[] = 'Berat Badan Lebih';
+            }
+
+            if ($teen->systolic_pressure !== null && $teen->systolic_pressure >= 140) {
+                $issues[] = 'Tekanan Darah Tinggi';
+            }
+        }
+
+        if ($adult = $examination->adult) {
+            if ($adult->systolic_pressure !== null && $adult->systolic_pressure >= 140) {
+                $issues[] = 'Hipertensi';
+            }
+
+            if ($adult->blood_sugar !== null && (float) $adult->blood_sugar >= 200) {
+                $issues[] = 'Gula Darah Tinggi';
+            }
+
+            if ($adult->cholesterol !== null && (float) $adult->cholesterol >= 200) {
+                $issues[] = 'Kolesterol Tinggi';
+            }
+
+            if ($adult->independence_level !== null && $adult->independence_level !== IndependenceLevel::Independent) {
+                $issues[] = $adult->independence_level->label();
+            }
+        }
+
+        $tbcSymptoms = array_diff($examination->skrining_tbc ?? [], [TbcSymptom::NoSymptoms->value]);
+        if ($tbcSymptoms !== []) {
+            $issues[] = 'Terduga Gejala TBC';
+        }
+
+        if ($issues === [] && $examination->is_referred) {
+            $issues[] = 'Rujukan Puskesmas';
+        }
+
+        return $issues;
     }
 }
