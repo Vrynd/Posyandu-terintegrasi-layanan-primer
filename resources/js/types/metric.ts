@@ -19,3 +19,16 @@ export interface MetricStat {
     trend?: MetricTrend | null;
     period?: string | null;
 }
+
+export type TrendCategory =
+    'pregnant' | 'toddler' | 'teenager' | 'productive' | 'adult';
+
+export interface MonthlyExamination {
+    month: string;
+    fullMonth: string;
+    pregnant: number;
+    toddler: number;
+    teenager: number;
+    productive: number;
+    adult: number;
+}

@@ -108,7 +108,7 @@ const categoryMetrics = computed(() => [
     <!-- Carousel Metrik Horizontal Native -->
     <div class="relative">
         <div
-            class="-mx-4 flex snap-x snap-mandatory scroll-px-4 scrollbar-none gap-4 overflow-x-auto scroll-smooth px-4 [-ms-overflow-style:none] md:mx-0 md:scroll-px-0 md:px-0 [&::-webkit-scrollbar]:hidden"
+            class="-mx-4 flex snap-x snap-mandatory scroll-px-4 scrollbar-none gap-3 overflow-x-auto scroll-smooth px-4 [-ms-overflow-style:none] sm:gap-4 md:mx-0 md:scroll-px-0 md:px-0 [&::-webkit-scrollbar]:hidden"
         >
             <div
                 v-for="item in categoryMetrics"

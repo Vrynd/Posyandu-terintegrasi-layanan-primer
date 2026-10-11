@@ -119,6 +119,26 @@
     .no-scrollbar::-webkit-scrollbar {
         display: none;
     }
+
+    .striped-pattern {
+        background-image: repeating-linear-gradient(
+            -45deg,
+            rgba(255, 255, 255, 0.55),
+            rgba(255, 255, 255, 0.55) 1px,
+            transparent 1px,
+            transparent 9px
+        );
+    }
+
+    .striped-empty-pattern {
+        background-image: repeating-linear-gradient(
+            -45deg,
+            color-mix(in srgb, var(--muted-foreground) 25%, transparent),
+            color-mix(in srgb, var(--muted-foreground) 25%, transparent) 1px,
+            transparent 1px,
+            transparent 8px
+        );
+    }
 }
 
 :root {

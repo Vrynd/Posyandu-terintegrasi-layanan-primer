@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import Breadcrumbs from '@/components/Breadcrumbs.vue';
-import HeaderWidgetBar from '@/components/HeaderWidgetBar.vue';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import type { BreadcrumbItem } from '@/types';
 
@@ -24,7 +23,6 @@ const props = withDefaults(defineProps<Props>(), {
                 v-if="props.breadcrumbs && props.breadcrumbs.length > 1"
                 :breadcrumbs="props.breadcrumbs"
             />
-            <HeaderWidgetBar v-else />
         </div>
     </header>
 </template>
