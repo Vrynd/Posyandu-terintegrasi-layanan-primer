@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { AltArrowLeftIcon, AltArrowRightIcon } from '@solar-icons/vue/linear';
-import { computed, ref } from 'vue';
+import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import ChartTooltip from '@/components/ChartTooltip.vue';
 import type { ChartTooltipItem } from '@/components/ChartTooltip.vue';
-import ChartWave from '@/components/ChartWave.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useScroll } from '@/composables/useScroll';
 import { monthNames } from '@/lib/date';
+import { trendCategories } from '@/lib/participant';
 import type { MonthlyExamination, TrendCategory } from '@/types';
 
 const props = defineProps<{
@@ -18,11 +18,10 @@ const props = defineProps<{
 const activeTooltipMonth = ref<string | null>(null);
 const container = ref<HTMLElement | null>(null);
 
-const barGap = 24;
 const MIN_SEGMENT_HEIGHT = 20;
-const SEGMENT_GAP = 4;
-const MAX_AVAILABLE_BAR_HEIGHT = 212;
+const MAX_AVAILABLE_BAR_HEIGHT = 220;
 const BAR_AREA_HEIGHT = 228;
+const currentMonth = new Date().getMonth();
 
 const {
     containerWidth,
@@ -30,23 +29,19 @@ const {
     canScrollRight,
     scrollPrev,
     scrollNext,
-} = useScroll(container, { gap: barGap });
+    scrollToEnd,
+} = useScroll(container, { gap: () => barGap.value });
 
-const barColumns = computed(() => {
+const isMobileContainer = computed(() => {
     if (containerWidth.value > 0) {
-        return containerWidth.value < 480 ? 6 : 9;
+        return containerWidth.value < 550;
     }
 
-    return typeof window !== 'undefined' && window.innerWidth < 640 ? 6 : 9;
+    return typeof window !== 'undefined' && window.innerWidth < 640;
 });
 
-const categories = [
-    { key: 'pregnant', label: 'Ibu Hamil', color: 'bg-pink-500' },
-    { key: 'toddler', label: 'Balita', color: 'bg-blue-500' },
-    { key: 'teenager', label: 'Remaja', color: 'bg-teal-500' },
-    { key: 'productive', label: 'Produktif', color: 'bg-orange-500' },
-    { key: 'adult', label: 'Lansia', color: 'bg-amber-400' },
-] as const;
+const barGap = computed(() => (isMobileContainer.value ? 20 : 24));
+const barColumns = computed(() => (isMobileContainer.value ? 6 : 9));
 
 // Data 12 Bulan
 const emptyYearData: MonthlyExamination[] = monthNames.map((name) => ({
@@ -71,12 +66,8 @@ function hasActivity(d: MonthlyExamination): boolean {
     return getMonthTotal(d) > 0;
 }
 
-const hasAnyActivity = computed(() =>
-    currentData.value.some((d) => hasActivity(d)),
-);
-
 const scaleFactor = computed(() => {
-    const baseMinTotal = MIN_SEGMENT_HEIGHT * categories.length;
+    const baseMinTotal = MIN_SEGMENT_HEIGHT * trendCategories.length;
     const maxDynamicSpace = MAX_AVAILABLE_BAR_HEIGHT - baseMinTotal;
 
     const maxMonthTotal = Math.max(
@@ -84,63 +75,23 @@ const scaleFactor = computed(() => {
         1,
     );
 
-    return maxMonthTotal > maxDynamicSpace
-        ? maxDynamicSpace / maxMonthTotal
-        : 1;
+    return Math.min(maxDynamicSpace / maxMonthTotal, 3);
 });
 
 function getSegmentHeight(d: MonthlyExamination, key: TrendCategory): number {
-    if (d[key] <= 0) {
-        return MIN_SEGMENT_HEIGHT;
-    }
-
     return MIN_SEGMENT_HEIGHT + Math.round(d[key] * scaleFactor.value);
 }
 
-function getActiveBarHeight(d: MonthlyExamination): number {
-    const segmentsHeight = categories.reduce(
-        (total, cat) => total + getSegmentHeight(d, cat.key),
-        0,
-    );
-    const totalGaps = (categories.length - 1) * SEGMENT_GAP;
-
-    return segmentsHeight + totalGaps;
+function getActiveCategories(d: MonthlyExamination) {
+    return trendCategories.filter((cat) => d[cat.key] > 0);
 }
-
-function getEmptyBarHeight(index: number): number {
-    for (let i = index - 1; i >= 0; i--) {
-        const prevMonth = currentData.value[i];
-
-        if (prevMonth && hasActivity(prevMonth)) {
-            return getActiveBarHeight(prevMonth);
-        }
-    }
-
-    return BAR_AREA_HEIGHT;
-}
-
-function getBarHeightByIndex(index: number): number {
-    const item = currentData.value[index];
-
-    if (!item) {
-        return 0;
-    }
-
-    return hasActivity(item)
-        ? getActiveBarHeight(item)
-        : getEmptyBarHeight(index);
-}
-
-const barHeights = computed(() =>
-    currentData.value.map((_, index) => getBarHeightByIndex(index)),
-);
 
 function getTooltipItems(d: MonthlyExamination): ChartTooltipItem[] {
     if (!hasActivity(d)) {
         return [];
     }
 
-    return categories.map((cat) => ({
+    return trendCategories.map((cat) => ({
         key: cat.key,
         label: cat.label,
         value: d[cat.key],
@@ -163,6 +114,17 @@ function isHighestCategory(d: MonthlyExamination, key: TrendCategory): boolean {
 
     return d[key] === maxVal && maxVal > 0;
 }
+
+function syncActiveMonthScroll(): void {
+    nextTick(() => {
+        if (currentMonth >= barColumns.value) {
+            scrollToEnd();
+        }
+    });
+}
+
+onMounted(syncActiveMonthScroll);
+watch(barColumns, syncActiveMonthScroll);
 </script>
 
 <template>
@@ -172,9 +134,7 @@ function isHighestCategory(d: MonthlyExamination, key: TrendCategory): boolean {
             class="flex flex-row items-center justify-between gap-4 border-dashed p-4 sm:p-5"
         >
             <div class="flex items-center gap-2.5">
-                <span
-                    class="hidden h-5 w-2 shrink-0 rounded-full bg-accent sm:block"
-                />
+                <span class="h-5 w-2 shrink-0 rounded-full bg-accent" />
                 <CardTitle class="text-base text-foreground/90">
                     Tren Pemeriksaan
                 </CardTitle>
@@ -184,7 +144,7 @@ function isHighestCategory(d: MonthlyExamination, key: TrendCategory): boolean {
                     class="hidden flex-wrap items-center gap-2 text-xs text-muted-foreground sm:flex sm:gap-2.5"
                 >
                     <div
-                        v-for="cat in categories"
+                        v-for="cat in trendCategories"
                         :key="cat.key"
                         class="flex items-center gap-1.5 select-none"
                     >
@@ -235,15 +195,6 @@ function isHighestCategory(d: MonthlyExamination, key: TrendCategory): boolean {
                 class="no-scrollbar relative flex h-64 w-full items-end overflow-x-auto scroll-smooth"
                 :style="{ gap: `${barGap}px` }"
             >
-                <ChartWave
-                    v-if="hasAnyActivity"
-                    :heights="barHeights"
-                    :container-width="containerWidth"
-                    :height="BAR_AREA_HEIGHT"
-                    :visible-columns="barColumns"
-                    :gap="barGap"
-                />
-
                 <div
                     v-for="(item, index) in currentData"
                     :key="item.month"
@@ -272,20 +223,16 @@ function isHighestCategory(d: MonthlyExamination, key: TrendCategory): boolean {
                     <!-- Bulan Aktif -->
                     <div
                         v-if="hasActivity(item)"
-                        class="flex w-full flex-col-reverse gap-1"
+                        class="flex w-full flex-col-reverse gap-0.5"
                     >
                         <div
-                            v-for="cat in categories"
+                            v-for="cat in getActiveCategories(item)"
                             :key="cat.key"
                             class="w-full rounded-[10px] transition-all duration-300"
                             :class="[
-                                item[cat.key] > 0
-                                    ? [
-                                          cat.color,
-                                          isHighestCategory(item, cat.key) &&
-                                              'striped-pattern',
-                                      ]
-                                    : 'striped-empty-pattern border border-dashed border-border/80 bg-muted/25',
+                                cat.color,
+                                isHighestCategory(item, cat.key) &&
+                                    'striped-pattern',
                             ]"
                             :style="{
                                 height: `${getSegmentHeight(item, cat.key)}px`,
@@ -298,7 +245,7 @@ function isHighestCategory(d: MonthlyExamination, key: TrendCategory): boolean {
                         v-else
                         class="striped-empty-pattern w-full rounded-[10px] border border-dashed border-border/80 bg-muted/25 transition-all duration-300"
                         :style="{
-                            height: `${getEmptyBarHeight(index)}px`,
+                            height: `${BAR_AREA_HEIGHT}px`,
                         }"
                     />
 

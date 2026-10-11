@@ -121,13 +121,15 @@
     }
 
     .striped-pattern {
-        background-image: repeating-linear-gradient(
-            -45deg,
-            rgba(255, 255, 255, 0.55),
-            rgba(255, 255, 255, 0.55) 1px,
-            transparent 1px,
-            transparent 9px
-        );
+        background-image:
+            repeating-linear-gradient(
+                -45deg,
+                rgba(255, 255, 255, 0.55),
+                rgba(255, 255, 255, 0.55) 1px,
+                transparent 1px,
+                transparent 9px
+            ),
+            linear-gradient(var(--tw-gradient-stops, transparent, transparent));
     }
 
     .striped-empty-pattern {

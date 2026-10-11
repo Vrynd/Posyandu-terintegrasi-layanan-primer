@@ -3,13 +3,16 @@ import { Head, usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
 import Heading from '@/components/Heading.vue';
 import { dashboard } from '@/routes';
+import type { MonthlyExamination } from '@/types';
 import DashboardMetrics from './partials/DashboardMetrics.vue';
 import type { DashboardMetricsProps } from './partials/DashboardMetrics.vue';
+import ExaminationProportions from './partials/ExaminationProportions.vue';
 import ExaminationTrends from './partials/ExaminationTrends.vue';
 import QuickActions from './partials/QuickActions.vue';
 
 interface Props {
     metrics?: DashboardMetricsProps['metrics'];
+    trends?: MonthlyExamination[];
 }
 
 const props = defineProps<Props>();
@@ -60,18 +63,13 @@ const greeting = computed(
                 class="mt-5 sm:mt-6 lg:hidden"
             />
             <div class="grid grid-cols-1 gap-4 lg:grid-cols-12">
-                <!-- Kolom Kiri: Tren Pemeriksaan (~60% / 7 Kolom) -->
+                <!-- Kolom Kiri: Tren Pemeriksaan (~60% / 8 Kolom) -->
                 <div class="lg:col-span-8">
-                    <ExaminationTrends />
+                    <ExaminationTrends :trends="props.trends" />
                 </div>
-                <!-- Kolom Kanan: Slot Konten Pendamping (~40% / 5 Kolom) -->
+                <!-- Kolom Kanan: Proporsi Pemeriksaan (~40% / 4 Kolom) -->
                 <div class="lg:col-span-4">
-                    <!-- Wadah Sementara: Siap diisi konten pendamping berikutnya -->
-                    <div
-                        class="flex h-full min-h-85 items-center justify-center rounded-2xl border border-dashed border-border/70 p-5 text-sm text-muted-foreground"
-                    >
-                        Konten Pendamping (40%)
-                    </div>
+                    <ExaminationProportions :trends="props.trends" />
                 </div>
             </div>
         </div>

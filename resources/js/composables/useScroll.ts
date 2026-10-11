@@ -1,11 +1,11 @@
-import { nextTick, ref, watch } from 'vue';
-import type { Ref } from 'vue';
+import { nextTick, ref, toValue, watch } from 'vue';
+import type { MaybeRefOrGetter, Ref } from 'vue';
 
 export interface UseScrollOptions {
     /** Jarak geser statis (opsional). Jika kosong, otomatis menggeser 1 halaman penuh */
     scrollAmount?: number;
     /** Jarak gap antar kolom (piksel) agar pergeseran 1 halaman pas di batas kolom */
-    gap?: number;
+    gap?: MaybeRefOrGetter<number>;
     /** Batas toleransi piksel untuk menentukan apakah masih bisa di-scroll */
     threshold?: number;
 }
@@ -33,7 +33,7 @@ export function useScroll(
     }
 
     function getStep(el: HTMLElement): number {
-        return scrollAmount ?? el.clientWidth + gap;
+        return scrollAmount ?? el.clientWidth + toValue(gap);
     }
 
     function scrollPrev(): void {
@@ -60,6 +60,20 @@ export function useScroll(
             left: getStep(el),
             behavior: 'smooth',
         });
+    }
+
+    function scrollToEnd(behavior: ScrollBehavior = 'instant'): void {
+        const el = containerRef.value;
+
+        if (!el) {
+            return;
+        }
+
+        el.scrollTo({
+            left: el.scrollWidth - el.clientWidth,
+            behavior,
+        });
+        updateScrollState();
     }
 
     watch(
@@ -97,5 +111,6 @@ export function useScroll(
         canScrollRight,
         scrollPrev,
         scrollNext,
+        scrollToEnd,
     };
 }

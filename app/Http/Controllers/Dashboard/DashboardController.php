@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Dashboard;
 
 use App\Enums\ParticipantCategory;
 use App\Http\Controllers\Controller;
+use App\Models\Examination;
 use App\Models\Participant;
+use Illuminate\Support\Carbon;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -106,6 +108,7 @@ class DashboardController extends Controller
                     'period' => $adultTrend['period'],
                 ],
             ],
+            'trends' => $this->getExaminationTrends($now->year),
         ]);
     }
 
@@ -134,5 +137,62 @@ class DashboardController extends Controller
             'trend' => $diff > 0 ? 'up' : ($diff < 0 ? 'down' : 'neutral'),
             'period' => 'vs bulan lalu',
         ];
+    }
+
+    /**
+     * Agregasi jumlah pemeriksaan bulanan (Januari - Desember) per kategori peserta.
+     *
+     * @return list<array{
+     *     month: string,
+     *     fullMonth: string,
+     *     pregnant: int,
+     *     toddler: int,
+     *     teenager: int,
+     *     productive: int,
+     *     adult: int
+     * }>
+     */
+    private function getExaminationTrends(int $year): array
+    {
+        $startOfYear = Carbon::createFromDate($year, 1, 1)->startOfDay()->toDateString();
+        $endOfYear = Carbon::createFromDate($year, 12, 31)->endOfDay()->toDateString();
+
+        $rows = Examination::query()
+            ->toBase()
+            ->join('participants', 'examinations.participant_id', '=', 'participants.id')
+            ->whereBetween('examinations.examination_date', [$startOfYear, $endOfYear])
+            ->selectRaw('SUBSTR(examinations.examination_date, 6, 2) as month_key, participants.category, count(*) as total')
+            ->groupBy('month_key', 'participants.category')
+            ->get();
+
+        /** @var array<int, array<string, int>> $grouped */
+        $grouped = [];
+
+        foreach ($rows as $row) {
+            $monthNumber = (int) $row->month_key;
+            $grouped[$monthNumber][(string) $row->category] = (int) $row->total;
+        }
+
+        $trends = [];
+
+        for ($month = 1; $month <= 12; $month++) {
+            $monthDate = Carbon::createFromDate($year, $month, 1);
+            $monthDate->locale('id');
+            $fullMonth = $monthDate->translatedFormat('F');
+
+            $monthCounts = $grouped[$month] ?? [];
+
+            $trends[] = [
+                'month' => substr($fullMonth, 0, 3),
+                'fullMonth' => $fullMonth,
+                'pregnant' => $monthCounts[ParticipantCategory::PregnantMother->value] ?? 0,
+                'toddler' => $monthCounts[ParticipantCategory::Toddler->value] ?? 0,
+                'teenager' => $monthCounts[ParticipantCategory::Teenager->value] ?? 0,
+                'productive' => $monthCounts[ParticipantCategory::Productive->value] ?? 0,
+                'adult' => $monthCounts[ParticipantCategory::Adult->value] ?? 0,
+            ];
+        }
+
+        return $trends;
     }
 }
