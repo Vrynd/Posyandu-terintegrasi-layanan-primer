@@ -24,6 +24,19 @@ Route::middleware('guest')->group(function () {
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', DashboardController::class)->name('dashboard');
 
+    // Route Pelayanan, Pencarian & Impor Data
+    Route::get('/pelayanan', function () {
+        return Inertia::render('pelayanan/Index');
+    })->name('pelayanan.index');
+
+    Route::get('/pencarian', function () {
+        return Inertia::render('pencarian/Index');
+    })->name('pencarian.index');
+
+    Route::get('/impor', function () {
+        return Inertia::render('impor/Index');
+    })->name('impor.index');
+
     // Route pendaftaran peserta
     Route::get('/participants', [ParticipantController::class, 'index'])->name('participants.index');
     Route::get('/participants/create', [ParticipantController::class, 'create'])->name('participants.create');

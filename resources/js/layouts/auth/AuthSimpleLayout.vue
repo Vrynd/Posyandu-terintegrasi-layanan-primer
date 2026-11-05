@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
-import { HeartPulse } from '@lucide/vue';
 import { home } from '@/routes';
 
 defineProps<{
@@ -60,20 +59,19 @@ defineProps<{
                         class="group flex items-center gap-3 transition-transform duration-300 hover:scale-105"
                     >
                         <div
-                            class="flex h-10 w-10 items-center justify-center rounded-xl bg-linear-to-br from-indigo-400 to-pink-400 text-white shadow-lg shadow-indigo-500/20"
+                            class="flex h-11 w-11 items-center justify-center overflow-hidden rounded-xl bg-white/10 p-1 shadow-lg ring-1 ring-white/20 backdrop-blur-xs"
                         >
-                            <HeartPulse class="h-5 w-5" />
+                            <img
+                                src="/images/logo.png"
+                                alt="Sehati Logo"
+                                class="size-full object-contain"
+                            />
                         </div>
                         <div class="leading-tight">
                             <span
-                                class="font-display text-lg font-bold tracking-tight text-white"
+                                class="font-display text-xl font-bold tracking-tight text-white"
                             >
-                                Posyandu Tondomulyo
-                            </span>
-                            <span
-                                class="block text-[11px] font-medium text-zinc-400"
-                            >
-                                Integrasi Layanan Primer
+                                Sehati
                             </span>
                         </div>
                     </Link>

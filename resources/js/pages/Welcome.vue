@@ -77,7 +77,7 @@ const categories = [
 </script>
 
 <template>
-    <Head title="Sistem Pelayanan Kesehatan Terpadu - Posyandu Tondomulyo" />
+    <Head title="Sehati - Sistem Pelayanan Posyandu Terpadu" />
 
     <div
         class="min-h-screen bg-zinc-950 font-sans text-white antialiased selection:bg-indigo-500 selection:text-white"
@@ -203,15 +203,19 @@ const categories = [
                     <!-- Brand -->
                     <Link href="/" class="group flex items-center gap-2.5">
                         <div
-                            class="bg-linear-to-brrom-indigo-400 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl to-pink-400 text-white shadow-lg shadow-indigo-500/20 transition-transform duration-300 group-hover:scale-105"
+                            class="flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white/10 p-1 shadow-lg ring-1 ring-white/20 backdrop-blur-xs transition-transform duration-300 group-hover:scale-105"
                         >
-                            <HeartPulse class="h-4 w-4" />
+                            <img
+                                src="/images/logo.png"
+                                alt="Sehati Logo"
+                                class="size-full object-contain"
+                            />
                         </div>
                         <div class="leading-tight">
                             <div
                                 class="font-display text-base font-bold tracking-tight text-white"
                             >
-                                Posyandu Tondomulyo
+                                Sehati
                             </div>
                         </div>
                     </Link>
