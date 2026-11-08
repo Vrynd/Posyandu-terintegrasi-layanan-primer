@@ -11,9 +11,8 @@ import {
 import {
     BellIcon,
     ClockCircleIcon,
-    FileSpreadsheetIcon,
     HealthIcon,
-    MagnifierIcon,
+    HistoryIcon,
     WidgetIcon,
 } from '@solar-icons/vue/linear';
 import { useWindowScroll } from '@vueuse/core';
@@ -53,8 +52,8 @@ const auth = computed(() => page.props.auth);
 const userRole = computed(() => page.props.auth?.user?.role);
 const { isCurrentUrl, isCurrentOrParentUrl } = useCurrentUrl();
 
-// Menu navigasi untuk Kader (Dashboard, Pelayanan, Pencarian, Import Data)
-// Catatan: Menu Pemeriksaan dan Buat Laporan dipindahkan ke dalam halaman Pelayanan
+// Menu navigasi untuk Kader (Dashboard, Layanan, Aktivitas Saya)
+// Catatan: Menu Pemeriksaan dan Buat Laporan dipindahkan ke dalam halaman Layanan
 const kaderNavItems = [
     {
         title: 'Dashboard',
@@ -64,29 +63,23 @@ const kaderNavItems = [
         isLocked: false,
     },
     {
-        title: 'Pelayanan',
+        title: 'Layanan',
         href: '/pelayanan',
         icon: HealthIcon,
         active: () =>
             isCurrentOrParentUrl('/pelayanan') ||
+            isCurrentOrParentUrl('/layanan') ||
             isCurrentOrParentUrl('/participants') ||
             isCurrentOrParentUrl('/examinations') ||
             isCurrentOrParentUrl('/reports'),
         isLocked: false,
     },
     {
-        title: 'Pencarian',
-        href: '/pencarian',
-        icon: MagnifierIcon,
-        active: () => isCurrentOrParentUrl('/pencarian'),
-        isLocked: false,
-    },
-    {
-        title: 'Import Data',
-        href: '/impor',
-        icon: FileSpreadsheetIcon,
-        active: () => isCurrentOrParentUrl('/impor'),
-        isLocked: false,
+        title: 'Aktivitas Saya',
+        href: '#',
+        icon: HistoryIcon,
+        active: () => false,
+        isLocked: true,
     },
 ];
 

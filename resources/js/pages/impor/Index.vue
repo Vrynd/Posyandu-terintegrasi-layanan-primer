@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { Head, setLayoutProps } from '@inertiajs/vue3';
 import {
     CloudUploadIcon,

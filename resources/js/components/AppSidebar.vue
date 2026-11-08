@@ -99,7 +99,7 @@ const navItems = computed<NavItem[]>(() => {
             icon: FileText,
         },
         {
-            title: 'Riwayat Aktivitas',
+            title: 'Aktivitas Saya',
             href: '#',
             icon: History,
             isLocked: true,
